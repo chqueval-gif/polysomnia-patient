@@ -1,0 +1,1940 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Questionnaire de pré-consultation — Sommeil</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#f0f4f8;color:#1f2937;
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    max-width:560px;margin:0 auto;
+    line-height:1.5;font-size:16px;
+  }
+  h1{font-size:22px;margin:24px 0 8px;color:#1e3a8a}
+  h2{font-size:18px;margin:24px 0 8px;color:#0e7490;border-bottom:2px solid #cffafe;padding-bottom:4px}
+  h3{font-size:15px;margin:18px 0 4px;color:#334155}
+  p{margin:8px 0}
+  .small{font-size:13px;color:#6b7280}
+  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+  .progress{position:sticky;top:0;background:#fff;z-index:10;padding:8px 0;border-bottom:1px solid #e5e7eb;margin:0 -16px 12px;text-align:center;font-size:13px;color:#6b7280}
+  .progress-bar{height:4px;background:#e5e7eb;border-radius:2px;margin-top:6px;overflow:hidden}
+  .progress-fill{height:100%;background:#0e7490;transition:width .3s}
+
+  .question{margin-bottom:16px}
+  .question .q{font-weight:600;margin-bottom:8px}
+  .options{display:flex;flex-direction:column;gap:6px}
+  .opt{
+    display:block;padding:12px 14px;background:#f8fafc;border:2px solid #e2e8f0;
+    border-radius:10px;cursor:pointer;font-size:15px;transition:all .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .opt:active{background:#e2e8f0}
+  .opt.on{background:#cffafe;border-color:#0e7490;font-weight:600}
+  .opt input{display:none}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    display:inline-block;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;
+    border-radius:999px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent;
+  }
+  .chip:active{background:#e2e8f0}
+  .chip.on{background:#cffafe;border-color:#0e7490;color:#0e7490;font-weight:600}
+  .chip input{display:none}
+
+  input[type=number],input[type=text]{
+    width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;
+    font-size:16px;font-family:inherit;
+  }
+  input[type=number]:focus,input[type=text]:focus{border-color:#0e7490;outline:none}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .btn{
+    display:block;width:100%;padding:14px;border:none;border-radius:10px;
+    background:#0e7490;color:#fff;font-size:16px;font-weight:600;cursor:pointer;
+    margin-top:12px;-webkit-tap-highlight-color:transparent;
+  }
+  .btn:disabled{background:#94a3b8;cursor:not-allowed}
+  .btn.secondary{background:#fff;color:#0e7490;border:2px solid #0e7490}
+
+  .consent{background:#fef3c7;border:1px solid #f59e0b;padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
+  .consent label{display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-top:8px}
+  .consent input{margin-top:4px;flex-shrink:0;width:18px;height:18px}
+
+  .step{display:none}
+  .step.active{display:block}
+
+  /* QR container : on force le fond blanc et les couleurs claires
+     pour garantir le décodage par tous les scanners, indépendamment
+     du mode sombre activé sur le téléphone */
+  .qr-container{
+    text-align:center;padding:24px;
+    background:#ffffff !important;
+    border-radius:12px;
+    color-scheme:light;  /* force le rendu en mode clair */
+  }
+  /* La zone qui contient le QR : marges supplémentaires "quiet zone" */
+  #qrcode-canvas{
+    margin:0 auto;
+    background:#ffffff !important;
+    padding:16px;
+    display:inline-block;
+    border-radius:8px;
+  }
+  /* Forcer fond blanc du SVG même si l'OS impose un thème sombre.
+     On NE force PAS la couleur des rect, sinon le rect de fond blanc
+     deviendrait noir et masquerait tout le QR. */
+  #qrcode-canvas svg{background:#ffffff !important}
+  #qrcode-canvas svg path{fill:#000000 !important}
+  /* Le canvas (cas qrcodejs ancien) */
+  #qrcode-canvas canvas{background:#ffffff !important}
+  /* Texte d'instruction sous le QR : reste lisible en mode sombre */
+  .qr-container p{color:#1f2937 !important}
+
+  .info-box{background:#dbeafe;border-left:3px solid #3b82f6;padding:12px;border-radius:6px;margin:12px 0;font-size:14px}
+
+  .nav{display:flex;gap:12px;margin-top:20px}
+  .nav .btn{margin-top:0}
+
+  /* ============================================================
+     STYLES POUR LE PDF (impression)
+     Cachés à l'écran, visibles uniquement à l'impression
+     ============================================================ */
+
+  /* À l'écran : zone PDF totalement cachée */
+  #pdf-zone {
+    display: none;
+  }
+
+  /* À l'impression : on cache l'interface normale et on affiche uniquement la zone PDF */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm;
+    }
+
+    /* Cacher tout le reste */
+    body > .step,
+    .progress,
+    body > div:not(#pdf-zone) {
+      display: none !important;
+    }
+
+    /* Afficher la zone PDF */
+    #pdf-zone {
+      display: block !important;
+      background: white;
+      color: #1f2937;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Calibri, Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.4;
+    }
+
+    .pdf-page {
+      padding: 0;
+    }
+
+    .pdf-header {
+      border-bottom: 2px solid #0a1929;
+      padding-bottom: 8mm;
+      margin-bottom: 8mm;
+    }
+    .pdf-header h1 {
+      font-size: 18pt;
+      color: #0a1929;
+      margin: 0 0 2mm;
+      font-weight: 600;
+    }
+    .pdf-header h2 {
+      font-size: 12pt;
+      color: #0e7490;
+      margin: 0 0 4mm;
+      font-weight: 400;
+      font-style: italic;
+      border: none;
+      padding: 0;
+    }
+    .pdf-date {
+      font-size: 10pt;
+      color: #64748b;
+    }
+
+    .pdf-section {
+      margin-bottom: 7mm;
+      page-break-inside: avoid;
+    }
+    .pdf-section h3 {
+      font-size: 11.5pt;
+      color: #0a1929;
+      margin: 0 0 3mm;
+      font-weight: 600;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1.5mm;
+    }
+
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+    .pdf-table th, .pdf-table td {
+      text-align: left;
+      padding: 2mm 3mm;
+      vertical-align: top;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .pdf-table th {
+      width: 45%;
+      font-weight: 500;
+      color: #475569;
+    }
+    .pdf-table td {
+      color: #0a1929;
+      font-weight: 600;
+    }
+    .pdf-scores .pdf-interp {
+      font-weight: 400;
+      color: #64748b;
+      font-style: italic;
+      width: 30%;
+    }
+
+    .pdf-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .pdf-list li {
+      padding: 1.5mm 3mm;
+      border-bottom: 1px solid #f1f5f9;
+      color: #0a1929;
+    }
+    .pdf-list li.pdf-empty {
+      color: #94a3b8;
+      font-style: italic;
+      font-weight: 300;
+    }
+    .pdf-list li::before {
+      content: "•";
+      color: #0e7490;
+      font-weight: bold;
+      margin-right: 2mm;
+    }
+    .pdf-list li.pdf-empty::before { display: none; }
+
+    .pdf-footer {
+      margin-top: 10mm;
+      padding-top: 4mm;
+      border-top: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      color: #64748b;
+      font-style: italic;
+      line-height: 1.5;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ ÉTAPE 1 : ACCUEIL + CONSENTEMENT ============================ -->
+<div class="step active" id="step-welcome">
+  <h1>🩺 Questionnaire de pré-consultation</h1>
+  <p>Vous êtes en salle d'attente pour une consultation de médecine du sommeil.<br>
+  En remplissant ce formulaire, vous gagnez du temps avec votre médecin.</p>
+
+  <div class="consent">
+    <strong>📌 Confidentialité — important à lire</strong>
+    <p style="margin:8px 0 0">Ce questionnaire est <strong>100 % local</strong> :</p>
+    <ul style="margin:4px 0 8px;padding-left:20px">
+      <li>Vos réponses restent <strong>uniquement dans votre téléphone</strong></li>
+      <li><strong>Aucune donnée n'est envoyée</strong> sur internet ni stockée par un tiers</li>
+      <li>À la fin, un QR code apparaît : votre médecin le scannera depuis son ordinateur pour récupérer vos réponses</li>
+      <li>Si vous fermez la page sans aller jusqu'au bout, tout est perdu — c'est volontaire pour votre vie privée</li>
+    </ul>
+    <label>
+      <input type="checkbox" id="consent">
+      <span>J'ai compris et j'accepte de remplir ce questionnaire pour faciliter ma consultation. Je sais que je peux refuser et le remplir directement avec mon médecin.</span>
+    </label>
+  </div>
+
+  <!-- Choix Adulte / Enfant -->
+  <div class="card" id="mode-choice" style="margin-top:18px;padding:18px;background:#eef2ff;border:1.5px solid #c7d2fe">
+    <h3 style="margin:0 0 10px;color:#312e81">Qui remplit ce questionnaire ?</h3>
+    <div class="options" style="flex-direction:row;gap:10px;flex-wrap:wrap">
+      <label class="opt" style="flex:1;text-align:center;min-width:140px" data-name="mode" data-v="adulte">
+        🧑 Adulte<br><span style="font-size:12px;color:#6366f1;font-weight:400">Pour moi-même (≥ 18 ans)</span>
+      </label>
+      <label class="opt" style="flex:1;text-align:center;min-width:140px" data-name="mode" data-v="pediatrie">
+        👶 Enfant<br><span style="font-size:12px;color:#6366f1;font-weight:400">Je remplis pour mon enfant (&lt; 18 ans)</span>
+      </label>
+    </div>
+  </div>
+
+  <p class="small">⏱️ Durée estimée : 5 à 10 minutes. Vous pouvez sauter une question si vous ne savez pas répondre.</p>
+
+  <button class="btn" id="btn-start" disabled>Commencer →</button>
+</div>
+
+<!-- ============================ ÉTAPE 2 : QUESTIONNAIRES ============================ -->
+<div class="step" id="step-form">
+  <div class="progress">
+    <span id="progress-label">Section 1 / 8</span>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:12.5%"></div></div>
+  </div>
+
+  <!-- ===== SECTION : MORPHOMÉTRIE & CONSTANTES ===== -->
+  <div class="section" data-section="0">
+    <h2>1. Quelques informations</h2>
+    <div class="card">
+      <div class="row">
+        <div>
+          <h3>Âge</h3>
+          <input type="number" id="age" min="18" max="120" placeholder="ex : 55" inputmode="numeric">
+        </div>
+        <div>
+          <h3>Genre</h3>
+          <div class="options" style="flex-direction:row;gap:8px">
+            <label class="opt" style="flex:1;text-align:center" data-name="genre" data-v="M">Homme</label>
+            <label class="opt" style="flex:1;text-align:center" data-name="genre" data-v="F">Femme</label>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <h3>Poids (kg)</h3>
+          <input type="number" id="poids" min="30" max="300" step="0.1" placeholder="ex : 75" inputmode="decimal">
+        </div>
+        <div>
+          <h3>Taille (cm)</h3>
+          <input type="number" id="taille" min="100" max="230" placeholder="ex : 175" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn" data-next="1">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION : EPWORTH ===== -->
+  <div class="section" data-section="1" style="display:none">
+    <h2>2. Échelle d'Epworth</h2>
+    <p class="small">Évaluez votre <strong>somnolence dans la journée</strong>. Pour chaque situation, indiquez la probabilité que vous vous endormiez ou somnoliez (pas seulement vous sentir fatigué).</p>
+    <div class="info-box">
+      <strong>Échelle :</strong><br>
+      0 = jamais&nbsp; • 1 = faible&nbsp; • 2 = moyenne&nbsp; • 3 = forte
+    </div>
+
+    <div id="epworth-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="epworth-total">Total : 0 / 24</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="0">← Retour</button>
+      <button class="btn" data-next="2">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION : PICHOT ===== -->
+  <div class="section" data-section="2" style="display:none">
+    <h2>3. Échelle de Pichot (fatigue)</h2>
+    <p class="small">Pour chacune des phrases suivantes, dites <strong>à quel point elle correspond à votre état actuel</strong>.</p>
+    <div class="info-box">
+      <strong>Échelle :</strong><br>
+      0 = pas du tout&nbsp; • 1 = un peu&nbsp; • 2 = moyennement&nbsp; • 3 = beaucoup&nbsp; • 4 = extrêmement
+    </div>
+
+    <div id="pichot-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pichot-total">Total : 0 / 32</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="1">← Retour</button>
+      <button class="btn" data-next="3">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION : HAD ===== -->
+  <div class="section" data-section="3" style="display:none">
+    <h2>4. Échelle HAD (anxiété et humeur)</h2>
+    <p class="small">Comment vous êtes-vous senti(e) <strong>au cours de la dernière semaine</strong> ? Choisissez la réponse qui décrit le mieux ce que vous avez ressenti.</p>
+
+    <div id="had-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="2">← Retour</button>
+      <button class="btn" data-next="4">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION : ISI ===== -->
+  <div class="section" data-section="4" style="display:none">
+    <h2>5. Index de sévérité de l'insomnie (ISI)</h2>
+    <p class="small">Évaluez vos <strong>problèmes de sommeil au cours des 2 dernières semaines</strong>.</p>
+
+    <div id="isi-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="isi-total">Total : 0 / 28</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="3">← Retour</button>
+      <button class="btn" data-next="5">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION : SYMPTÔMES & ATCD ===== -->
+  <div class="section" data-section="5" style="display:none">
+    <h2>6. Symptômes</h2>
+    <p class="small" style="margin-bottom:16px;color:#475569">
+      Cochez tout ce qui vous concerne, même partiellement. Plus c'est précis, mieux votre médecin pourra vous aider.
+    </p>
+
+    <div class="card">
+      <h3>🌙 Symptômes pendant la nuit</h3>
+      <div class="chips" id="chips-symptn"></div>
+    </div>
+
+    <div class="card">
+      <h3>☀️ Symptômes pendant la journée</h3>
+      <div class="chips" id="chips-symptd"></div>
+    </div>
+
+    <div class="card">
+      <h3>Vos horaires de sommeil habituels</h3>
+      <div class="row">
+        <div>
+          <label class="small">Heure habituelle de coucher</label>
+          <input type="text" id="heure-coucher" placeholder="ex : 23h00">
+        </div>
+        <div>
+          <label class="small">Heure habituelle de lever</label>
+          <input type="text" id="heure-lever" placeholder="ex : 07h00">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="4">← Retour</button>
+      <button class="btn" data-next="6">Suivant →</button>
+    </div>
+  </div>
+
+  <div class="section" data-section="6" style="display:none">
+    <h2>7. Mode de vie &amp; hygiène du sommeil</h2>
+    <p class="small" style="margin-bottom:16px;color:#475569">
+      Ces informations aident à comprendre certaines causes de mauvais sommeil indépendantes des troubles médicaux.
+    </p>
+
+    <div class="card">
+      <h3>☕ Habitudes et environnement de sommeil</h3>
+      <div class="chips" id="chips-hygiene"></div>
+    </div>
+
+    <div class="card">
+      <h3>💼 Profession et activité</h3>
+      <p class="small" style="margin-bottom:8px">
+        Cochez si l'une de ces situations correspond à votre activité actuelle ou récente.
+      </p>
+      <div class="chips" id="chips-prof"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="5">← Retour</button>
+      <button class="btn" data-next="7">Suivant →</button>
+    </div>
+  </div>
+
+  <div class="section" data-section="7" style="display:none">
+    <h2>8. Antécédents &amp; retentissement</h2>
+    <p class="small" style="margin-bottom:16px;color:#475569">
+      Dernière étape ! Ces éléments sont essentiels pour évaluer la prise en charge la plus adaptée.
+    </p>
+
+    <div class="card">
+      <h3>🩺 Antécédents médicaux connus</h3>
+      <div class="chips" id="chips-comorb"></div>
+    </div>
+
+    <div class="card">
+      <h3>👪 Antécédents familiaux</h3>
+      <p class="small" style="color:#64748b;margin-bottom:8px">Parents, frères et sœurs au 1er degré.</p>
+      <div class="chips" id="chips-atcdfam"></div>
+    </div>
+
+    <div class="card">
+      <h3>💊 Traitements en cours</h3>
+      <div class="chips" id="chips-traitements"></div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Retentissement de votre sommeil sur votre vie quotidienne</h3>
+      <div class="chips" id="chips-retentissement"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="6">← Retour</button>
+      <button class="btn" id="btn-finish">Terminer et générer le QR code →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================ ÉTAPE 2 BIS : QUESTIONNAIRE PÉDIATRIQUE ============================ -->
+<div class="step" id="step-form-pediatrie">
+  <div class="progress">
+    <span id="pedia-progress-label">Section 1 / 4</span>
+    <div class="progress-bar"><div class="progress-fill" id="pedia-progress-fill" style="width:25%"></div></div>
+  </div>
+
+  <!-- ===== SECTION 0 : IDENTITÉ & MORPHOMÉTRIE ENFANT ===== -->
+  <div class="pedia-section" data-pedia-section="0">
+    <h2>1. Quelques informations sur votre enfant</h2>
+    <div class="card">
+      <div class="row">
+        <div>
+          <h3>Âge de l'enfant</h3>
+          <input type="number" id="pedia-age" min="0" max="17" placeholder="ex : 8" inputmode="numeric">
+          <p class="small">en années</p>
+        </div>
+        <div>
+          <h3>Sexe</h3>
+          <div class="options" style="flex-direction:row;gap:8px">
+            <label class="opt" style="flex:1;text-align:center" data-name="pedia-genre" data-v="M">Garçon</label>
+            <label class="opt" style="flex:1;text-align:center" data-name="pedia-genre" data-v="F">Fille</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div>
+          <h3>Poids</h3>
+          <input type="number" id="pedia-poids" step="0.1" placeholder="ex : 25" inputmode="decimal">
+          <p class="small">en kilogrammes</p>
+        </div>
+        <div>
+          <h3>Taille</h3>
+          <input type="number" id="pedia-taille" placeholder="ex : 130" inputmode="numeric">
+          <p class="small">en centimètres</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🛌 Habitudes de sommeil</h3>
+      <div class="row">
+        <div>
+          <label class="small">Heure habituelle de coucher</label>
+          <input type="text" id="pedia-heure-coucher" placeholder="ex : 20h30">
+        </div>
+        <div>
+          <label class="small">Heure habituelle de lever</label>
+          <input type="text" id="pedia-heure-lever" placeholder="ex : 07h00">
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn" data-pedia-next="1">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 1 : PSQ CHERVIN ===== -->
+  <div class="pedia-section" data-pedia-section="1" style="display:none">
+    <h2>2. Sommeil de votre enfant (PSQ)</h2>
+    <p class="small" style="margin-bottom:12px;color:#475569">
+      Pour chaque affirmation, indiquez si elle correspond à votre enfant ces 6 derniers mois.
+    </p>
+    <div id="psq-items"></div>
+    <div class="nav">
+      <button class="btn secondary" data-pedia-prev="0">← Retour</button>
+      <button class="btn" data-pedia-next="2">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2 : SYMPTÔMES NOCTURNES & DIURNES ===== -->
+  <div class="pedia-section" data-pedia-section="2" style="display:none">
+    <h2>3. Symptômes observés</h2>
+
+    <div class="card">
+      <h3>🌙 Symptômes nocturnes</h3>
+      <p class="small" style="color:#64748b">Cochez ce qui correspond à votre enfant.</p>
+      <div class="chips" id="chips-pedia-symptn"></div>
+    </div>
+
+    <div class="card">
+      <h3>☀️ Symptômes en journée et à l'école</h3>
+      <p class="small" style="color:#64748b">Cochez ce qui correspond à votre enfant.</p>
+      <div class="chips" id="chips-pedia-symptd"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-pedia-prev="1">← Retour</button>
+      <button class="btn" data-pedia-next="3">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 3 : ANTÉCÉDENTS ===== -->
+  <div class="pedia-section" data-pedia-section="3" style="display:none">
+    <h2>4. Antécédents</h2>
+
+    <div class="card">
+      <h3>🩺 Antécédents personnels de votre enfant</h3>
+      <div class="chips" id="chips-pedia-atcd"></div>
+    </div>
+
+    <div class="card">
+      <h3>👪 Antécédents familiaux</h3>
+      <p class="small" style="color:#64748b">Parents, frères et sœurs.</p>
+      <div class="chips" id="chips-pedia-atcdfam"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-pedia-prev="2">← Retour</button>
+      <button class="btn" id="btn-finish-pedia">Terminer et générer le QR code →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================ ÉTAPE 3 : QR CODE FINAL ============================ -->
+<div class="step" id="step-qr">
+  <h1>✅ Questionnaire terminé</h1>
+  <p>Présentez ce QR code à votre médecin. Il le scannera depuis son ordinateur pour récupérer vos réponses.</p>
+
+  <div class="qr-container">
+    <div id="qrcode-canvas" style="display:inline-block"></div>
+    <p class="small" style="margin-top:12px">Vos réponses sont contenues dans ce QR code.<br>Elles ne sont stockées nulle part.</p>
+  </div>
+
+  <!-- Fallback texte si QR ne se charge pas -->
+  <div id="qr-fallback" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:16px;margin-top:16px">
+    <p style="font-weight:600;color:#92400e;margin:0 0 8px">⚠️ Mode de secours</p>
+    <p style="font-size:14px;color:#78350f;margin:0 0 10px" id="qr-fallback-reason"></p>
+    <p style="font-size:14px;color:#78350f;margin:0 0 8px"><strong>Solution :</strong> montrez l'écran ci-dessous à votre médecin, ou utilisez le bouton "Copier" pour transmettre vos réponses par message.</p>
+    <textarea id="qr-fallback-data" readonly style="width:100%;height:120px;font-family:monospace;font-size:11px;padding:8px;border:1px solid #fbbf24;border-radius:6px;background:#fff;resize:none"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn" onclick="copyFallback()" style="flex:1;min-width:140px">📋 Copier le code</button>
+      <button class="btn secondary" onclick="retryQR()" style="flex:1;min-width:140px">🔄 Réessayer le QR</button>
+    </div>
+    <p id="qr-fallback-copy-status" style="font-size:13px;color:#15803d;margin:6px 0 0;text-align:center"></p>
+  </div>
+
+  <div class="info-box">
+    <strong>💡 Si le QR code ne se scanne pas bien :</strong><br>
+    Augmentez la luminosité de votre écran au maximum, et tenez votre téléphone à 20-30 cm de la webcam de votre médecin.
+  </div>
+
+  <div class="info-box" style="background:#e0f2fe;border-left-color:#0369a1">
+    <strong>📤 Vous voulez envoyer vos réponses à l'avance via Doctolib ?</strong><br>
+    <span style="font-size:13px">Cliquez sur le bouton ci-dessous pour télécharger un PDF récapitulatif. Vous pourrez ensuite l'envoyer à votre médecin via Doctolib (« Envoyer un document avant la consultation »).</span>
+  </div>
+
+  <button class="btn" id="btn-pdf" onclick="downloadPDF()" style="background:#0369a1">
+    📄 Télécharger le récapitulatif en PDF
+  </button>
+
+  <button class="btn secondary" id="btn-restart">Recommencer le questionnaire</button>
+</div>
+
+<!-- ============================ ZONE D'IMPRESSION PDF ============================ -->
+<!-- Cachée à l'écran, ne s'affiche qu'à l'impression / export PDF -->
+<div id="pdf-zone" aria-hidden="true">
+  <div class="pdf-page">
+    <div class="pdf-header">
+      <h1 id="pdf-title">Questionnaire de pré-consultation</h1>
+      <h2 id="pdf-subtitle">Médecine du sommeil</h2>
+      <div class="pdf-date" id="pdf-date">—</div>
+    </div>
+
+    <!-- ===== CONTENU ADULTE ===== -->
+    <div id="pdf-adult-content">
+      <section class="pdf-section">
+        <h3>Identité &amp; morphologie</h3>
+        <table class="pdf-table">
+          <tr><th>Âge</th><td id="pdf-age">—</td></tr>
+          <tr><th>Genre</th><td id="pdf-genre">—</td></tr>
+          <tr><th>Poids</th><td id="pdf-poids">—</td></tr>
+          <tr><th>Taille</th><td id="pdf-taille">—</td></tr>
+          <tr><th>IMC</th><td id="pdf-imc">—</td></tr>
+        </table>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Habitudes de sommeil</h3>
+        <table class="pdf-table">
+          <tr><th>Heure de coucher habituelle</th><td id="pdf-coucher">—</td></tr>
+          <tr><th>Heure de lever habituelle</th><td id="pdf-lever">—</td></tr>
+        </table>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Scores psychométriques</h3>
+        <table class="pdf-table pdf-scores">
+          <tr><th>Échelle de somnolence d'Epworth</th><td><span id="pdf-epworth">—</span> / 24</td><td class="pdf-interp" id="pdf-epworth-interp">—</td></tr>
+          <tr><th>Échelle de fatigue de Pichot</th><td><span id="pdf-pichot">—</span> / 32</td><td class="pdf-interp" id="pdf-pichot-interp">—</td></tr>
+          <tr><th>Anxiété (HAD-A)</th><td><span id="pdf-hada">—</span> / 21</td><td class="pdf-interp" id="pdf-hada-interp">—</td></tr>
+          <tr><th>Dépression (HAD-D)</th><td><span id="pdf-hadd">—</span> / 21</td><td class="pdf-interp" id="pdf-hadd-interp">—</td></tr>
+          <tr><th>Index de sévérité de l'insomnie (ISI)</th><td><span id="pdf-isi">—</span> / 28</td><td class="pdf-interp" id="pdf-isi-interp">—</td></tr>
+        </table>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Symptômes nocturnes rapportés</h3>
+        <ul class="pdf-list" id="pdf-symptn"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Symptômes diurnes rapportés</h3>
+        <ul class="pdf-list" id="pdf-symptd"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Antécédents et comorbidités</h3>
+        <ul class="pdf-list" id="pdf-comorb"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Antécédents familiaux</h3>
+        <ul class="pdf-list" id="pdf-atcdfam"><li class="pdf-empty">Aucun antécédent familial connu</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Traitements en cours</h3>
+        <ul class="pdf-list" id="pdf-traitements"><li class="pdf-empty">Aucun traitement régulier</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Profession / Activité</h3>
+        <ul class="pdf-list" id="pdf-prof"><li class="pdf-empty">Non renseigné</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Hygiène du sommeil &amp; mode de vie</h3>
+        <ul class="pdf-list" id="pdf-hygiene"><li class="pdf-empty">Aucun élément signalé</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Retentissement sur la vie quotidienne</h3>
+        <ul class="pdf-list" id="pdf-retentissement"><li class="pdf-empty">Aucun retentissement signalé</li></ul>
+      </section>
+    </div>
+
+    <!-- ===== CONTENU PÉDIATRIQUE ===== -->
+    <div id="pdf-pedia-content" style="display:none">
+      <section class="pdf-section">
+        <h3>Identité &amp; morphologie</h3>
+        <table class="pdf-table">
+          <tr><th>Âge de l'enfant</th><td id="pdf-pedia-age">—</td></tr>
+          <tr><th>Sexe</th><td id="pdf-pedia-genre">—</td></tr>
+          <tr><th>Poids</th><td id="pdf-pedia-poids">—</td></tr>
+          <tr><th>Taille</th><td id="pdf-pedia-taille">—</td></tr>
+          <tr><th>IMC (à interpréter sur courbe)</th><td id="pdf-pedia-imc">—</td></tr>
+        </table>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Habitudes de sommeil</h3>
+        <table class="pdf-table">
+          <tr><th>Heure habituelle de coucher</th><td id="pdf-pedia-coucher">—</td></tr>
+          <tr><th>Heure habituelle de lever</th><td id="pdf-pedia-lever">—</td></tr>
+        </table>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Score PSQ Chervin (suspicion SAOS pédiatrique)</h3>
+        <table class="pdf-table pdf-scores">
+          <tr>
+            <th>Items « Oui » / total répondu</th>
+            <td><span id="pdf-pedia-psq-oui">—</span> / <span id="pdf-pedia-psq-tot">—</span></td>
+            <td class="pdf-interp" id="pdf-pedia-psq-ratio">—</td>
+          </tr>
+          <tr>
+            <th>Ratio (seuil ≥ 0,33 = forte suspicion)</th>
+            <td colspan="2" class="pdf-interp" id="pdf-pedia-psq-interp">—</td>
+          </tr>
+        </table>
+        <p style="font-size:9pt;color:#64748b;font-style:italic;margin-top:3mm">Détail des réponses :</p>
+        <ul class="pdf-list" id="pdf-pedia-psq-details"></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Symptômes nocturnes rapportés</h3>
+        <ul class="pdf-list" id="pdf-pedia-symptn"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Symptômes diurnes / scolaires</h3>
+        <ul class="pdf-list" id="pdf-pedia-symptd"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Antécédents personnels</h3>
+        <ul class="pdf-list" id="pdf-pedia-atcd"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+
+      <section class="pdf-section">
+        <h3>Antécédents familiaux</h3>
+        <ul class="pdf-list" id="pdf-pedia-atcdfam"><li class="pdf-empty">Aucun</li></ul>
+      </section>
+    </div>
+
+    <div class="pdf-footer">
+      Document rempli en pré-consultation. À transmettre à votre médecin via Doctolib (rubrique « Envoyer un document avant la consultation ») ou à présenter directement le jour du rendez-vous.
+    </div>
+  </div>
+</div>
+
+<!-- ============================ JS ============================ -->
+<script>
+// ====== Chargement de la lib QR ======
+// On utilise qrcode-generator de Kazuhiko Arase : robuste, supporte de gros payloads.
+// Cascade de CDN sans dépendance à un fichier local (qui n'existe pas sur GitHub Pages).
+window.QR_STATUS = 'loading'  // 'loading' | 'ready' | 'failed'
+window.QR_LIB = null          // 'arase' | 'qrcodejs' | 'qrcode'  (selon la lib chargée)
+window.QR_LOAD_ERRORS = []    // pour le diagnostic
+
+;(function loadQRCode() {
+  // Liste de sources, par ordre de préférence.
+  // Chaque entrée : url + lib qu'elle expose
+  const sources = [
+    { url: 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js', lib: 'arase' },
+    { url: 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js', lib: 'arase' },
+    { url: 'https://unpkg.com/qrcode-generator@1.4.4/qrcode.js', lib: 'arase' },
+    // Fallbacks vers d'autres libs si Arase indisponible
+    { url: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', lib: 'qrcodejs' },
+    { url: 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js', lib: 'qrcodejs' },
+  ]
+  let i = 0
+  function tryLoad() {
+    if (i >= sources.length) {
+      window.QR_STATUS = 'failed'
+      return
+    }
+    const src = sources[i++]
+    const s = document.createElement('script')
+    s.src = src.url
+    s.async = true
+    s.onload = () => {
+      // Vérification que la lib est bien là (selon la lib attendue)
+      if (src.lib === 'arase' && typeof qrcode === 'function') {
+        window.QR_LIB = 'arase'
+        window.QR_STATUS = 'ready'
+      } else if (src.lib === 'qrcodejs' && typeof QRCode !== 'undefined' && QRCode.CorrectLevel) {
+        window.QR_LIB = 'qrcodejs'
+        window.QR_STATUS = 'ready'
+      } else {
+        // Script chargé mais pas l'API attendue → on essaie suivant
+        window.QR_LOAD_ERRORS.push('Script ' + src.url + ' chargé mais API absente')
+        tryLoad()
+      }
+    }
+    s.onerror = () => {
+      window.QR_LOAD_ERRORS.push('Échec réseau : ' + src.url)
+      tryLoad()
+    }
+    document.head.appendChild(s)
+  }
+  tryLoad()
+})()
+</script>
+<script>
+'use strict'
+
+// ====== Configuration des questionnaires ======
+const EPWORTH_ITEMS = [
+  "Assis(e) en train de lire",
+  "En train de regarder la télévision",
+  "Assis(e) inactif(ve) dans un lieu public (théâtre, réunion)",
+  "Comme passager(ère) en voiture pendant 1 heure sans interruption",
+  "Allongé(e) l'après-midi pour vous reposer quand les circonstances le permettent",
+  "Assis(e) en parlant avec quelqu'un",
+  "Assis(e) au calme après un repas sans alcool",
+  "Au volant, en voiture, immobilisé(e) dans un embouteillage pendant quelques minutes",
+]
+const EPWORTH_OPTIONS = [
+  { v:0, l:"0 — Aucune chance de m'endormir" },
+  { v:1, l:"1 — Faible chance" },
+  { v:2, l:"2 — Chance moyenne" },
+  { v:3, l:"3 — Forte chance" },
+]
+
+const PICHOT_ITEMS = [
+  "Je manque d'énergie",
+  "Tout demande un effort",
+  "Je me sens faible dans certaines parties du corps",
+  "Je me sens fatigué(e) sans raison",
+  "J'ai envie de m'allonger pour me reposer",
+  "J'ai du mal à me concentrer",
+  "J'en ai assez",
+  "Je n'arrive pas à faire grand-chose",
+]
+const PICHOT_OPTIONS = [
+  { v:0, l:"0 — Pas du tout" },
+  { v:1, l:"1 — Un peu" },
+  { v:2, l:"2 — Moyennement" },
+  { v:3, l:"3 — Beaucoup" },
+  { v:4, l:"4 — Extrêmement" },
+]
+
+// HAD : alternance A/D, scoring inversé pour certains items
+// type: 'A' = anxiété, 'D' = dépression
+// reverse: si true, le score est inversé (3-x)
+const HAD_ITEMS = [
+  { t:'A', q:"Je me sens tendu(e) ou énervé(e)", opts:["La plupart du temps","Souvent","De temps en temps","Jamais"], rev:false },
+  { t:'D', q:"Je prends plaisir aux mêmes choses qu'autrefois", opts:["Oui, tout autant","Pas autant","Un peu seulement","Presque plus"], rev:false },
+  { t:'A', q:"J'ai une sensation de peur comme si quelque chose d'horrible allait arriver", opts:["Oui, très nettement","Oui, mais ce n'est pas trop grave","Un peu, mais cela ne m'inquiète pas","Pas du tout"], rev:false },
+  { t:'D', q:"Je ris facilement et vois le bon côté des choses", opts:["Autant que par le passé","Plus autant qu'avant","Vraiment moins qu'avant","Plus du tout"], rev:false },
+  { t:'A', q:"Je me fais du souci", opts:["Très souvent","Assez souvent","Occasionnellement","Très occasionnellement"], rev:false },
+  { t:'D', q:"Je suis de bonne humeur", opts:["Jamais","Rarement","Assez souvent","La plupart du temps"], rev:false },
+  { t:'A', q:"Je peux rester tranquillement assis(e) à ne rien faire et me sentir décontracté(e)", opts:["Oui, quoi qu'il arrive","Oui, en général","Rarement","Jamais"], rev:false },
+  { t:'D', q:"J'ai l'impression de fonctionner au ralenti", opts:["Presque toujours","Très souvent","Parfois","Jamais"], rev:false },
+  { t:'A', q:"J'éprouve des sensations de peur, j'ai l'estomac noué", opts:["Jamais","Parfois","Assez souvent","Très souvent"], rev:false },
+  { t:'D', q:"Je ne m'intéresse plus à mon apparence", opts:["Plus du tout","Je n'y accorde pas autant d'attention que je devrais","Il se peut que je n'y fasse plus attention","J'y prête autant d'attention que par le passé"], rev:false },
+  { t:'A', q:"J'ai la bougeotte et n'arrive pas à tenir en place", opts:["Oui, c'est tout à fait le cas","Un peu","Pas tellement","Pas du tout"], rev:false },
+  { t:'D', q:"Je me réjouis d'avance à l'idée de faire certaines choses", opts:["Autant qu'avant","Un peu moins qu'avant","Bien moins qu'avant","Presque jamais"], rev:false },
+  { t:'A', q:"J'éprouve des sensations soudaines de panique", opts:["Vraiment très souvent","Assez souvent","Pas très souvent","Jamais"], rev:false },
+  { t:'D', q:"Je peux prendre plaisir à un bon livre, à une bonne émission radio ou TV", opts:["Souvent","Parfois","Rarement","Très rarement"], rev:false },
+]
+
+const ISI_ITEMS = [
+  { q:"Difficultés à vous endormir", opts:["Aucune","Légères","Moyennes","Importantes","Très importantes"] },
+  { q:"Difficultés à rester endormi(e)", opts:["Aucune","Légères","Moyennes","Importantes","Très importantes"] },
+  { q:"Réveil(s) trop tôt le matin", opts:["Aucun","Léger","Moyen","Important","Très important"] },
+  { q:"Satisfaction par rapport à votre sommeil actuel", opts:["Très satisfait(e)","Satisfait(e)","Plutôt neutre","Insatisfait(e)","Très insatisfait(e)"] },
+  { q:"Votre problème de sommeil est-il visible pour les autres en termes de qualité de vie ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+  { q:"Êtes-vous préoccupé(e) par votre problème de sommeil ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+  { q:"Dans quelle mesure votre problème de sommeil interfère avec votre fonctionnement quotidien ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+]
+
+const SYMPT_NOCTURNES = [
+  // Ronflements et respiration (regroupé)
+  "ronflements habituels",
+  "ronflements sévères selon le conjoint",
+  "pauses respiratoires rapportées par l'entourage",
+  "éveils en suffocation",
+  "respiration buccale nocturne",
+  "bouche sèche au réveil",
+  // Sueurs et neurovégétatif
+  "sueurs nocturnes profuses",
+  "palpitations nocturnes",
+  // Mictions et reflux
+  "nycturie (1 levée)",
+  "nycturie (2 levées ou plus)",
+  "reflux gastro-œsophagien nocturne",
+  // Sommeil fragmenté
+  "réveils fréquents en milieu de nuit",
+  "réveil précoce avec impossibilité de se rendormir",
+  "difficultés d'endormissement (> 30 min)",
+  // Mouvements et parasomnies
+  "bruxisme nocturne (grincement de dents)",
+  "impatiences des membres inférieurs au coucher",
+  "mouvements involontaires des jambes pendant le sommeil",
+  "agitation nocturne avec rêves animés",
+  // Position
+  "position de sommeil dorsale prédominante",
+]
+
+const SYMPT_DIURNES = [
+  // Vigilance et somnolence
+  "somnolence diurne",
+  "endormissements involontaires en réunion ou en lecture",
+  "endormissement au volant ou risque évité",
+  "siestes incontrôlables",
+  // Énergie
+  "asthénie matinale",
+  "sensation de sommeil non réparateur",
+  // Cognitif
+  "céphalées matinales",
+  "troubles de la concentration",
+  "troubles de la mémoire récente",
+  "baisse des performances au travail",
+  // Humeur et comportement
+  "irritabilité",
+  "humeur dépressive",
+  // Retentissement vie quotidienne
+  "baisse de la libido",
+  "dysfonction érectile",
+  // Hypersomnie spécifique
+  "cataplexies (perte de tonus aux émotions)",
+  // Médicolégal
+  "antécédent d'accident de la route lié à la somnolence",
+  "antécédent d'accident du travail lié à la somnolence",
+]
+
+const COMORBIDITES = [
+  // Cardiovasculaire
+  "HTA traitée",
+  "HTA résistante (≥ 3 médicaments)",
+  "fibrillation auriculaire",
+  "coronaropathie / antécédent d'infarctus",
+  "insuffisance cardiaque",
+  "AVC ou AIT",
+  // Métabolique
+  "diabète type 2",
+  "dyslipidémie",
+  "obésité (IMC ≥ 30)",
+  "obésité morbide (IMC ≥ 40)",
+  // Respiratoire
+  "BPCO",
+  "asthme",
+  "rhinite chronique",
+  "antécédent d'amygdalectomie",
+  // Neurologique
+  "syndrome des jambes sans repos",
+  "narcolepsie connue",
+  "pathologie neuromusculaire",
+  // Psychiatrique
+  "syndrome dépressif",
+  "trouble anxieux",
+  // Autres
+  "hypothyroïdie",
+  "RGO",
+  "douleurs chroniques",
+  "antécédent de chirurgie bariatrique",
+  "cancer en cours de traitement",
+]
+
+const PROFESSIONS = [
+  // Conducteurs professionnels (drapeaux rouges majeurs)
+  "conducteur professionnel poids lourd",
+  "conducteur de car ou bus",
+  "taxi ou VTC",
+  "ambulancier",
+  // Aérien et ferroviaire
+  "pilote ou personnel naviguant",
+  "conducteur de train",
+  // Sécurité et urgence
+  "personnel hospitalier de garde",
+  "pompier",
+  "policier ou gendarme",
+  // Travail posté
+  "travail de nuit",
+  "travail posté en 3x8 ou 2x8",
+  "horaires irréguliers",
+  // Risques particuliers
+  "manipulation de machines dangereuses",
+  // Autres
+  "retraité",
+  "sans activité professionnelle",
+]
+
+const ATCD_FAMILIAUX = [
+  "syndrome d'apnées du sommeil chez un parent au 1er degré",
+  "ronflements importants chez un parent au 1er degré",
+  "narcolepsie familiale",
+  "syndrome des jambes sans repos familial",
+  "parasomnies familiales",
+  "mort subite du nourrisson dans la famille",
+  "obésité familiale (≥ 2 parents au 1er degré)",
+  "diabète type 2 familial",
+  "hypertension artérielle familiale précoce (< 55 ans)",
+  "maladie cardiovasculaire précoce dans la famille",
+  "aucun antécédent familial connu",
+]
+
+
+const HYGIENE_SOMMEIL = [
+  // Stimulants
+  "consommation de café après 14h",
+  "consommation de thé/coca le soir",
+  "consommation d'alcool quotidienne au dîner",
+  "tabagisme actif",
+  "consommation de cannabis ou autres substances",
+  // Comportements au coucher
+  "écrans (TV/téléphone) dans l'heure précédant le coucher",
+  "écrans (TV/téléphone) au lit",
+  "horaires de coucher très variables",
+  "siestes longues (> 30 min) en journée",
+  // Activité physique
+  "sédentarité (peu d'activité physique)",
+  "activité physique régulière (≥ 3 fois/semaine)",
+  "exercice physique intense en soirée",
+  // Repas
+  "dîner copieux ou tardif (après 21h)",
+  // Environnement de sommeil
+  "chambre bruyante",
+  "chambre trop chaude",
+  "matelas inconfortable ou ancien",
+  "partage du lit avec animal de compagnie",
+]
+
+const TRAITEMENTS = [
+  // Sommeil
+  "somnifère / hypnotique (zolpidem, zopiclone...)",
+  "benzodiazépine",
+  "mélatonine",
+  // Psychotropes
+  "antidépresseur",
+  "anxiolytique",
+  "neuroleptique",
+  // Cardiovasculaire
+  "antihypertenseur",
+  "bêtabloquant",
+  "diurétique",
+  "anticoagulant ou antiagrégant",
+  "statine",
+  // Métabolique
+  "antidiabétique",
+  "hormones thyroïdiennes",
+  // Respiratoire
+  "bronchodilatateur ou corticoïde inhalé",
+  // Antalgiques
+  "antalgique opiacé (tramadol, codéine, morphine...)",
+  // Hormones
+  "œstrogènes / THM (femme)",
+  "corticothérapie au long cours",
+  // Aucun
+  "aucun traitement régulier",
+]
+
+const RETENTISSEMENT = [
+  // Travail
+  "baisse de productivité au travail",
+  "arrêts de travail liés à la fatigue",
+  // Conduite
+  "évite désormais les longs trajets en voiture",
+  "antécédent d'amende ou d'accident pour somnolence",
+  // Couple et famille
+  "tensions de couple à cause des ronflements",
+  "chambre à part imposée par les ronflements",
+  "vie sexuelle altérée",
+  // Loisirs
+  "renoncement à des activités sociales le soir",
+  "endormissement gênant en société (cinéma, théâtre, repas)",
+  // Sécurité
+  "sentiment d'être un danger pour soi-même au volant",
+  // Psychologique
+  "perte de confiance en soi liée à la fatigue",
+  "anxiété anticipatoire à l'approche du coucher",
+  // Quotidien
+  "difficultés à se lever le matin",
+  "consommation accrue de café/stimulants pour tenir",
+  "aucun retentissement particulier ressenti",
+]
+
+// ====================== LISTES PÉDIATRIQUES ======================
+
+const PEDIA_SYMPT_NOCTURNES = [
+  // Respiration
+  "ronflements habituels",
+  "ronflements forts (audibles d'une autre pièce)",
+  "respiration buccale nocturne (bouche ouverte)",
+  "pauses respiratoires observées",
+  "respiration bruyante / râles",
+  // Position
+  "position en hyperextension cervicale (tête en arrière)",
+  "agitation nocturne, change souvent de position",
+  // Sueurs
+  "sueurs nocturnes profuses",
+  // Éveils et fragmentation
+  "éveils fréquents en milieu de nuit",
+  "difficultés d'endormissement (> 30 min)",
+  "peur du coucher / refus d'aller au lit",
+  // Énurésie
+  "énurésie nocturne (pipi au lit)",
+  // Parasomnies
+  "terreurs nocturnes",
+  "somnambulisme",
+  "bruxisme (grincement de dents)",
+]
+
+const PEDIA_SYMPT_DIURNES = [
+  // Comportement et attention
+  "hyperactivité",
+  "trouble du déficit de l'attention",
+  "agressivité ou irritabilité",
+  "humeur changeante / labilité émotionnelle",
+  // Scolarité
+  "difficultés scolaires",
+  "baisse récente des résultats scolaires",
+  "remarques d'enseignants sur l'attention",
+  // Vigilance
+  "somnolence en classe",
+  "endormissements en voiture (trajets courts)",
+  "réveil matinal difficile",
+  "céphalées matinales",
+  // Croissance et développement
+  "retard staturo-pondéral",
+  "petit appétit chronique",
+  // Voix et ORL
+  "voix nasonnée",
+  "rhinopharyngites à répétition",
+]
+
+const PEDIA_ATCD = [
+  // Périnatal
+  "prématurité (< 37 SA)",
+  "hypotrophie à la naissance",
+  // ORL
+  "otites à répétition",
+  "rhinopharyngites à répétition",
+  "amygdalectomie",
+  "adénoïdectomie",
+  "diabolos / aérateurs trans-tympaniques",
+  // Allergies / atopie
+  "rhinite allergique",
+  "eczéma / dermatite atopique",
+  "asthme",
+  // Digestif
+  "RGO",
+  // Neurologique / développemental
+  "retard de développement psychomoteur",
+  "retard de langage",
+  "trouble du spectre autistique",
+  "trouble dys (dyslexie, dyspraxie...)",
+  // Génétique / morphologique
+  "trisomie 21",
+  "syndrome génétique connu",
+  "malformation cranio-faciale",
+  "obésité",
+]
+
+const PEDIA_ATCD_FAMILIAUX = [
+  "SAOS chez le père",
+  "SAOS chez la mère",
+  "ronflements importants chez un parent",
+  "amygdalectomie ou adénoïdectomie chez la fratrie",
+  "asthme ou allergies dans la famille",
+  "obésité familiale",
+  "trouble du sommeil chez la fratrie",
+  "trouble du déficit de l'attention dans la famille",
+  "aucun antécédent familial connu",
+]
+
+// PSQ Chervin RACCOURCI : 12 items principaux (les plus discriminants pour SAOS pédia)
+// Seuil ≥ 0.33 (4/12) = forte suspicion SAOS pédiatrique
+const PSQ_ITEMS = [
+  // Ronflement / respiration (4 items)
+  { q: "Votre enfant ronfle plus de la moitié du temps", k: "ron1" },
+  { q: "Votre enfant ronfle fort", k: "ron2" },
+  { q: "Votre enfant a du mal à respirer pendant le sommeil", k: "resp" },
+  { q: "Vous avez déjà vu votre enfant arrêter de respirer pendant son sommeil", k: "apn" },
+  // Somnolence / fatigue (3 items)
+  { q: "Votre enfant a tendance à s'endormir dans la journée", k: "somn1" },
+  { q: "Votre enfant a du mal à se réveiller le matin", k: "somn2" },
+  { q: "Votre enfant se plaint de maux de tête le matin au réveil", k: "somn3" },
+  // Hyperactivité / attention (3 items)
+  { q: "Votre enfant est facilement distrait par ce qui se passe autour", k: "tda1" },
+  { q: "Votre enfant est toujours en mouvement, comme monté sur ressorts", k: "tda2" },
+  { q: "Votre enfant est plus agité que les autres enfants de son âge", k: "agit" },
+  // Symptômes complémentaires (2 items)
+  { q: "Votre enfant respire la bouche ouverte pendant la journée", k: "buc" },
+  { q: "Votre enfant fait pipi au lit", k: "enur" },
+]
+
+// ====== État ======
+const state = {
+  mode: 'adulte',  // 'adulte' | 'pediatrie'
+  age:null, genre:null, poids:null, taille:null,
+  // Scores adulte
+  epworth:Array(EPWORTH_ITEMS.length).fill(null),
+  pichot:Array(PICHOT_ITEMS.length).fill(null),
+  had:Array(HAD_ITEMS.length).fill(null),
+  isi:Array(ISI_ITEMS.length).fill(null),
+  // Scores pédiatriques (PSQ uniquement)
+  psq:Array(PSQ_ITEMS.length).fill(null),       // 0=non, 1=oui, null=ne sait pas
+  // Listes adulte
+  symptomes_nocturnes:[],
+  symptomes_diurnes:[],
+  comorbidites:[],
+  profession:[],
+  hygiene_sommeil:[],
+  traitements:[],
+  atcd_familiaux:[],
+  retentissement:[],
+  // Listes pédiatriques
+  pedia_symptn:[],
+  pedia_symptd:[],
+  pedia_atcd:[],
+  pedia_atcd_fam:[],
+  // Communs
+  heure_coucher:null,
+  heure_lever:null,
+}
+
+// ====== Helpers UI ======
+function show(stepId){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'))
+  document.getElementById(stepId).classList.add('active')
+  window.scrollTo(0,0)
+}
+
+function showSection(idx){
+  document.querySelectorAll('.section').forEach(s=>s.style.display='none')
+  document.querySelector(`.section[data-section="${idx}"]`).style.display='block'
+  document.getElementById('progress-label').textContent = `Section ${idx+1} / 8`
+  document.getElementById('progress-fill').style.width = `${((idx+1)/8)*100}%`
+  window.scrollTo(0,0)
+}
+
+function showPediaSection(idx){
+  document.querySelectorAll('.pedia-section').forEach(s=>s.style.display='none')
+  document.querySelector(`.pedia-section[data-pedia-section="${idx}"]`).style.display='block'
+  document.getElementById('pedia-progress-label').textContent = `Section ${idx+1} / 4`
+  document.getElementById('pedia-progress-fill').style.width = `${((idx+1)/4)*100}%`
+  window.scrollTo(0,0)
+}
+
+// ====== Construction des questionnaires ======
+function buildScale(containerId, items, options, stateKey, totalCallback){
+  const c = document.getElementById(containerId)
+  c.innerHTML = ''
+  items.forEach((q, i)=>{
+    const text = (typeof q === 'string') ? q : q.q || q
+    const opts = (typeof q === 'object' && q.opts) ? q.opts.map((l,j)=>({v:j,l})) : options
+    const div = document.createElement('div')
+    div.className = 'question card'
+    div.innerHTML = `<div class="q">${i+1}. ${text}</div>`
+    const wrap = document.createElement('div')
+    wrap.className = 'options'
+    opts.forEach(o=>{
+      const lbl = document.createElement('label')
+      lbl.className = 'opt'
+      lbl.dataset.idx = i
+      lbl.dataset.v = o.v
+      lbl.textContent = o.l
+      lbl.addEventListener('click', ()=>{
+        wrap.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'))
+        lbl.classList.add('on')
+        state[stateKey][i] = parseInt(o.v)
+        if(totalCallback) totalCallback()
+      })
+      wrap.appendChild(lbl)
+    })
+    div.appendChild(wrap)
+    c.appendChild(div)
+  })
+}
+
+function buildChips(containerId, options, stateKey){
+  const c = document.getElementById(containerId)
+  c.innerHTML = ''
+  options.forEach(o=>{
+    const lbl = document.createElement('label')
+    lbl.className = 'chip'
+    lbl.textContent = o
+    lbl.addEventListener('click', ()=>{
+      lbl.classList.toggle('on')
+      const idx = state[stateKey].indexOf(o)
+      if(lbl.classList.contains('on') && idx === -1) state[stateKey].push(o)
+      if(!lbl.classList.contains('on') && idx !== -1) state[stateKey].splice(idx,1)
+    })
+    c.appendChild(lbl)
+  })
+}
+
+// ====== Construction PSQ Chervin (Oui/Non/Ne sait pas) ======
+function buildPsq(){
+  const c = document.getElementById('psq-items')
+  if(!c) return
+  c.innerHTML = ''
+  PSQ_ITEMS.forEach((item, i)=>{
+    const wrap = document.createElement('div')
+    wrap.className = 'card'
+    wrap.style.padding = '12px 14px'
+    wrap.style.marginBottom = '8px'
+    const q = document.createElement('div')
+    q.style.fontSize = '14px'
+    q.style.marginBottom = '8px'
+    q.textContent = item.q
+    wrap.appendChild(q)
+    const opts = document.createElement('div')
+    opts.className = 'options'
+    opts.style.flexDirection = 'row'
+    opts.style.gap = '6px'
+    ;[
+      {v: 1, t: 'Oui'},
+      {v: 0, t: 'Non'},
+      {v: null, t: 'Ne sais pas'},
+    ].forEach(o=>{
+      const lbl = document.createElement('label')
+      lbl.className = 'opt'
+      lbl.style.flex = '1'
+      lbl.style.textAlign = 'center'
+      lbl.style.fontSize = '13px'
+      lbl.style.padding = '8px 6px'
+      lbl.textContent = o.t
+      lbl.addEventListener('click', ()=>{
+        opts.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'))
+        lbl.classList.add('on')
+        state.psq[i] = o.v
+      })
+      opts.appendChild(lbl)
+    })
+    wrap.appendChild(opts)
+    c.appendChild(wrap)
+  })
+}
+
+// ====== Totaux ======
+function updateEpworthTotal(){
+  const t = state.epworth.reduce((a,b)=>a+(b||0),0)
+  document.getElementById('epworth-total').textContent = `Total : ${t} / 24`
+}
+function updatePichotTotal(){
+  const t = state.pichot.reduce((a,b)=>a+(b||0),0)
+  document.getElementById('pichot-total').textContent = `Total : ${t} / 32`
+}
+function updateHadTotal(){
+  let a=0, d=0
+  HAD_ITEMS.forEach((item, i)=>{
+    const v = state.had[i]
+    if(v === null || v === undefined) return
+    if(item.t === 'A') a += v
+    else d += v
+  })
+  document.getElementById('had-total').textContent = `HAD-A : ${a}/21 — HAD-D : ${d}/21`
+}
+function updateIsiTotal(){
+  const t = state.isi.reduce((a,b)=>a+(b||0),0)
+  document.getElementById('isi-total').textContent = `Total : ${t} / 28`
+}
+
+// ====== Initialisation ======
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Consentement + choix de mode → activation du bouton Commencer
+  const cb = document.getElementById('consent')
+  function refreshStartBtn(){
+    const ok = cb.checked && state.mode
+    document.getElementById('btn-start').disabled = !ok
+  }
+  cb.addEventListener('change', refreshStartBtn)
+
+  // Choix Adulte / Enfant
+  document.querySelectorAll('[data-name="mode"]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-name="mode"]').forEach(x=>x.classList.remove('on'))
+      b.classList.add('on')
+      state.mode = b.dataset.v
+      refreshStartBtn()
+    })
+  })
+
+  document.getElementById('btn-start').addEventListener('click', ()=>{
+    if(state.mode === 'pediatrie'){
+      show('step-form-pediatrie')
+      showPediaSection(0)
+    } else {
+      show('step-form')
+      showSection(0)
+    }
+  })
+
+  // Boutons next/prev (adulte)
+  document.querySelectorAll('[data-next]').forEach(b=>{
+    b.addEventListener('click', ()=>showSection(parseInt(b.dataset.next)))
+  })
+  document.querySelectorAll('[data-prev]').forEach(b=>{
+    b.addEventListener('click', ()=>showSection(parseInt(b.dataset.prev)))
+  })
+
+  // Boutons next/prev (pédiatrique)
+  document.querySelectorAll('[data-pedia-next]').forEach(b=>{
+    b.addEventListener('click', ()=>showPediaSection(parseInt(b.dataset.pediaNext)))
+  })
+  document.querySelectorAll('[data-pedia-prev]').forEach(b=>{
+    b.addEventListener('click', ()=>showPediaSection(parseInt(b.dataset.pediaPrev)))
+  })
+
+  // Inputs identité
+  document.getElementById('age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
+  document.getElementById('poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
+  document.getElementById('taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
+  document.querySelectorAll('[data-name="genre"]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-name="genre"]').forEach(x=>x.classList.remove('on'))
+      b.classList.add('on')
+      state.genre = b.dataset.v
+    })
+  })
+  document.getElementById('heure-coucher').addEventListener('input', e=>state.heure_coucher=e.target.value||null)
+  document.getElementById('heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
+
+  // Questionnaires
+  buildScale('epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
+  buildScale('pichot-questions', PICHOT_ITEMS, PICHOT_OPTIONS, 'pichot', updatePichotTotal)
+  buildScale('had-questions', HAD_ITEMS, null, 'had', updateHadTotal)
+  buildScale('isi-questions', ISI_ITEMS, null, 'isi', updateIsiTotal)
+
+  // Chips adulte
+  buildChips('chips-symptn', SYMPT_NOCTURNES, 'symptomes_nocturnes')
+  buildChips('chips-symptd', SYMPT_DIURNES, 'symptomes_diurnes')
+  buildChips('chips-comorb', COMORBIDITES, 'comorbidites')
+  buildChips('chips-prof', PROFESSIONS, 'profession')
+  buildChips('chips-hygiene', HYGIENE_SOMMEIL, 'hygiene_sommeil')
+  buildChips('chips-traitements', TRAITEMENTS, 'traitements')
+  buildChips('chips-atcdfam', ATCD_FAMILIAUX, 'atcd_familiaux')
+  buildChips('chips-retentissement', RETENTISSEMENT, 'retentissement')
+
+  // ===== Initialisation pédiatrique =====
+  // Inputs identité enfant
+  document.getElementById('pedia-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
+  document.getElementById('pedia-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
+  document.getElementById('pedia-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
+  document.querySelectorAll('[data-name="pedia-genre"]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-name="pedia-genre"]').forEach(x=>x.classList.remove('on'))
+      b.classList.add('on')
+      state.genre = b.dataset.v
+    })
+  })
+  document.getElementById('pedia-heure-coucher').addEventListener('input', e=>state.heure_coucher=e.target.value||null)
+  document.getElementById('pedia-heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
+
+  // PSQ Chervin raccourci (oui/non/ne sait pas)
+  buildPsq()
+
+  // Chips pédiatriques
+  buildChips('chips-pedia-symptn', PEDIA_SYMPT_NOCTURNES, 'pedia_symptn')
+  buildChips('chips-pedia-symptd', PEDIA_SYMPT_DIURNES, 'pedia_symptd')
+  buildChips('chips-pedia-atcd', PEDIA_ATCD, 'pedia_atcd')
+  buildChips('chips-pedia-atcdfam', PEDIA_ATCD_FAMILIAUX, 'pedia_atcd_fam')
+
+  // Bouton final adulte
+  document.getElementById('btn-finish').addEventListener('click', generateQR)
+  // Bouton final pédiatrique
+  document.getElementById('btn-finish-pedia').addEventListener('click', generateQR)
+
+  // Bouton recommencer
+  document.getElementById('btn-restart').addEventListener('click', ()=>location.reload())
+})
+
+// ====== Génération du QR code ======
+function generateQR(){
+  // IMC auto
+  let imc = null
+  if(state.poids && state.taille){
+    imc = Math.round((state.poids / Math.pow(state.taille/100, 2)) * 10) / 10
+  }
+
+  // Helper : convertir un tableau de chaînes en tableau d'indices dans la liste source
+  function toIdx(arr, source){
+    if(!arr || !arr.length) return []
+    return arr.map(s => source.indexOf(s)).filter(i => i >= 0)
+  }
+
+  let payload
+
+  if(state.mode === 'pediatrie'){
+    // Score PSQ Chervin : compter les "Oui" (1) / nombre items répondus
+    let psqOui = 0, psqRep = 0
+    state.psq.forEach(v=>{
+      if(v === 1) { psqOui++; psqRep++ }
+      else if(v === 0) psqRep++
+    })
+    const psqRatio = psqRep > 0 ? Math.round((psqOui/psqRep)*100)/100 : null
+
+    // Payload pédiatrique V3-PEDIA
+    payload = {
+      v:3,
+      m: 'pedia',  // mode pédiatrique
+      age: state.age,
+      g: state.genre,
+      p: state.poids,
+      t: state.taille,
+      i: imc,
+      // Scores pédiatriques
+      psq: state.psq,           // tableau brut (oui=1/non=0/null) — 12 items
+      psqr: psqRatio,           // ratio "oui" / total répondu
+      // Listes (indices)
+      psn: toIdx(state.pedia_symptn, PEDIA_SYMPT_NOCTURNES),
+      psd: toIdx(state.pedia_symptd, PEDIA_SYMPT_DIURNES),
+      pat: toIdx(state.pedia_atcd, PEDIA_ATCD),
+      paf: toIdx(state.pedia_atcd_fam, PEDIA_ATCD_FAMILIAUX),
+      // Communs
+      hc: state.heure_coucher,
+      hl: state.heure_lever,
+    }
+  } else {
+    // Mode adulte (par défaut)
+    const epworth = state.epworth.reduce((a,b)=>a+(b||0),0)
+    const pichot = state.pichot.reduce((a,b)=>a+(b||0),0)
+    let hada=0, hadd=0
+    HAD_ITEMS.forEach((item, i)=>{
+      const v = state.had[i]
+      if(v === null || v === undefined) return
+      if(item.t === 'A') hada += v
+      else hadd += v
+    })
+    const isi = state.isi.reduce((a,b)=>a+(b||0),0)
+
+    payload = {
+      v:3,
+      m: 'adulte',  // mode adulte
+      age: state.age,
+      g: state.genre,
+      p: state.poids,
+      t: state.taille,
+      i: imc,
+      e: epworth,
+      pi: pichot,
+      ha: hada,
+      hd: hadd,
+      is: isi,
+      sn: toIdx(state.symptomes_nocturnes, SYMPT_NOCTURNES),
+      sd: toIdx(state.symptomes_diurnes, SYMPT_DIURNES),
+      co: toIdx(state.comorbidites, COMORBIDITES),
+      pr: toIdx(state.profession, PROFESSIONS),
+      hy: toIdx(state.hygiene_sommeil, HYGIENE_SOMMEIL),
+      tr: toIdx(state.traitements, TRAITEMENTS),
+      af: toIdx(state.atcd_familiaux, ATCD_FAMILIAUX),
+      re: toIdx(state.retentissement, RETENTISSEMENT),
+      hc: state.heure_coucher,
+      hl: state.heure_lever,
+    }
+  }
+
+  const json = JSON.stringify(payload)
+  const data = 'SLEEP-V3::' + json
+
+  // Aller à l'écran final tout de suite
+  show('step-qr')
+
+  // Tenter de générer le QR — avec retries si la lib pas encore chargée
+  tryRenderQR(data, 0)
+}
+
+// ====== Génération PDF (impression navigateur → Enregistrer en PDF) ======
+function downloadPDF(){
+  // Date du jour
+  const today = new Date().toLocaleDateString('fr-FR', {
+    day:'numeric', month:'long', year:'numeric'
+  })
+
+  // Helper pour sécuriser le contenu (échapper le HTML)
+  function safe(v){
+    if(v === null || v === undefined || v === '') return '—'
+    return String(v).replace(/[<>&"]/g, c =>
+      ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))
+  }
+
+  function fillList(elId, arr, emptyText){
+    const ul = document.getElementById(elId)
+    if(!ul) return
+    if(!arr || arr.length === 0){
+      ul.innerHTML = '<li class="pdf-empty">' + safe(emptyText) + '</li>'
+      return
+    }
+    ul.innerHTML = arr.map(item => '<li>' + safe(item) + '</li>').join('')
+  }
+
+  let imc = null
+  if(state.poids && state.taille){
+    imc = Math.round((state.poids / Math.pow(state.taille/100, 2)) * 10) / 10
+  }
+
+  // Date dans le titre PDF
+  document.getElementById('pdf-date').textContent = 'Document généré le ' + today
+
+  if(state.mode === 'pediatrie'){
+    // ===== MODE PÉDIATRIQUE =====
+    document.getElementById('pdf-title').textContent = 'Questionnaire de pré-consultation pédiatrique'
+    document.getElementById('pdf-subtitle').textContent = 'Médecine du sommeil — enfant'
+    document.getElementById('pdf-adult-content').style.display = 'none'
+    document.getElementById('pdf-pedia-content').style.display = 'block'
+
+    // Identité
+    document.getElementById('pdf-pedia-age').textContent = state.age ? state.age + ' ans' : '—'
+    document.getElementById('pdf-pedia-genre').textContent = state.genre === 'M' ? 'Garçon' : (state.genre === 'F' ? 'Fille' : '—')
+    document.getElementById('pdf-pedia-poids').textContent = state.poids ? state.poids + ' kg' : '—'
+    document.getElementById('pdf-pedia-taille').textContent = state.taille ? state.taille + ' cm' : '—'
+    document.getElementById('pdf-pedia-imc').textContent = imc ? imc + ' kg/m²' : '—'
+    document.getElementById('pdf-pedia-coucher').textContent = state.heure_coucher || '—'
+    document.getElementById('pdf-pedia-lever').textContent = state.heure_lever || '—'
+
+    // PSQ Chervin
+    let psqOui = 0, psqRep = 0
+    state.psq.forEach(v=>{
+      if(v === 1){ psqOui++; psqRep++ }
+      else if(v === 0) psqRep++
+    })
+    document.getElementById('pdf-pedia-psq-oui').textContent = psqOui
+    document.getElementById('pdf-pedia-psq-tot').textContent = psqRep
+    const ratio = psqRep > 0 ? (psqOui/psqRep) : null
+    if(ratio !== null){
+      document.getElementById('pdf-pedia-psq-ratio').textContent = 'Ratio = ' + ratio.toFixed(2)
+      let interp = 'Faible probabilité de SAOS'
+      if(ratio >= 0.33) interp = 'Forte suspicion de SAOS pédiatrique (≥ 0,33)'
+      else if(ratio >= 0.20) interp = 'Probabilité intermédiaire'
+      document.getElementById('pdf-pedia-psq-interp').textContent = interp
+    } else {
+      document.getElementById('pdf-pedia-psq-ratio').textContent = '—'
+      document.getElementById('pdf-pedia-psq-interp').textContent = 'Pas assez de réponses'
+    }
+
+    // Détail PSQ
+    const psqDetails = []
+    PSQ_ITEMS.forEach((item, i)=>{
+      const v = state.psq[i]
+      const rep = v === 1 ? '<strong>OUI</strong>' : (v === 0 ? 'non' : '<em>—</em>')
+      psqDetails.push(item.q + ' : ' + rep)
+    })
+    const psqUl = document.getElementById('pdf-pedia-psq-details')
+    if(psqUl) psqUl.innerHTML = psqDetails.map(d => '<li style="font-size:9pt">' + d + '</li>').join('')
+
+    // Listes pédiatriques
+    fillList('pdf-pedia-symptn', state.pedia_symptn, 'Aucun symptôme nocturne rapporté')
+    fillList('pdf-pedia-symptd', state.pedia_symptd, 'Aucun symptôme diurne rapporté')
+    fillList('pdf-pedia-atcd', state.pedia_atcd, 'Aucun antécédent personnel rapporté')
+    fillList('pdf-pedia-atcdfam', state.pedia_atcd_fam, 'Aucun antécédent familial connu')
+
+  } else {
+    // ===== MODE ADULTE =====
+    document.getElementById('pdf-title').textContent = 'Questionnaire de pré-consultation'
+    document.getElementById('pdf-subtitle').textContent = 'Médecine du sommeil'
+    document.getElementById('pdf-adult-content').style.display = 'block'
+    document.getElementById('pdf-pedia-content').style.display = 'none'
+
+    // Calculs scores adulte
+    const epworth = state.epworth.reduce((a,b)=>a+(b||0),0)
+    const pichot = state.pichot.reduce((a,b)=>a+(b||0),0)
+    let hada=0, hadd=0
+    HAD_ITEMS.forEach((item, i)=>{
+      const v = state.had[i]
+      if(v === null || v === undefined) return
+      if(item.t === 'A') hada += v
+      else hadd += v
+    })
+    const isi = state.isi.reduce((a,b)=>a+(b||0),0)
+
+    function interpEpworth(s){
+      if(s <= 10) return 'Score normal'
+      if(s <= 15) return 'Somnolence diurne modérée'
+      return 'Somnolence diurne sévère'
+    }
+    function interpPichot(s){
+      if(s <= 8) return 'Fatigue normale'
+      if(s <= 21) return 'Fatigue modérée'
+      return 'Fatigue importante'
+    }
+    function interpHad(s){
+      if(s <= 7) return 'Pas de symptomatologie'
+      if(s <= 10) return 'Symptomatologie douteuse'
+      return 'Symptomatologie probable'
+    }
+    function interpIsi(s){
+      if(s <= 7) return 'Pas d\'insomnie cliniquement significative'
+      if(s <= 14) return 'Insomnie infraclinique'
+      if(s <= 21) return 'Insomnie clinique modérée'
+      return 'Insomnie clinique sévère'
+    }
+
+    // Remplir la zone PDF adulte
+    document.getElementById('pdf-age').textContent = state.age ? state.age + ' ans' : '—'
+    document.getElementById('pdf-genre').textContent = state.genre === 'M' ? 'Masculin' : (state.genre === 'F' ? 'Féminin' : '—')
+    document.getElementById('pdf-poids').textContent = state.poids ? state.poids + ' kg' : '—'
+    document.getElementById('pdf-taille').textContent = state.taille ? state.taille + ' cm' : '—'
+    document.getElementById('pdf-imc').textContent = imc ? imc + ' kg/m²' : '—'
+    document.getElementById('pdf-coucher').textContent = state.heure_coucher || '—'
+    document.getElementById('pdf-lever').textContent = state.heure_lever || '—'
+    document.getElementById('pdf-epworth').textContent = epworth
+    document.getElementById('pdf-epworth-interp').textContent = interpEpworth(epworth)
+    document.getElementById('pdf-pichot').textContent = pichot
+    document.getElementById('pdf-pichot-interp').textContent = interpPichot(pichot)
+    document.getElementById('pdf-hada').textContent = hada
+    document.getElementById('pdf-hada-interp').textContent = interpHad(hada)
+    document.getElementById('pdf-hadd').textContent = hadd
+    document.getElementById('pdf-hadd-interp').textContent = interpHad(hadd)
+    document.getElementById('pdf-isi').textContent = isi
+    document.getElementById('pdf-isi-interp').textContent = interpIsi(isi)
+
+    fillList('pdf-symptn', state.symptomes_nocturnes, 'Aucun symptôme nocturne rapporté')
+    fillList('pdf-symptd', state.symptomes_diurnes, 'Aucun symptôme diurne rapporté')
+    fillList('pdf-comorb', state.comorbidites, 'Aucun antécédent particulier')
+    fillList('pdf-atcdfam', state.atcd_familiaux, 'Aucun antécédent familial connu')
+    fillList('pdf-traitements', state.traitements, 'Aucun traitement régulier')
+    fillList('pdf-prof', state.profession, 'Non renseigné')
+    fillList('pdf-hygiene', state.hygiene_sommeil, 'Aucun élément signalé')
+    fillList('pdf-retentissement', state.retentissement, 'Aucun retentissement signalé')
+  }
+
+  // Lancer l'impression — l'utilisateur choisira "Enregistrer en PDF" comme destination
+  setTimeout(()=>window.print(), 100)
+}
+
+// Sélectionne le niveau de correction d'erreur le plus élevé qui permet d'encoder le payload.
+// Plus le niveau est élevé, plus le QR est lisible mais sa capacité diminue.
+// Capacités approximatives en mode Byte : H=1273, Q=1663, M=2331, L=2953 caractères.
+function pickErrorLevel(byteLength){
+  if(byteLength <= 1200) return 'H'   // niveau optimal : très tolérant aux salissures/luminosité
+  if(byteLength <= 1600) return 'Q'   // bon compromis
+  if(byteLength <= 2300) return 'M'   // moyen
+  return 'L'                          // grande capacité, faible correction
+}
+
+function tryRenderQR(data, attempt){
+  const container = document.getElementById('qrcode-canvas')
+  if(!container) return
+
+  // ====== Cas 1 : la lib Arase (qrcode-generator) est disponible — chemin préféré ======
+  if(window.QR_LIB === 'arase' && typeof qrcode === 'function'){
+    try {
+      const byteLen = (new TextEncoder()).encode(data).length
+      const ecLevel = pickErrorLevel(byteLen)
+      // typeNumber=0 → la lib choisit automatiquement la version la plus petite suffisante
+      const qr = qrcode(0, ecLevel)
+      qr.addData(data)
+      qr.make()
+      // SVG : cellules plus grosses + grosse marge "quiet zone" pour décodage robuste
+      const cellSize = 8
+      const margin = 24  // ≥ 4 modules × cellSize, marge confortable
+      container.innerHTML = qr.createSvgTag({
+        cellSize: cellSize,
+        margin: margin,
+        scalable: true,
+      })
+      // Forcer largeur + fond blanc explicite (anti mode sombre)
+      const svg = container.querySelector('svg')
+      if(svg){
+        svg.style.width = '300px'
+        svg.style.height = '300px'
+        svg.style.maxWidth = '92vw'
+        svg.style.maxHeight = '92vw'
+        svg.style.background = '#ffffff'
+        svg.style.display = 'block'
+        // Forcer uniquement les <path> en noir (les modules QR).
+        // Les <rect> existants (fond blanc) restent intacts.
+        svg.querySelectorAll('path').forEach(el => {
+          el.setAttribute('fill', '#000000')
+        })
+        // Forcer également les rect existants sans fill, qui sont les modules :
+        // dans qrcode-generator, le fond est un rect avec fill="#ffffff" explicite,
+        // donc on ne touche QUE les rects sans attribut fill ou avec fill noir.
+        svg.querySelectorAll('rect').forEach(el => {
+          const fill = el.getAttribute('fill')
+          if(!fill || fill === '#000000' || fill === 'black' || fill.toLowerCase() === '#000'){
+            el.setAttribute('fill', '#000000')
+          }
+          // Sinon (fill="#ffffff" ou "white"), on laisse intact — c'est le fond
+        })
+      }
+      return
+    } catch(e) {
+      const byteLen = (new TextEncoder()).encode(data).length
+      showFallback(data, "Le QR code n'a pas pu être généré (" + e.message + "). Taille du contenu : " + byteLen + " caractères. " +
+        "Cela peut arriver si beaucoup de symptômes ont été cochés.")
+      return
+    }
+  }
+
+  // ====== Cas 2 : ancienne lib qrcodejs (David Shim) en fallback ======
+  if(window.QR_LIB === 'qrcodejs' && typeof QRCode !== 'undefined' && QRCode.CorrectLevel){
+    container.innerHTML = ''
+    try {
+      const byteLen = (new TextEncoder()).encode(data).length
+      // qrcodejs a une limite à ~2300 caractères en mode M, bien moins en H
+      const level = byteLen > 1500 ? QRCode.CorrectLevel.L : QRCode.CorrectLevel.M
+      new QRCode(container, {
+        text: data,
+        width: 280,
+        height: 280,
+        correctLevel: level,
+      })
+      // Vérification post-génération : si le canvas est vide, c'est un échec silencieux
+      setTimeout(()=>{
+        const img = container.querySelector('canvas, img')
+        if(!img || (img.tagName === 'CANVAS' && img.width === 0)){
+          showFallback(data, "La librairie QR a échoué silencieusement (contenu trop volumineux : " + byteLen + " caractères).")
+        }
+      }, 100)
+    } catch(e) {
+      const byteLen = (new TextEncoder()).encode(data).length
+      showFallback(data, 'Erreur de génération du QR : ' + e.message + ' (taille : ' + byteLen + ' car.)')
+    }
+    return
+  }
+
+  // ====== Cas 3 : la lib n'a pas pu être chargée du tout ======
+  if(window.QR_STATUS === 'failed'){
+    const errs = (window.QR_LOAD_ERRORS || []).join(' ; ')
+    showFallback(data, "Le générateur de QR code n'a pas pu être chargé. " +
+      "Cela arrive si le téléphone n'a pas de connexion internet au moment précis du chargement de cette page. " +
+      "Solution : présentez le code ci-dessous à votre médecin." +
+      (errs ? " (Détails techniques : " + errs + ")" : ""))
+    return
+  }
+
+  // ====== Cas 4 : la lib est en cours de chargement → on retente ======
+  if(attempt < 50){  // 10 secondes max (50 × 200 ms)
+    if(attempt === 5){
+      // Au bout de 1 sec sans lib : afficher un message d'attente
+      container.innerHTML = '<p style="color:#6b7280;font-size:14px">Préparation du QR code…</p>'
+    }
+    setTimeout(()=>tryRenderQR(data, attempt + 1), 200)
+    return
+  }
+
+  // ====== Cas 5 : timeout après 10 secondes ======
+  showFallback(data, "Le générateur de QR code met trop de temps à se charger (plus de 10 secondes). " +
+    "Vérifiez la connexion internet et rechargez la page.")
+}
+
+function showFallback(data, reason){
+  const container = document.getElementById('qrcode-canvas')
+  const fallback = document.getElementById('qr-fallback')
+  if(container) container.style.display = 'none'
+  if(fallback){
+    fallback.style.display = 'block'
+    document.getElementById('qr-fallback-reason').textContent = reason
+    document.getElementById('qr-fallback-data').value = data
+  }
+}
+
+function copyFallback(){
+  const ta = document.getElementById('qr-fallback-data')
+  ta.select()
+  try {
+    document.execCommand('copy')
+    document.getElementById('qr-fallback-copy-status').textContent = '✓ Copié dans le presse-papiers'
+  } catch(e) {
+    document.getElementById('qr-fallback-copy-status').textContent = 'Sélectionnez le texte ci-dessus puis copiez-le manuellement'
+  }
+}
+
+function retryQR(){
+  const ta = document.getElementById('qr-fallback-data')
+  const data = ta ? ta.value : null
+  if(!data) return
+  // Cacher le fallback et réafficher la zone QR
+  const container = document.getElementById('qrcode-canvas')
+  const fallback = document.getElementById('qr-fallback')
+  if(fallback) fallback.style.display = 'none'
+  if(container) {
+    container.style.display = 'inline-block'
+    container.innerHTML = '<p style="color:#6b7280;font-size:14px">Nouvelle tentative…</p>'
+  }
+  // Si la lib avait échoué : on réinitialise et on relance le chargement
+  if(window.QR_STATUS === 'failed'){
+    window.QR_STATUS = 'loading'
+    window.QR_LOAD_ERRORS = []
+    // Recharger la lib
+    const s = document.createElement('script')
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'
+    s.onload = () => {
+      if(typeof qrcode === 'function'){
+        window.QR_LIB = 'arase'
+        window.QR_STATUS = 'ready'
+        tryRenderQR(data, 0)
+      } else {
+        window.QR_STATUS = 'failed'
+        tryRenderQR(data, 0)
+      }
+    }
+    s.onerror = () => {
+      window.QR_STATUS = 'failed'
+      tryRenderQR(data, 0)
+    }
+    document.head.appendChild(s)
+  } else {
+    tryRenderQR(data, 0)
+  }
+}
+</script>
+</body>
+</html>
