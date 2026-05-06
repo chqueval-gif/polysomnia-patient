@@ -165,8 +165,8 @@
 <!-- ============================ ÉTAPE 3a : QUESTIONNAIRE ADULTE / PPC ============================ -->
 <div class="step" id="step-form">
   <div class="progress">
-    <span data-progress-label>Section 1 / 10</span>
-    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:10%"></div></div>
+    <span data-progress-label>Section 1 / 11</span>
+    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:9%"></div></div>
   </div>
 
   <!-- ===== SECTION 1 : MORPHOMÉTRIE & CONSTANTES ===== -->
@@ -202,9 +202,25 @@
     </div>
   </div>
 
-  <!-- ===== SECTION 2 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
+  
+  <!-- ===== SECTION 2 : MOTIF DE CONSULTATION ===== -->
   <div class="section" data-section="1" style="display:none">
-    <h2>2. Antécédents et traitements</h2>
+    <h2>2. Motif de consultation</h2>
+
+    <div class="card">
+      <h3>Pourquoi consultez-vous aujourd'hui ?</h3>
+      <p class="small">Cochez ce qui correspond le mieux (plusieurs choix possibles).</p>
+      <div class="chips" id="chips-motif"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="0">← Retour</button>
+      <button class="btn" data-next="2">Suivant →</button>
+    </div>
+  </div>
+<!-- ===== SECTION 2 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
+  <div class="section" data-section="2" style="display:none">
+    <h2>3. Antécédents et traitements</h2>
 
     <div class="card">
       <h3>Antécédents médicaux personnels</h3>
@@ -225,14 +241,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="0">← Retour</button>
-      <button class="btn" data-next="2">Suivant →</button>
+      <button class="btn secondary" data-prev="1">← Retour</button>
+      <button class="btn" data-next="3">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 3 : MODE DE VIE & PROFESSION ===== -->
-  <div class="section" data-section="2" style="display:none">
-    <h2>3. Mode de vie et profession</h2>
+  <div class="section" data-section="3" style="display:none">
+    <h2>4. Mode de vie et profession</h2>
 
     <div class="card">
       <h3>Hygiène de sommeil et habitudes</h3>
@@ -247,14 +263,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="1">← Retour</button>
-      <button class="btn" data-next="3">Suivant →</button>
+      <button class="btn secondary" data-prev="2">← Retour</button>
+      <button class="btn" data-next="4">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 4 : HABITUDES DE SOMMEIL ===== -->
-  <div class="section" data-section="3" style="display:none">
-    <h2>4. Habitudes de sommeil</h2>
+  <div class="section" data-section="4" style="display:none">
+    <h2>5. Habitudes de sommeil</h2>
 
     <div class="card">
       <div class="row">
@@ -270,14 +286,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="2">← Retour</button>
-      <button class="btn" data-next="4">Suivant →</button>
+      <button class="btn secondary" data-prev="3">← Retour</button>
+      <button class="btn" data-next="5">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 5 : SYMPTÔMES NOCTURNES & DIURNES ===== -->
-  <div class="section" data-section="4" style="display:none">
-    <h2>5. Symptômes nocturnes et diurnes</h2>
+  <div class="section" data-section="5" style="display:none">
+    <h2>6. Symptômes nocturnes et diurnes</h2>
 
     <div class="card">
       <h3>Symptômes nocturnes (cochez ceux qui vous concernent)</h3>
@@ -290,14 +306,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="3">← Retour</button>
-      <button class="btn" data-next="5">Suivant →</button>
+      <button class="btn secondary" data-prev="4">← Retour</button>
+      <button class="btn" data-next="6">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 6 : RETENTISSEMENT ===== -->
-  <div class="section" data-section="5" style="display:none">
-    <h2>6. Retentissement sur la vie quotidienne</h2>
+  <div class="section" data-section="6" style="display:none">
+    <h2>7. Retentissement sur la vie quotidienne</h2>
 
     <div class="card">
       <p class="small">Comment vos troubles du sommeil affectent votre quotidien ?</p>
@@ -305,14 +321,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="4">← Retour</button>
-      <button class="btn" data-next="6">Suivant →</button>
+      <button class="btn secondary" data-prev="5">← Retour</button>
+      <button class="btn" data-next="7">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 7 : EPWORTH ===== -->
-  <div class="section" data-section="6" style="display:none">
-    <h2>7. Échelle d'Epworth</h2>
+  <div class="section" data-section="7" style="display:none">
+    <h2>8. Échelle d'Epworth</h2>
     <p class="small">Évaluez votre <strong>somnolence dans la journée</strong>. Pour chaque situation, indiquez la probabilité que vous vous endormiez ou somnoliez (pas seulement vous sentir fatigué).</p>
     <div class="info-box">
       <strong>Échelle :</strong><br>
@@ -324,14 +340,14 @@
     <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="epworth-total">Total : 0 / 24</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="5">← Retour</button>
-      <button class="btn" data-next="7">Suivant →</button>
+      <button class="btn secondary" data-prev="6">← Retour</button>
+      <button class="btn" data-next="8">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 8 : PICHOT ===== -->
-  <div class="section" data-section="7" style="display:none">
-    <h2>8. Échelle de Pichot (fatigue)</h2>
+  <div class="section" data-section="8" style="display:none">
+    <h2>9. Échelle de Pichot (fatigue)</h2>
     <p class="small">Pour chacune des phrases suivantes, dites <strong>à quel point elle correspond à votre état actuel</strong>.</p>
     <div class="info-box">
       <strong>Échelle :</strong><br>
@@ -343,14 +359,14 @@
     <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pichot-total">Total : 0 / 32</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="6">← Retour</button>
-      <button class="btn" data-next="8">Suivant →</button>
+      <button class="btn secondary" data-prev="7">← Retour</button>
+      <button class="btn" data-next="9">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 9 : HAD ===== -->
-  <div class="section" data-section="8" style="display:none">
-    <h2>9. Échelle HAD (anxiété et humeur)</h2>
+  <div class="section" data-section="9" style="display:none">
+    <h2>10. Échelle HAD (anxiété et humeur)</h2>
     <p class="small">Comment vous êtes-vous senti(e) <strong>au cours de la dernière semaine</strong> ? Choisissez la réponse qui décrit le mieux ce que vous avez ressenti.</p>
 
     <div id="had-questions"></div>
@@ -358,14 +374,14 @@
     <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="7">← Retour</button>
-      <button class="btn" data-next="9">Suivant →</button>
+      <button class="btn secondary" data-prev="8">← Retour</button>
+      <button class="btn" data-next="10">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 10 : ISI ===== -->
-  <div class="section" data-section="9" style="display:none">
-    <h2>10. Index de sévérité de l'insomnie (ISI)</h2>
+  <div class="section" data-section="10" style="display:none">
+    <h2>11. Index de sévérité de l'insomnie (ISI)</h2>
     <p class="small">Évaluez vos <strong>problèmes de sommeil au cours des 2 dernières semaines</strong>.</p>
 
     <div id="isi-questions"></div>
@@ -373,7 +389,7 @@
     <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="isi-total">Total : 0 / 28</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="8">← Retour</button>
+      <button class="btn secondary" data-prev="9">← Retour</button>
       <button class="btn" id="btn-finish">Terminer et générer le QR code →</button>
     </div>
   </div>
@@ -383,8 +399,8 @@
 <!-- ============================ ÉTAPE 3b : QUESTIONNAIRE PÉDIATRIQUE ============================ -->
 <div class="step" id="step-form-pedia">
   <div class="progress">
-    <span data-progress-label>Section 1 / 6</span>
-    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:16.7%"></div></div>
+    <span data-progress-label>Section 1 / 7</span>
+    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:14.3%"></div></div>
   </div>
 
   <!-- ===== PEDIA SECTION 1 : INFOS ENFANT ===== -->
@@ -421,9 +437,25 @@
     </div>
   </div>
 
-  <!-- ===== PEDIA SECTION 2 : ANTÉCÉDENTS PERSONNELS + FAMILIAUX ===== -->
+  
+  <!-- ===== PEDIA SECTION 2 : MOTIF DE CONSULTATION ===== -->
   <div class="section" data-section="1" style="display:none">
-    <h2>2. Antécédents</h2>
+    <h2>2. Motif de consultation</h2>
+
+    <div class="card">
+      <h3>Pourquoi consultez-vous aujourd'hui ?</h3>
+      <p class="small">Cochez ce qui correspond le mieux (plusieurs choix possibles).</p>
+      <div class="chips" id="chips-motif-pedia"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="0">← Retour</button>
+      <button class="btn" data-next="2">Suivant →</button>
+    </div>
+  </div>
+<!-- ===== PEDIA SECTION 2 : ANTÉCÉDENTS PERSONNELS + FAMILIAUX ===== -->
+  <div class="section" data-section="2" style="display:none">
+    <h2>3. Antécédents</h2>
 
     <div class="card">
       <h3>Antécédents personnels de votre enfant</h3>
@@ -438,14 +470,14 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="0">← Retour</button>
-      <button class="btn" data-next="2">Suivant →</button>
+      <button class="btn secondary" data-prev="1">← Retour</button>
+      <button class="btn" data-next="3">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== PEDIA SECTION 3 : HABITUDES DE SOMMEIL ===== -->
-  <div class="section" data-section="2" style="display:none">
-    <h2>3. Habitudes de sommeil</h2>
+  <div class="section" data-section="3" style="display:none">
+    <h2>4. Habitudes de sommeil</h2>
 
     <div class="card">
       <div class="row">
@@ -461,33 +493,18 @@
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="1">← Retour</button>
-      <button class="btn" data-next="3">Suivant →</button>
-    </div>
-  </div>
-
-  <!-- ===== PEDIA SECTION 4 : SYMPTÔMES NOCTURNES ===== -->
-  <div class="section" data-section="3" style="display:none">
-    <h2>4. Symptômes nocturnes</h2>
-
-    <div class="card">
-      <p class="small">Cochez les symptômes que votre enfant présente la nuit.</p>
-      <div class="chips" id="chips-pedia-psn"></div>
-    </div>
-
-    <div class="nav">
       <button class="btn secondary" data-prev="2">← Retour</button>
       <button class="btn" data-next="4">Suivant →</button>
     </div>
   </div>
 
-  <!-- ===== PEDIA SECTION 5 : SYMPTÔMES DIURNES ===== -->
+  <!-- ===== PEDIA SECTION 4 : SYMPTÔMES NOCTURNES ===== -->
   <div class="section" data-section="4" style="display:none">
-    <h2>5. Symptômes en journée et à l'école</h2>
+    <h2>5. Symptômes nocturnes</h2>
 
     <div class="card">
-      <p class="small">Cochez ce que vous observez en journée chez votre enfant.</p>
-      <div class="chips" id="chips-pedia-psd"></div>
+      <p class="small">Cochez les symptômes que votre enfant présente la nuit.</p>
+      <div class="chips" id="chips-pedia-psn"></div>
     </div>
 
     <div class="nav">
@@ -496,20 +513,35 @@
     </div>
   </div>
 
-  <!-- ===== PEDIA SECTION 6 : PSQ CHERVIN ===== -->
+  <!-- ===== PEDIA SECTION 5 : SYMPTÔMES DIURNES ===== -->
   <div class="section" data-section="5" style="display:none">
-    <h2>6. Questionnaire de dépistage (PSQ)</h2>
+    <h2>6. Symptômes en journée et à l'école</h2>
+
+    <div class="card">
+      <p class="small">Cochez ce que vous observez en journée chez votre enfant.</p>
+      <div class="chips" id="chips-pedia-psd"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="4">← Retour</button>
+      <button class="btn" data-next="6">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== PEDIA SECTION 6 : PSQ CHERVIN ===== -->
+  <div class="section" data-section="6" style="display:none">
+    <h2>7. Questionnaire de dépistage (PSQ)</h2>
     <p class="small">Pour chacune des questions, répondez <strong>Oui</strong> ou <strong>Non</strong> selon ce que vous observez le plus souvent chez votre enfant.</p>
     <div class="info-box">
-      <strong>À savoir :</strong> ce questionnaire (PSQ Chervin) est un outil de dépistage validé pour repérer les troubles respiratoires du sommeil chez l'enfant.
+      <strong>À savoir :</strong> ce questionnaire (PSQ-SRBD de Chervin, version 22 items) est un outil de dépistage validé pour repérer les troubles respiratoires du sommeil chez l'enfant. Vous pouvez répondre « Non » si vous n'êtes pas sûr(e).
     </div>
 
     <div id="psq-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="psq-total">Score : 0 / 12</p>
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="psq-total">Score : 0 / 22</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="4">← Retour</button>
+      <button class="btn secondary" data-prev="5">← Retour</button>
       <button class="btn" id="btn-finish-pedia">Terminer et générer le QR code →</button>
     </div>
   </div>
@@ -976,23 +1008,45 @@ const PEDS_PAF = [
   "trouble du déficit de l'attention dans la famille","aucun antécédent familial connu",
 ]
 
-// PSQ Chervin (12 items oui/non) — strictement aligné sur PSQ_QUESTIONS
+// PSQ-SRBD Chervin (22 items oui/non) — strictement aligné sur PSQ_QUESTIONS
 // de forms/formulaire_consultation_pediatrie.html (lignes 1366-1379)
+// PSQ-SRBD Chervin (Sleep-Related Breathing Disorders subscale) — 22 items.
+// Score = nb de "Oui" / nb d'items répondus. Seuil de positivité : ≥ 0.33.
 const PSQ_QUESTIONS = [
-  "Votre enfant ronfle plus de la moitié du temps",
+  // Ronflement (4)
+  "Pendant qu'il dort, votre enfant ronfle plus de la moitié du temps",
+  "Pendant qu'il dort, votre enfant ronfle toujours",
   "Votre enfant ronfle fort",
-  "Votre enfant a du mal à respirer pendant le sommeil",
+  "Votre enfant a une respiration « lourde » ou bruyante",
+  // Apnées et difficultés respiratoires (3)
+  "Votre enfant a du mal à respirer pendant son sommeil",
   "Vous avez déjà vu votre enfant arrêter de respirer pendant son sommeil",
-  "Votre enfant a tendance à s'endormir dans la journée",
-  "Votre enfant a du mal à se réveiller le matin",
-  "Votre enfant se plaint de maux de tête le matin au réveil",
-  "Votre enfant est facilement distrait par ce qui se passe autour",
-  "Votre enfant est toujours en mouvement, comme monté sur ressorts",
-  "Votre enfant est plus agité que les autres enfants de son âge",
-  "Votre enfant respire la bouche ouverte pendant la journée",
+  "Vous êtes inquiet(e) pour la respiration de votre enfant la nuit",
+  // Bouche / nez (2)
+  "Votre enfant a tendance à respirer par la bouche pendant la journée",
+  "Votre enfant a la bouche sèche au réveil",
+  // Énurésie (1)
   "Votre enfant fait pipi au lit",
+  // Somnolence diurne (4)
+  "Votre enfant a du mal à se réveiller le matin",
+  "Votre enfant se plaint d'être fatigué pendant la journée",
+  "Un enseignant ou un autre adulte vous a déjà fait remarquer que votre enfant semblait somnolent en classe",
+  "Votre enfant a tendance à s'endormir involontairement pendant la journée",
+  // Céphalées (1)
+  "Votre enfant se plaint de maux de tête le matin au réveil",
+  // Comportement / inattention / hyperactivité (7)
+  "Votre enfant ne fait pas attention aux détails ou fait des erreurs d'inattention",
+  "Votre enfant a du mal à maintenir son attention sur les tâches ou les jeux",
+  "Votre enfant ne semble pas écouter quand on lui parle directement",
+  "Votre enfant ne suit pas les instructions ou ne termine pas son travail scolaire",
+  "Votre enfant remue les mains ou les pieds, ne tient pas en place sur sa chaise",
+  "Votre enfant est facilement distrait par ce qui se passe autour",
+  "Votre enfant interrompt les autres ou ne peut pas attendre son tour",
 ]
 
+
+const MOTIFS_AD = ["ronflements", "pauses respiratoires observées", "somnolence diurne", "asthénie chronique", "sommeil non réparateur", "insomnie chronique", "céphalées matinales", "nycturie", "cauchemars", "parasomnies", "suspicion de troubles moteurs nocturnes", "suivi de SAHOS connu"]
+const MOTIFS_PEDIA = ["ronflements habituels", "ronflements bruyants", "pauses respiratoires observées par les parents", "respiration buccale nocturne", "sommeil agité", "énurésie nocturne secondaire", "difficultés scolaires", "troubles de l'attention / TDAH", "hyperactivité diurne", "insomnie chronique de l'enfant", "terreurs nocturnes", "somnambulisme", "cauchemars répétés", "bruxisme nocturne", "suivi de SAOS connu"]
 // ====== État ======
 const state = {
   mode: null,  // 'ad' | 'pe' | 'ppc'
@@ -1006,10 +1060,11 @@ const state = {
   hygiene:[], traitements:[], atcdfam:[], retent:[],
   // Tableaux d'INDICES dans les listes pédiatriques
   psn:[], psd:[], pat:[], paf:[],
-  // PSQ Chervin : tableau de 12 valeurs oui(1)/non(0)/null
+  // PSQ-SRBD Chervin : tableau de 22 valeurs oui(1)/non(0)/null
   psq:Array(PSQ_QUESTIONS.length).fill(null),
   // Tableaux d'INDICES dans les listes PPC
   tol:[], sr:[], ce:[],
+  motif:[],
   heure_coucher:null,
   heure_lever:null,
 }
@@ -1069,7 +1124,7 @@ function buildScale(containerId, items, options, stateKey, totalCallback){
   })
 }
 
-// Construit le PSQ Chervin (12 oui/non) — stocke 0/1 dans state[stateKey][i]
+// Construit le PSQ-SRBD Chervin (22 oui/non) — stocke 0/1 dans state[stateKey][i]
 function buildPSQ(containerId, items, stateKey, totalCallback){
   const c = document.getElementById(containerId)
   c.innerHTML = ''
@@ -1152,7 +1207,7 @@ function updateIsiTotal(){
 }
 function updatePsqTotal(){
   const oui = state.psq.reduce((a,b)=>a+(b===1?1:0),0)
-  document.getElementById('psq-total').textContent = `Score : ${oui} / 12`
+  document.getElementById('psq-total').textContent = `Score : ${oui} / 22`
 }
 
 // ====== Initialisation ======
@@ -1225,6 +1280,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-traitements', TRAITEMENTS, 'traitements')
   buildChipsIndex('chips-atcdfam', ATCD_FAMILIAUX, 'atcdfam')
   buildChipsIndex('chips-retent', RETENTISSEMENT, 'retent')
+  buildChipsIndex('chips-motif', MOTIFS_AD, 'motif')
 
   // ====== Pédiatrie : inputs identité ======
   document.getElementById('pedia-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
@@ -1246,6 +1302,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-pedia-pat', PEDS_PAT, 'pat')
   buildChipsIndex('chips-pedia-paf', PEDS_PAF, 'paf')
   buildPSQ('psq-questions', PSQ_QUESTIONS, 'psq', updatePsqTotal)
+  buildChipsIndex('chips-motif-pedia', MOTIFS_PEDIA, 'motif')
 
   // ====== Renouv PPC : inputs identité ======
   document.getElementById('ppc-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
@@ -1306,6 +1363,7 @@ function generateQR(){
       i: imc,
       hc: state.heure_coucher,
       hl: state.heure_lever,
+      mo: state.motif,
       psn: state.psn,
       psd: state.psd,
       pat: state.pat,
@@ -1369,6 +1427,7 @@ function generateQR(){
       ha: hada,
       hd: hadd,
       is: isi,
+      mo: state.motif,
       sn: state.symptn,
       sd: state.symptd,
       co: state.comorb,
