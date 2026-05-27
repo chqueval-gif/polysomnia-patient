@@ -175,6 +175,16 @@
     <div class="card">
       <div class="row">
         <div>
+          <h3>Nom</h3>
+          <input type="text" id="nom" placeholder="votre nom" autocomplete="off">
+        </div>
+        <div>
+          <h3>Prénom</h3>
+          <input type="text" id="prenom" placeholder="votre prénom" autocomplete="off">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
           <h3>Âge</h3>
           <input type="number" id="age" min="0" max="120" placeholder="ex : 55" inputmode="numeric">
         </div>
@@ -390,6 +400,41 @@
 
     <div class="nav">
       <button class="btn secondary" data-prev="9">← Retour</button>
+      <button class="btn" data-next="11">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 11 : SPIELMAN (insomnie, optionnel) ===== -->
+  <div class="section" data-section="11" style="display:none">
+    <h2>12. Si vous souffrez d'insomnie <span style="font-size:13px;font-weight:500;color:#64748b">(optionnel)</span></h2>
+    <p class="small"><strong>À remplir uniquement si l'insomnie est le motif principal de la consultation.</strong> Sinon, laissez tout vide et cliquez sur Terminer. Ces questions permettent de mieux comprendre votre insomnie selon le modèle de Spielman (facteurs qui ont préparé, déclenché et entretiennent vos troubles).</p>
+
+    <div class="card">
+      <h3>Schéma typique de votre nuit</h3>
+      <p class="small">Cochez ce qui décrit le mieux vos nuits actuelles.</p>
+      <div class="chips" id="chips-sc"></div>
+    </div>
+
+    <div class="card">
+      <h3>Votre terrain <span style="font-size:13px;font-weight:500;color:#64748b">(avant que ça ne commence)</span></h3>
+      <p class="small">Ce qui vous correspond depuis longtemps, avant même les troubles actuels.</p>
+      <div class="chips" id="chips-pd"></div>
+    </div>
+
+    <div class="card">
+      <h3>Ce qui a déclenché vos troubles</h3>
+      <p class="small">Un événement précis a-t-il fait basculer votre sommeil ?</p>
+      <div class="chips" id="chips-pc"></div>
+    </div>
+
+    <div class="card">
+      <h3>Habitudes qui entretiennent le trouble</h3>
+      <p class="small">Comportements actuels (souvent corrigeables en thérapie).</p>
+      <div class="chips" id="chips-pp"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="10">← Retour</button>
       <button class="btn" id="btn-finish">Terminer et générer le QR code →</button>
     </div>
   </div>
@@ -409,6 +454,16 @@
     <p class="small">Vous remplissez ce questionnaire <strong>en tant que parent</strong> ou accompagnant. Toutes les questions concernent votre enfant.</p>
     <div class="card">
       <div class="row">
+        <div>
+          <h3>Nom de l'enfant</h3>
+          <input type="text" id="pedia-nom" placeholder="nom de l'enfant" autocomplete="off">
+        </div>
+        <div>
+          <h3>Prénom</h3>
+          <input type="text" id="pedia-prenom" placeholder="prénom de l'enfant" autocomplete="off">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
         <div>
           <h3>Âge de l'enfant</h3>
           <input type="number" id="pedia-age" min="0" max="18" placeholder="ex : 7" inputmode="numeric">
@@ -561,6 +616,16 @@
     <p class="small">Vous êtes <strong>déjà sous traitement par PPC</strong>. Ce questionnaire évalue votre état actuel sous PPC.</p>
     <div class="card">
       <div class="row">
+        <div>
+          <h3>Nom</h3>
+          <input type="text" id="ppc-nom" placeholder="votre nom" autocomplete="off">
+        </div>
+        <div>
+          <h3>Prénom</h3>
+          <input type="text" id="ppc-prenom" placeholder="votre prénom" autocomplete="off">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
         <div>
           <h3>Âge</h3>
           <input type="number" id="ppc-age" min="18" max="120" placeholder="ex : 60" inputmode="numeric">
@@ -932,8 +997,61 @@ const RETENTISSEMENT = [
   "aucun retentissement particulier ressenti",
 ]
 
+// ====== Modèle Spielman (3P) : insomnie ====
+// Question optionnelle, à remplir uniquement si l'insomnie est le motif principal.
+// Aligné sur les sections 13a/b/c/d du questionnaire papier adulte.
+const SCHEMA_NUIT = [
+  "Plus de 30 min pour m'endormir",
+  "Plus d'1 h pour m'endormir",
+  "Je m'endors vite mais me réveille plusieurs fois",
+  "Je me réveille trop tôt sans pouvoir me rendormir",
+  "Mon sommeil est très fragmenté",
+  "Mon sommeil ne me repose pas, même après 7-8 h",
+  "Je dors mieux le week-end ou en vacances",
+  "Mes horaires de sommeil sont très irréguliers",
+  "Je fais des siestes longues pour compenser",
+  "Mes éveils nocturnes sont anxieux",
+  "Cauchemars fréquents",
+]
+const TERRAIN_INS = [
+  "Anxieux/ruminant de nature",
+  "Perfectionniste ou contrôlant",
+  "Sommeil léger / hyper-réactif depuis toujours",
+  "Épisodes d'insomnie déjà eus par le passé",
+  "Insomnie ou mauvais sommeil dans la famille",
+  "Anxiété ou dépression déjà diagnostiquée",
+  "Douleurs chroniques",
+  "Période de ménopause",
+  "Plutôt « du soir » ou « du matin » de façon marquée",
+]
+const DECLENCH_INS = [
+  "Stress professionnel important",
+  "Burn-out",
+  "Deuil",
+  "Séparation / divorce",
+  "Naissance d'un enfant",
+  "Maladie aiguë / hospitalisation",
+  "Déménagement",
+  "Changement d'horaires de travail / travail de nuit",
+  "Choc psychologique / traumatisme",
+  "Nouveau médicament (corticoïdes, bêtabloquant…)",
+  "Aucun élément déclencheur identifié",
+]
+const ENTRETIEN_INS = [
+  "Je passe trop de temps au lit (couché bien avant le sommeil)",
+  "Je rumine longuement au coucher",
+  "J'angoisse à l'idée de mal dormir",
+  "Je regarde l'heure quand je me réveille la nuit",
+  "J'utilise des écrans au lit ou juste avant",
+  "Je fais d'autres choses au lit (manger, travailler, TV)",
+  "Je me force à dormir",
+  "Je prends des somnifères depuis longtemps",
+  "Je fais des siestes longues qui compensent",
+  "Je pense qu'il « me faut » 8 h pour bien fonctionner",
+]
+
 // Nombre de sections par mode
-const TOTAL_SECTIONS_AD = 10
+const TOTAL_SECTIONS_AD = 11
 const TOTAL_SECTIONS_PEDIA = 6
 const TOTAL_SECTIONS_PPC = 8
 
@@ -1050,6 +1168,7 @@ const MOTIFS_PEDIA = ["ronflements habituels", "ronflements bruyants", "pauses r
 // ====== État ======
 const state = {
   mode: null,  // 'ad' | 'pe' | 'ppc'
+  nom:null, prenom:null,
   age:null, genre:null, poids:null, taille:null,
   epworth:Array(EPWORTH_ITEMS.length).fill(null),
   pichot:Array(PICHOT_ITEMS.length).fill(null),
@@ -1058,6 +1177,8 @@ const state = {
   // Tableaux d'INDICES (0-based) dans les listes V3 adulte
   symptn:[], symptd:[], comorb:[], prof:[],
   hygiene:[], traitements:[], atcdfam:[], retent:[],
+  // Modèle Spielman (3P) — si insomnie comme motif
+  sc:[], pd:[], pc:[], pp:[],
   // Tableaux d'INDICES dans les listes pédiatriques
   psn:[], psd:[], pat:[], paf:[],
   // PSQ-SRBD Chervin : tableau de 22 valeurs oui(1)/non(0)/null
@@ -1252,6 +1373,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   })
 
   // Inputs identité
+  document.getElementById('nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
+  document.getElementById('prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
   document.getElementById('age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
   document.getElementById('poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
@@ -1279,10 +1402,17 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-hygiene', HYGIENE, 'hygiene')
   buildChipsIndex('chips-traitements', TRAITEMENTS, 'traitements')
   buildChipsIndex('chips-atcdfam', ATCD_FAMILIAUX, 'atcdfam')
+  // Spielman (insomnie, optionnel)
+  buildChipsIndex('chips-sc', SCHEMA_NUIT, 'sc')
+  buildChipsIndex('chips-pd', TERRAIN_INS, 'pd')
+  buildChipsIndex('chips-pc', DECLENCH_INS, 'pc')
+  buildChipsIndex('chips-pp', ENTRETIEN_INS, 'pp')
   buildChipsIndex('chips-retent', RETENTISSEMENT, 'retent')
   buildChipsIndex('chips-motif', MOTIFS_AD, 'motif')
 
   // ====== Pédiatrie : inputs identité ======
+  document.getElementById('pedia-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
+  document.getElementById('pedia-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
   document.getElementById('pedia-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
   document.getElementById('pedia-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('pedia-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
@@ -1305,6 +1435,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-motif-pedia', MOTIFS_PEDIA, 'motif')
 
   // ====== Renouv PPC : inputs identité ======
+  document.getElementById('ppc-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
+  document.getElementById('ppc-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
   document.getElementById('ppc-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
   document.getElementById('ppc-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('ppc-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
@@ -1356,6 +1488,8 @@ function generateQR(){
     payload = {
       v:3,
       m: 'pedia',
+      nom: state.nom,
+      prenom: state.prenom,
       age: state.age,
       g: state.genre,
       p: state.poids,
@@ -1386,6 +1520,8 @@ function generateQR(){
     payload = {
       v:3,
       m: 'ppc',
+      nom: state.nom,
+      prenom: state.prenom,
       age: state.age,
       g: state.genre,
       p: state.poids,
@@ -1417,6 +1553,8 @@ function generateQR(){
     payload = {
       v:3,
       m: state.mode || 'ad',
+      nom: state.nom,
+      prenom: state.prenom,
       age: state.age,
       g: state.genre,
       p: state.poids,
@@ -1438,6 +1576,11 @@ function generateQR(){
       re: state.retent,
       hc: state.heure_coucher,
       hl: state.heure_lever,
+      // Spielman (insomnie, optionnel — vides si pas rempli)
+      sc: state.sc,
+      pd: state.pd,
+      pc: state.pc,
+      pp: state.pp,
     }
   }
 
