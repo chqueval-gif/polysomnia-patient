@@ -215,7 +215,7 @@
   
   <!-- ===== SECTION 2 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
   <div class="section" data-section="1" style="display:none">
-    <h2>2. Antécédents et traitements</h2>
+    <h2>2. Antécédents, traitements et profession</h2>
 
     <div class="card">
       <h3>Antécédents médicaux personnels</h3>
@@ -233,6 +233,14 @@
       <h3>Traitements actuels</h3>
       <p class="small">Cochez les classes de médicaments que vous prenez actuellement.</p>
       <div class="chips" id="chips-traitements"></div>
+      <label class="small" style="display:block;margin-top:10px">Nom du médicament, si vous vous en souvenez</label>
+      <input type="text" id="traitements-noms" placeholder="ex : Lévothyrox, Doliprane… (facultatif)">
+    </div>
+
+    <div class="card">
+      <h3>Profession à risque</h3>
+      <p class="small">Cochez si votre activité actuelle correspond à l'une de ces catégories.</p>
+      <div class="chips" id="chips-prof"></div>
     </div>
 
     <div class="nav">
@@ -241,20 +249,14 @@
     </div>
   </div>
 
-  <!-- ===== SECTION 3 : MODE DE VIE & PROFESSION ===== -->
+  <!-- ===== SECTION 3 : MODE DE VIE ===== -->
   <div class="section" data-section="2" style="display:none">
-    <h2>3. Mode de vie et profession</h2>
+    <h2>3. Mode de vie</h2>
 
     <div class="card">
-      <h3>Hygiène de sommeil et habitudes</h3>
+      <h3>Hygiène de sommeil et mode de vie</h3>
       <p class="small">Cochez ce qui s'applique à votre quotidien.</p>
       <div class="chips" id="chips-hygiene"></div>
-    </div>
-
-    <div class="card">
-      <h3>Profession à risque</h3>
-      <p class="small">Cochez si votre activité actuelle correspond à l'une de ces catégories.</p>
-      <div class="chips" id="chips-prof"></div>
     </div>
 
     <div class="nav">
@@ -888,36 +890,33 @@ const SYMPT_NOCTURNES = [
   "respiration buccale nocturne","bouche sèche au réveil",
   "sueurs nocturnes profuses","palpitations nocturnes",
   "nycturie",
-  "reflux gastro-œsophagien nocturne",
-  "réveils fréquents en milieu de nuit",
-  "réveil précoce avec impossibilité de se rendormir",
-  "difficultés d'endormissement (> 30 min)",
-  "bruxisme nocturne (grincement de dents)",
   "impatiences des membres inférieurs au coucher",
   "mouvements involontaires des jambes pendant le sommeil",
 ]
 const SYMPT_DIURNES = [
-  "somnolence diurne",
-  "endormissements involontaires en réunion ou en lecture",
-  "endormissement au volant ou risque évité",
-  "siestes incontrôlables","asthénie matinale",
+  "asthénie",
   "sensation de sommeil non réparateur",
   "céphalées matinales","troubles de la concentration",
   "troubles de la mémoire récente",
-  "irritabilité","humeur dépressive",
+  "irritabilité",
   "baisse de la libido","dysfonction érectile",
-  "cataplexies (perte de tonus aux émotions)",
 ]
 const COMORBIDITES = [
+  // Cardio-métabolique
   "HTA traitée","HTA résistante (≥ 3 médicaments)","fibrillation auriculaire",
   "coronaropathie / antécédent d'infarctus","insuffisance cardiaque",
   "AVC ou AIT","diabète type 2","dyslipidémie",
   "obésité (IMC ≥ 30)","obésité morbide (IMC ≥ 40)",
+  // Pneumo / ORL
   "BPCO","asthme","rhinite chronique","antécédent d'amygdalectomie",
-  "syndrome des jambes sans repos","narcolepsie connue","pathologie neuromusculaire",
-  "syndrome dépressif","trouble anxieux",
-  "hypothyroïdie","RGO","douleurs chroniques",
-  "antécédent de chirurgie bariatrique","cancer en cours de traitement",
+  // Neurologique
+  "douleurs chroniques","pathologie neuromusculaire","démence / troubles cognitifs","maladie de Parkinson",
+  // Psychiatrique
+  "trouble anxieux","syndrome dépressif",
+  // Sommeil
+  "syndrome des jambes sans repos","narcolepsie connue",
+  // Divers
+  "hypothyroïdie","RGO","antécédent de chirurgie bariatrique","cancer en cours de traitement",
 ]
 const PROFESSIONS = [
   "conducteur professionnel poids lourd","conducteur de car ou bus","taxi ou VTC",
@@ -927,24 +926,23 @@ const PROFESSIONS = [
   "manipulation de machines dangereuses",
   "retraité","sans activité professionnelle",
 ]
+// « Mode de vie » — facteurs gardés pour TOUS les patients (pertinents apnée +
+// général). Les comportements purement entretien-insomnie sont déplacés dans le
+// bloc 3P « entretien » (ENTRETIEN_INS) pour coller au modèle de Spielman.
 const HYGIENE = [
   "consommation de café après 14h","consommation de thé/coca le soir",
   "consommation d'alcool quotidienne au dîner","tabagisme actif",
   "consommation de cannabis ou autres substances",
-  "écrans (TV/téléphone) dans l'heure précédant le coucher",
-  "écrans (TV/téléphone) au lit","horaires de coucher très variables",
-  "siestes longues (> 30 min) en journée",
   "sédentarité (peu d'activité physique)",
   "activité physique régulière (≥ 3 fois/semaine)",
-  "exercice physique intense en soirée",
   "dîner copieux ou tardif (après 21h)",
   "chambre bruyante","chambre trop chaude",
   "matelas inconfortable ou ancien","partage du lit avec animal de compagnie",
 ]
 const TRAITEMENTS = [
-  "somnifère / hypnotique (zolpidem, zopiclone...)","benzodiazépine",
-  "mélatonine","antidépresseur","anxiolytique","neuroleptique",
-  "antihypertenseur","bêtabloquant","diurétique",
+  "somnifère / hypnotique (zolpidem, zopiclone...)",
+  "mélatonine","antidépresseur","anxiolytique",
+  "antihypertenseur","diurétique",
   "anticoagulant ou antiagrégant","statine","antidiabétique","hormones thyroïdiennes",
   "bronchodilatateur ou corticoïde inhalé",
   "antalgique opiacé (tramadol, codéine, morphine...)",
@@ -954,45 +952,27 @@ const TRAITEMENTS = [
 const ATCD_FAMILIAUX = [
   "syndrome d'apnées du sommeil chez un parent au 1er degré",
   "ronflements importants chez un parent au 1er degré","narcolepsie familiale",
-  "syndrome des jambes sans repos familial","parasomnies familiales",
-  "mort subite du nourrisson dans la famille",
+  "syndrome des jambes sans repos familial",
   "obésité familiale (≥ 2 parents au 1er degré)","diabète type 2 familial",
   "hypertension artérielle familiale précoce (< 55 ans)",
   "maladie cardiovasculaire précoce dans la famille","aucun antécédent familial connu",
 ]
 const RETENTISSEMENT = [
-  "baisse de productivité au travail",
-  "arrêts de travail liés à la fatigue",
-  "évite désormais les longs trajets en voiture",
-  "antécédent d'amende ou d'accident pour somnolence",
   "tensions de couple à cause des ronflements",
   "chambre à part imposée par les ronflements",
   "vie sexuelle altérée",
   "renoncement à des activités sociales le soir",
-  "endormissement gênant en société (cinéma, théâtre, repas)",
-  "sentiment d'être un danger pour soi-même au volant",
-  "perte de confiance en soi liée à la fatigue",
-  "anxiété anticipatoire à l'approche du coucher",
   "difficultés à se lever le matin",
-  "consommation accrue de café/stimulants pour tenir",
-  "aucun retentissement particulier ressenti",
 ]
 
 // ====== Modèle Spielman (3P) : insomnie ====
 // Question optionnelle, à remplir uniquement si l'insomnie est le motif principal.
 // Aligné sur les sections 13a/b/c/d du questionnaire papier adulte.
+// Schéma de nuit volontairement minimal : la sévérité/le type d'insomnie
+// (endormissement / maintien / réveil précoce) est déjà mesuré par l'ISI.
+// On garde le seul marqueur d'orientation « endormissement long ».
 const SCHEMA_NUIT = [
-  "Plus de 30 min pour m'endormir",
-  "Plus d'1 h pour m'endormir",
-  "Je m'endors vite mais me réveille plusieurs fois",
-  "Je me réveille trop tôt sans pouvoir me rendormir",
-  "Mon sommeil est très fragmenté",
-  "Mon sommeil ne me repose pas, même après 7-8 h",
-  "Je dors mieux le week-end ou en vacances",
-  "Mes horaires de sommeil sont très irréguliers",
-  "Je fais des siestes longues pour compenser",
-  "Mes éveils nocturnes sont anxieux",
-  "Cauchemars fréquents",
+  "Je mets plus de 30 minutes à m'endormir (endormissement long)",
 ]
 const TERRAIN_INS = [
   "Anxieux/ruminant de nature",
@@ -1018,13 +998,16 @@ const DECLENCH_INS = [
   "Nouveau médicament (corticoïdes, bêtabloquant…)",
   "Aucun élément déclencheur identifié",
 ]
+// Facteurs d'ENTRETIEN (3P de Spielman) — inclut les comportements
+// d'hygiène purement entretien-insomnie déplacés depuis « mode de vie ».
 const ENTRETIEN_INS = [
   "Je passe trop de temps au lit (couché bien avant le sommeil)",
   "Je rumine longuement au coucher",
   "J'angoisse à l'idée de mal dormir",
   "Je regarde l'heure quand je me réveille la nuit",
-  "J'utilise des écrans au lit ou juste avant",
+  "J'utilise des écrans au lit ou dans l'heure précédant le coucher",
   "Je fais d'autres choses au lit (manger, travailler, TV)",
+  "Mes horaires de coucher sont très variables",
   "Je me force à dormir",
   "Je prends des somnifères depuis longtemps",
   "Je fais des siestes longues qui compensent",
@@ -1168,6 +1151,7 @@ const state = {
   motif:[],
   heure_coucher:null,
   heure_lever:null,
+  med_noms:null,
 }
 
 // ====== Helpers UI ======
@@ -1367,6 +1351,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   })
   document.getElementById('heure-coucher').addEventListener('input', e=>state.heure_coucher=e.target.value||null)
   document.getElementById('heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
+  document.getElementById('traitements-noms').addEventListener('input', e=>state.med_noms=e.target.value.trim()||null)
 
   // Échelles
   buildScale('epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
@@ -1530,7 +1515,7 @@ function generateQR(){
     const isi = state.isi.reduce((a,b)=>a+(b||0),0)
 
     payload = {
-      v:3,
+      v:4,
       m: state.mode || 'ad',
       nom: state.nom,
       prenom: state.prenom,
@@ -1551,6 +1536,7 @@ function generateQR(){
       pr: state.prof,
       hy: state.hygiene,
       tr: state.traitements,
+      mn: state.med_noms,
       af: state.atcdfam,
       re: state.retent,
       hc: state.heure_coucher,
