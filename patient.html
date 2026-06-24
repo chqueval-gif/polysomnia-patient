@@ -774,6 +774,8 @@
     <div id="qrcode-loading" style="padding:60px 20px;color:#0e7490;font-weight:600">⏳ Génération du QR code…</div>
     <p class="small" style="margin-top:12px;color:#475569">Vos réponses sont contenues dans ce QR code.<br>Elles ne sont stockées nulle part.</p>
     <button class="btn" id="btn-fullscreen-qr" type="button" style="margin-top:14px;display:none">🔍 Agrandir en plein écran</button>
+    <button class="btn secondary" id="btn-save-qr" type="button" style="margin-top:10px;display:none">📥 Enregistrer / partager le QR (image)</button>
+    <p id="save-qr-status" class="small" style="display:none;margin-top:6px;color:#475569"></p>
   </div>
 
   <!-- Overlay plein écran : QR maximal + Wake Lock pour empêcher l'écran de se mettre en veille -->
@@ -1436,6 +1438,38 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
   // Bouton recommencer
   document.getElementById('btn-restart').addEventListener('click', ()=>location.reload())
+
+  // Enregistrer / partager le QR (image PNG). Sur mobile : partage natif
+  // (Enregistrer dans Photos / Fichiers, envoyer par message) si dispo ;
+  // sinon téléchargement direct du PNG.
+  const saveBtn = document.getElementById('btn-save-qr')
+  if(saveBtn) saveBtn.addEventListener('click', async ()=>{
+    const img = document.getElementById('qrcode-img')
+    const st = document.getElementById('save-qr-status')
+    if(!img || !img.src){ return }
+    const nm = (state.nom || '').trim().replace(/[^\wÀ-ÿ-]+/g,'_')
+    const fname = 'questionnaire-sommeil' + (nm ? '-' + nm : '') + '.png'
+    const setStatus = (t)=>{ if(st){ st.textContent = t; st.style.display = 'block' } }
+    try {
+      const blob = await (await fetch(img.src)).blob()
+      const file = new File([blob], fname, { type:'image/png' })
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        await navigator.share({ files:[file], title:'Questionnaire de sommeil' })
+        setStatus('QR partagé. Vous pouvez l’enregistrer dans vos photos / fichiers.')
+        return
+      }
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = fname
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(()=>URL.revokeObjectURL(url), 2000)
+      setStatus('Image enregistrée (' + fname + ').')
+    } catch(e){
+      // Dernier recours : ouvrir l’image, l’utilisateur fait « enregistrer »
+      try { window.open(img.src, '_blank') } catch(_){}
+      setStatus('Si le téléchargement n’a pas démarré : appui long sur le QR → « Enregistrer l’image ».')
+    }
+  })
 })
 
 // ====== Génération du QR code ======
@@ -1614,6 +1648,8 @@ function finalizeRender(canvas, img, loading, fsBtn, data){
     if(img){ img.src = url; img.style.display = 'block' }
     if(loading) loading.style.display = 'none'
     if(fsBtn) fsBtn.style.display = 'block'
+    const saveBtn = document.getElementById('btn-save-qr')
+    if(saveBtn) saveBtn.style.display = 'block'
   } catch(e){
     showFallback(data, 'Conversion canvas → image impossible : ' + e.message)
   }
