@@ -1443,21 +1443,38 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // (Enregistrer dans Photos / Fichiers, envoyer par message) si dispo ;
   // sinon téléchargement direct du PNG.
   const saveBtn = document.getElementById('btn-save-qr')
-  if(saveBtn) saveBtn.addEventListener('click', async ()=>{
+  if(saveBtn) saveBtn.addEventListener('click', ()=>{
     const img = document.getElementById('qrcode-img')
     const st = document.getElementById('save-qr-status')
     if(!img || !img.src){ return }
     const nm = (state.nom || '').trim().replace(/[^\wÀ-ÿ-]+/g,'_')
     const fname = 'questionnaire-sommeil' + (nm ? '-' + nm : '') + '.png'
     const setStatus = (t)=>{ if(st){ st.textContent = t; st.style.display = 'block' } }
+    // IMPORTANT iOS : on construit le Blob de maniere SYNCHRONE depuis le data
+    // URL (pas de fetch/await), puis on appelle navigator.share() directement
+    // dans le geste du clic. Un 'await' avant share() casse l'activation
+    // utilisateur sur iOS Safari -> partage refuse (NotAllowedError).
+    let blob
     try {
-      const blob = await (await fetch(img.src)).blob()
-      const file = new File([blob], fname, { type:'image/png' })
-      if(navigator.canShare && navigator.canShare({ files:[file] })){
-        await navigator.share({ files:[file], title:'Questionnaire de sommeil' })
-        setStatus('QR partagé. Vous pouvez l’enregistrer dans vos photos / fichiers.')
-        return
-      }
+      const parts = img.src.split(',')
+      const mime = ((parts[0]||'').match(/:(.*?);/) || [])[1] || 'image/png'
+      const bin = atob(parts[1] || '')
+      const u8 = new Uint8Array(bin.length)
+      for(let i=0; i<bin.length; i++) u8[i] = bin.charCodeAt(i)
+      blob = new Blob([u8], { type: mime })
+    } catch(e){
+      setStatus('Appui long sur le QR ci-dessus → « Enregistrer l’image ».'); return
+    }
+    const file = new File([blob], fname, { type:'image/png' })
+    // 1) Partage natif (mobile) — appele dans le geste, sans await prealable
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({ files:[file], title:'Questionnaire de sommeil' })
+        .then(()=>setStatus('QR partagé — enregistrez-le dans vos photos / fichiers.'))
+        .catch(()=>setStatus('Si rien ne s’est passé : appui long sur le QR → « Enregistrer l’image ».'))
+      return
+    }
+    // 2) Telechargement direct (PC)
+    try {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url; a.download = fname
@@ -1465,9 +1482,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       setTimeout(()=>URL.revokeObjectURL(url), 2000)
       setStatus('Image enregistrée (' + fname + ').')
     } catch(e){
-      // Dernier recours : ouvrir l’image, l’utilisateur fait « enregistrer »
-      try { window.open(img.src, '_blank') } catch(_){}
-      setStatus('Si le téléchargement n’a pas démarré : appui long sur le QR → « Enregistrer l’image ».')
+      setStatus('Appui long sur le QR ci-dessus → « Enregistrer l’image ».')
     }
   })
 })
