@@ -783,6 +783,8 @@
     <button id="btn-close-fullscreen" type="button" style="position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;background:#0e7490;color:#fff;border:none;border-radius:999px;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;line-height:1" aria-label="Fermer">✕</button>
     <img id="qrcode-img-fullscreen" alt="QR code des réponses (plein écran)" style="display:block;width:min(90vmin,90vw);height:min(90vmin,90vw);background:#ffffff;image-rendering:pixelated;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;filter:none !important;-webkit-filter:none !important">
     <p style="margin-top:18px;font-size:14px;color:#334155;text-align:center;max-width:420px">Approchez le téléphone à 20-30 cm de la webcam de votre médecin.<br><span style="color:#0e7490;font-weight:600">L'écran reste allumé tant que ce mode est actif.</span></p>
+    <button id="btn-save-qr-fs" type="button" style="margin-top:16px;background:#0e7490;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer">📥 Enregistrer / partager le QR</button>
+    <p id="save-qr-fs-status" style="display:none;margin-top:8px;font-size:13px;color:#334155;text-align:center;max-width:420px"></p>
   </div>
 
   <!-- Fallback texte si QR ne se charge pas -->
@@ -1442,10 +1444,9 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // Enregistrer / partager le QR (image PNG). Sur mobile : partage natif
   // (Enregistrer dans Photos / Fichiers, envoyer par message) si dispo ;
   // sinon téléchargement direct du PNG.
-  const saveBtn = document.getElementById('btn-save-qr')
-  if(saveBtn) saveBtn.addEventListener('click', ()=>{
+  // Logique commune au bouton de l'ecran final ET a celui du plein ecran.
+  function saveOrShareQR(st){
     const img = document.getElementById('qrcode-img')
-    const st = document.getElementById('save-qr-status')
     if(!img || !img.src){ return }
     const nm = (state.nom || '').trim().replace(/[^\wÀ-ÿ-]+/g,'_')
     const fname = 'questionnaire-sommeil' + (nm ? '-' + nm : '') + '.png'
@@ -1484,7 +1485,11 @@ window.addEventListener('DOMContentLoaded', ()=>{
     } catch(e){
       setStatus('Appui long sur le QR ci-dessus → « Enregistrer l’image ».')
     }
-  })
+  }
+  const saveBtn = document.getElementById('btn-save-qr')
+  if(saveBtn) saveBtn.addEventListener('click', ()=>saveOrShareQR(document.getElementById('save-qr-status')))
+  const saveBtnFs = document.getElementById('btn-save-qr-fs')
+  if(saveBtnFs) saveBtnFs.addEventListener('click', ()=>saveOrShareQR(document.getElementById('save-qr-fs-status')))
 })
 
 // ====== Génération du QR code ======
