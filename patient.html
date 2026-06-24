@@ -854,19 +854,19 @@ const PICHOT_OPTIONS = [
 ]
 
 const HAD_ITEMS = [
-  { t:'A', q:"Je me sens tendu(e) ou énervé(e)", opts:["La plupart du temps","Souvent","De temps en temps","Jamais"], rev:false },
+  { t:'A', q:"Je me sens tendu(e) ou énervé(e)", opts:["La plupart du temps","Souvent","De temps en temps","Jamais"], rev:true },
   { t:'D', q:"Je prends plaisir aux mêmes choses qu'autrefois", opts:["Oui, tout autant","Pas autant","Un peu seulement","Presque plus"], rev:false },
-  { t:'A', q:"J'ai une sensation de peur comme si quelque chose d'horrible allait arriver", opts:["Oui, très nettement","Oui, mais ce n'est pas trop grave","Un peu, mais cela ne m'inquiète pas","Pas du tout"], rev:false },
+  { t:'A', q:"J'ai une sensation de peur comme si quelque chose d'horrible allait arriver", opts:["Oui, très nettement","Oui, mais ce n'est pas trop grave","Un peu, mais cela ne m'inquiète pas","Pas du tout"], rev:true },
   { t:'D', q:"Je ris facilement et vois le bon côté des choses", opts:["Autant que par le passé","Plus autant qu'avant","Vraiment moins qu'avant","Plus du tout"], rev:false },
-  { t:'A', q:"Je me fais du souci", opts:["Très souvent","Assez souvent","Occasionnellement","Très occasionnellement"], rev:false },
-  { t:'D', q:"Je suis de bonne humeur", opts:["Jamais","Rarement","Assez souvent","La plupart du temps"], rev:false },
+  { t:'A', q:"Je me fais du souci", opts:["Très souvent","Assez souvent","Occasionnellement","Très occasionnellement"], rev:true },
+  { t:'D', q:"Je suis de bonne humeur", opts:["Jamais","Rarement","Assez souvent","La plupart du temps"], rev:true },
   { t:'A', q:"Je peux rester tranquillement assis(e) à ne rien faire et me sentir décontracté(e)", opts:["Oui, quoi qu'il arrive","Oui, en général","Rarement","Jamais"], rev:false },
-  { t:'D', q:"J'ai l'impression de fonctionner au ralenti", opts:["Presque toujours","Très souvent","Parfois","Jamais"], rev:false },
+  { t:'D', q:"J'ai l'impression de fonctionner au ralenti", opts:["Presque toujours","Très souvent","Parfois","Jamais"], rev:true },
   { t:'A', q:"J'éprouve des sensations de peur, j'ai l'estomac noué", opts:["Jamais","Parfois","Assez souvent","Très souvent"], rev:false },
-  { t:'D', q:"Je ne m'intéresse plus à mon apparence", opts:["Plus du tout","Je n'y accorde pas autant d'attention que je devrais","Il se peut que je n'y fasse plus attention","J'y prête autant d'attention que par le passé"], rev:false },
-  { t:'A', q:"J'ai la bougeotte et n'arrive pas à tenir en place", opts:["Oui, c'est tout à fait le cas","Un peu","Pas tellement","Pas du tout"], rev:false },
+  { t:'D', q:"Je ne m'intéresse plus à mon apparence", opts:["Plus du tout","Je n'y accorde pas autant d'attention que je devrais","Il se peut que je n'y fasse plus attention","J'y prête autant d'attention que par le passé"], rev:true },
+  { t:'A', q:"J'ai la bougeotte et n'arrive pas à tenir en place", opts:["Oui, c'est tout à fait le cas","Un peu","Pas tellement","Pas du tout"], rev:true },
   { t:'D', q:"Je me réjouis d'avance à l'idée de faire certaines choses", opts:["Autant qu'avant","Un peu moins qu'avant","Bien moins qu'avant","Presque jamais"], rev:false },
-  { t:'A', q:"J'éprouve des sensations soudaines de panique", opts:["Vraiment très souvent","Assez souvent","Pas très souvent","Jamais"], rev:false },
+  { t:'A', q:"J'éprouve des sensations soudaines de panique", opts:["Vraiment très souvent","Assez souvent","Pas très souvent","Jamais"], rev:true },
   { t:'D', q:"Je peux prendre plaisir à un bon livre, à une bonne émission radio ou TV", opts:["Souvent","Parfois","Rarement","Très rarement"], rev:false },
 ]
 
@@ -1184,7 +1184,12 @@ function buildScale(containerId, items, options, stateKey, totalCallback){
   c.innerHTML = ''
   items.forEach((q, i)=>{
     const text = (typeof q === 'string') ? q : q.q || q
-    const opts = (typeof q === 'object' && q.opts) ? q.opts.map((l,j)=>({v:j,l})) : options
+    // Pour les items à cotation inversée (rev:true, formulés positivement),
+    // le score = (n-1 - position) : la 1re option (pire état) vaut 3, la
+    // dernière (meilleur état) vaut 0. Sinon score = position.
+    const opts = (typeof q === 'object' && q.opts)
+      ? q.opts.map((l,j)=>({v:(q.rev ? q.opts.length-1-j : j), l}))
+      : options
     const div = document.createElement('div')
     div.className = 'question card'
     div.innerHTML = `<div class="q">${i+1}. ${text}</div>`
