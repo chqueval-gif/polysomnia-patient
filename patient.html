@@ -431,8 +431,8 @@
 <!-- ============================ ÉTAPE 3b : QUESTIONNAIRE PÉDIATRIQUE ============================ -->
 <div class="step" id="step-form-pedia">
   <div class="progress">
-    <span data-progress-label>Section 1 / 7</span>
-    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:14.3%"></div></div>
+    <span data-progress-label>Section 1 / 9</span>
+    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:11.1%"></div></div>
   </div>
 
   <!-- ===== PEDIA SECTION 1 : INFOS ENFANT ===== -->
@@ -584,6 +584,50 @@
 
     <div class="nav">
       <button class="btn secondary" data-prev="5">← Retour</button>
+      <button class="btn" data-next="7">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== PEDIA SECTION 7 : EPWORTH ENFANT (ESS-CHAD) ===== -->
+  <div class="section" data-section="7" style="display:none">
+    <h2>8. Échelle de somnolence (Epworth enfant)</h2>
+    <p class="small">Pour chaque situation, indiquez la probabilité que <strong>votre enfant s'endorme ou somnole</strong> (pas seulement qu'il se sente fatigué). Répondez selon ce que vous observez habituellement.</p>
+
+    <div id="pedia-epworth-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pedia-epworth-total">Total : 0 / 24</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="6">← Retour</button>
+      <button class="btn" data-next="8">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== PEDIA SECTION 8 : CONNERS ABRÉGÉ (INDEX TDAH) ===== -->
+  <div class="section" data-section="8" style="display:none">
+    <h2>9. Comportement et attention</h2>
+    <div class="card">
+      <h3>Un trouble de l'attention ou une hyperactivité (TDAH) est-il évoqué chez votre enfant ?</h3>
+      <p class="small">Par vous-même, par l'école ou par un médecin. Si non, passez directement à la fin.</p>
+      <div class="options" style="flex-direction:row;gap:8px">
+        <label class="opt" style="flex:1;text-align:center" data-name="tdah-suspect" data-v="oui">Oui</label>
+        <label class="opt" style="flex:1;text-align:center" data-name="tdah-suspect" data-v="non">Non</label>
+      </div>
+    </div>
+
+    <div id="conners-block" style="display:none">
+      <p class="small">Pour chaque comportement, indiquez à quel point il s'applique à <strong>votre enfant sur les derniers mois</strong>.</p>
+      <div class="info-box">
+        <strong>À savoir :</strong> ce questionnaire (Conners abrégé, 10 items) est un outil de <strong>dépistage</strong> de l'inattention et de l'hyperactivité. Il ne pose pas de diagnostic : un score élevé conduira, si besoin, à une évaluation spécialisée.
+      </div>
+
+      <div id="pedia-conners-questions"></div>
+
+      <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pedia-conners-total">Total : 0 / 30</p>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="7">← Retour</button>
       <button class="btn" id="btn-finish-pedia">Terminer et générer le QR code →</button>
     </div>
   </div>
@@ -1131,6 +1175,49 @@ const PSQ_QUESTIONS = [
 ]
 
 
+// ====== Échelle d'Epworth enfant / adolescent (ESS-CHAD) ======
+// Version parent-report : les 8 situations classiques d'Epworth reformulées
+// pour un enfant. Cotation 0-3, total /24. Seuil > 10 = somnolence diurne
+// excessive à explorer.
+const EPWORTH_ENFANT_ITEMS = [
+  "Assis en train de lire ou de regarder un livre",
+  "En train de regarder la télévision, une tablette ou un téléphone",
+  "Assis sans bouger dans un lieu public (en classe, au cinéma, au restaurant)",
+  "Comme passager en voiture pendant une heure sans s'arrêter",
+  "Allongé pour se reposer l'après-midi",
+  "Assis en train de parler avec quelqu'un",
+  "Assis au calme après le déjeuner",
+  "En voiture ou en bus, à l'arrêt quelques minutes dans les embouteillages",
+]
+const EPWORTH_ENFANT_OPTIONS = [
+  {v:0, l:"Ne somnolerait jamais"},
+  {v:1, l:"Faible chance de somnoler"},
+  {v:2, l:"Chance moyenne de somnoler"},
+  {v:3, l:"Forte chance de somnoler"},
+]
+
+// ====== Index TDAH — Conners abrégé (ASQ, 10 items, version parent) ======
+// Cotation 0-3, total /30. Seuil ≥ 15 = suspicion de TDAH à confirmer par une
+// évaluation spécialisée (dépistage, jamais un diagnostic).
+const CONNERS_ITEMS = [
+  "Agité(e) ou remuant(e), ne tient pas en place",
+  "Excitable, impulsif(ve)",
+  "Dérange les autres enfants",
+  "Ne termine pas ce qu'il/elle commence, capacité d'attention brève",
+  "Sans cesse en train de gigoter / de bouger",
+  "Inattentif(ve), facilement distrait(e)",
+  "Ses demandes doivent être satisfaites immédiatement, facilement frustré(e)",
+  "Pleure souvent et facilement",
+  "Change d'humeur rapidement et de façon marquée",
+  "Accès de colère, comportement explosif et imprévisible",
+]
+const CONNERS_OPTIONS = [
+  {v:0, l:"Pas du tout"},
+  {v:1, l:"Un peu"},
+  {v:2, l:"Beaucoup"},
+  {v:3, l:"Énormément"},
+]
+
 const MOTIFS_PEDIA =["ronflements habituels", "ronflements bruyants", "pauses respiratoires observées par les parents", "respiration buccale nocturne", "sommeil agité", "énurésie nocturne secondaire", "difficultés scolaires", "troubles de l'attention / TDAH", "hyperactivité diurne", "insomnie chronique de l'enfant", "terreurs nocturnes", "somnambulisme", "cauchemars répétés", "bruxisme nocturne", "suivi de SAOS connu"]
 // ====== État ======
 const state = {
@@ -1150,6 +1237,9 @@ const state = {
   psn:[], psd:[], pat:[], paf:[],
   // PSQ-SRBD Chervin : tableau de 22 valeurs oui(1)/non(0)/null
   psq:Array(PSQ_QUESTIONS.length).fill(null),
+  // Epworth enfant (ESS-CHAD, 8 items /24) et Conners abrégé (10 items /30)
+  epworthEnfant:Array(EPWORTH_ENFANT_ITEMS.length).fill(null),
+  conners:Array(CONNERS_ITEMS.length).fill(null),
   // Tableaux d'INDICES dans les listes PPC
   tol:[], sr:[], ce:[],
   motif:[],
@@ -1303,6 +1393,14 @@ function updatePsqTotal(){
   const oui = state.psq.reduce((a,b)=>a+(b===1?1:0),0)
   document.getElementById('psq-total').textContent = `Score : ${oui} / 22`
 }
+function updateEpworthEnfantTotal(){
+  const t = state.epworthEnfant.reduce((a,b)=>a+(b||0),0)
+  document.getElementById('pedia-epworth-total').textContent = `Total : ${t} / 24`
+}
+function updateConnersTotal(){
+  const t = state.conners.reduce((a,b)=>a+(b||0),0)
+  document.getElementById('pedia-conners-total').textContent = `Total : ${t} / 30`
+}
 
 // ====== Initialisation ======
 window.addEventListener('DOMContentLoaded', ()=>{
@@ -1396,6 +1494,23 @@ window.addEventListener('DOMContentLoaded', ()=>{
       state.genre = b.dataset.v
     })
   })
+  // Filtre TDAH : n'affiche le questionnaire Conners que si suspicion évoquée.
+  // Si « Non », on réinitialise les réponses pour que le score ne parte pas dans le QR.
+  document.querySelectorAll('[data-name="tdah-suspect"]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-name="tdah-suspect"]').forEach(x=>x.classList.remove('on'))
+      b.classList.add('on')
+      const block = document.getElementById('conners-block')
+      if(b.dataset.v === 'oui'){
+        block.style.display = 'block'
+      } else {
+        block.style.display = 'none'
+        state.conners = Array(CONNERS_ITEMS.length).fill(null)
+        document.querySelectorAll('#pedia-conners-questions .opt.on').forEach(x=>x.classList.remove('on'))
+        updateConnersTotal()
+      }
+    })
+  })
   document.getElementById('pedia-heure-coucher').addEventListener('input', e=>state.heure_coucher=e.target.value||null)
   document.getElementById('pedia-heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
 
@@ -1405,6 +1520,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-pedia-pat', PEDS_PAT, 'pat')
   buildChipsIndex('chips-pedia-paf', PEDS_PAF, 'paf')
   buildPSQ('psq-questions', PSQ_QUESTIONS, 'psq', updatePsqTotal)
+  buildScale('pedia-epworth-questions', EPWORTH_ENFANT_ITEMS, EPWORTH_ENFANT_OPTIONS, 'epworthEnfant', updateEpworthEnfantTotal)
+  buildScale('pedia-conners-questions', CONNERS_ITEMS, CONNERS_OPTIONS, 'conners', updateConnersTotal)
   buildChipsIndex('chips-motif-pedia', MOTIFS_PEDIA, 'motif')
 
   // ====== Renouv PPC : inputs identité ======
@@ -1508,6 +1625,12 @@ function generateQR(){
     const ouiCount = answered.filter(v=>v===1).length
     const psqr = answered.length ? Math.round((ouiCount / answered.length) * 100) / 100 : null
 
+    // Epworth enfant (/24) et Conners abrégé (/30) — null si rien répondu
+    const eeAnswered = state.epworthEnfant.some(v=>v!==null && v!==undefined)
+    const ee = eeAnswered ? state.epworthEnfant.reduce((a,b)=>a+(b||0),0) : null
+    const cnAnswered = state.conners.some(v=>v!==null && v!==undefined)
+    const cn = cnAnswered ? state.conners.reduce((a,b)=>a+(b||0),0) : null
+
     payload = {
       v:3,
       m: 'pedia',
@@ -1527,6 +1650,9 @@ function generateQR(){
       paf: state.paf,
       psq: state.psq.map(v=>v===null ? 0 : v),
       psqr: psqr,
+      ee: ee,
+      cn: cn,
+      cna: cnAnswered ? state.conners.map(v=>v===null ? 0 : v) : null,
     }
   } else if(state.mode === 'ppc'){
     // ===== Mode renouvellement PPC =====
