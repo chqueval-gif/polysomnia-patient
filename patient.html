@@ -132,6 +132,12 @@
 
   <p class="small">⏱️ Durée estimée : 5 à 10 minutes. Vous pouvez sauter une question si vous ne savez pas répondre.</p>
 
+  <div id="reprise-box" style="display:none;background:#ecfeff;border:1px solid #0e7490;border-radius:10px;padding:14px 16px;margin:16px 0">
+    <p style="margin:0 0 4px;font-weight:600;color:#0e7490">Vous avez déjà rempli ce questionnaire</p>
+    <p class="small" style="margin:0 0 10px;color:#334155" id="reprise-date"></p>
+    <button class="btn" id="btn-reprise" type="button">Réafficher mon QR code</button>
+    <button class="btn secondary" id="btn-effacer-reprise" type="button" style="margin-top:8px">Effacer mes réponses</button>
+  </div>
   <button class="btn" id="btn-start" disabled>Commencer →</button>
 </div>
 
@@ -820,6 +826,9 @@
     <button class="btn" id="btn-fullscreen-qr" type="button" style="margin-top:14px;display:none">🔍 Agrandir en plein écran</button>
     <button class="btn secondary" id="btn-save-qr" type="button" style="margin-top:10px;display:none">📥 Enregistrer / partager le QR (image)</button>
     <p id="save-qr-status" class="small" style="display:none;margin-top:6px;color:#475569"></p>
+    <p class="small" style="margin-top:14px;color:#475569">Inutile d'enregistrer l'image : vos réponses restent <strong>sur ce téléphone</strong> pendant 7 jours. Rouvrez simplement ce lien le jour du rendez-vous pour réafficher ce QR code.</p>
+    <button class="btn secondary" id="btn-effacer-final" type="button" style="margin-top:8px">Effacer mes réponses de ce téléphone</button>
+    <p id="effacer-final-status" class="small" style="display:none;margin-top:6px;color:#0e7490"></p>
   </div>
 
   <!-- Overlay plein écran : QR maximal + Wake Lock pour empêcher l'écran de se mettre en veille -->
@@ -1220,6 +1229,32 @@ const CONNERS_OPTIONS = [
 
 const MOTIFS_PEDIA =["ronflements habituels", "ronflements bruyants", "pauses respiratoires observées par les parents", "respiration buccale nocturne", "sommeil agité", "énurésie nocturne secondaire", "difficultés scolaires", "troubles de l'attention / TDAH", "hyperactivité diurne", "insomnie chronique de l'enfant", "terreurs nocturnes", "somnambulisme", "cauchemars répétés", "bruxisme nocturne", "suivi de SAOS connu"]
 // ====== État ======
+// ====== Reprise du questionnaire sur ce telephone ======
+// Les réponses sont conservées UNIQUEMENT dans ce navigateur (localStorage) :
+// elles ne sont jamais transmises. Effacement automatique au bout de 7 jours,
+// et bouton d'effacement immediat. But : rouvrir le lien le jour du rendez-vous
+// et reafficher le QR code, sans avoir a enregistrer une image dans ses photos
+// (ou elle finirait dans la sauvegarde cloud du telephone).
+const CLE_REPRISE = 'hypnote_questionnaire_v1'
+const DUREE_REPRISE_MS = 7 * 24 * 3600 * 1000
+
+function sauvegarderReponses(){
+  try { localStorage.setItem(CLE_REPRISE, JSON.stringify({ t: Date.now(), state: state })) } catch(e) {}
+}
+function lireReponses(){
+  try {
+    const brut = localStorage.getItem(CLE_REPRISE)
+    if(!brut) return null
+    const o = JSON.parse(brut)
+    if(!o || !o.t || !o.state) return null
+    if(Date.now() - o.t > DUREE_REPRISE_MS){ effacerReponses(); return null }
+    return o
+  } catch(e){ return null }
+}
+function effacerReponses(){
+  try { localStorage.removeItem(CLE_REPRISE) } catch(e) {}
+}
+
 const state = {
   mode: null,  // 'ad' | 'pe' | 'ppc'
   nom:null, prenom:null,
@@ -1555,6 +1590,35 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('btn-finish-pedia').addEventListener('click', generateQR)
   document.getElementById('btn-finish-ppc').addEventListener('click', generateQR)
 
+  // Reprise : proposer de reafficher le QR si des reponses sont encore la
+  const sauvegarde = lireReponses()
+  if(sauvegarde){
+    const box = document.getElementById('reprise-box')
+    const info = document.getElementById('reprise-date')
+    if(box && info){
+      const d = new Date(sauvegarde.t)
+      info.textContent = 'Rempli le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) + '. Vos réponses sont conservées sur ce téléphone pendant 7 jours au maximum.'
+      box.style.display = 'block'
+      document.getElementById('btn-reprise').addEventListener('click', ()=>{
+        Object.assign(state, sauvegarde.state)
+        generateQR()
+      })
+      document.getElementById('btn-effacer-reprise').addEventListener('click', ()=>{
+        effacerReponses()
+        box.style.display = 'none'
+      })
+    }
+  }
+  const btnEffacerFinal = document.getElementById('btn-effacer-final')
+  if(btnEffacerFinal){
+    btnEffacerFinal.addEventListener('click', ()=>{
+      effacerReponses()
+      const st = document.getElementById('effacer-final-status')
+      if(st){ st.textContent = 'Réponses effacées de ce téléphone.'; st.style.display = 'block' }
+      btnEffacerFinal.style.display = 'none'
+    })
+  }
+
   // Bouton recommencer
   document.getElementById('btn-restart').addEventListener('click', ()=>location.reload())
 
@@ -1737,6 +1801,7 @@ function generateQR(){
   const json = JSON.stringify(payload)
   const data = 'SLEEP-V3::' + json
 
+  sauvegarderReponses()
   // Aller à l'écran final tout de suite
   show('step-qr')
 
