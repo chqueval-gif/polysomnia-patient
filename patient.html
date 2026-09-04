@@ -191,6 +191,12 @@
       </div>
       <div class="row" style="margin-top:12px">
         <div>
+          <h3>Date de naissance</h3>
+          <input type="date" id="ddn">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
           <h3>Âge</h3>
           <input type="number" id="age" min="0" max="120" placeholder="ex : 55" inputmode="numeric">
         </div>
@@ -458,6 +464,12 @@
       </div>
       <div class="row" style="margin-top:12px">
         <div>
+          <h3>Date de naissance de l’enfant</h3>
+          <input type="date" id="pedia-ddn">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
           <h3>Âge de l'enfant</h3>
           <input type="number" id="pedia-age" min="0" max="18" placeholder="ex : 7" inputmode="numeric">
         </div>
@@ -660,6 +672,12 @@
         <div>
           <h3>Prénom</h3>
           <input type="text" id="ppc-prenom" placeholder="votre prénom" autocomplete="off">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <h3>Date de naissance</h3>
+          <input type="date" id="ppc-ddn">
         </div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -1258,7 +1276,7 @@ function effacerReponses(){
 const state = {
   mode: null,  // 'ad' | 'pe' | 'ppc'
   nom:null, prenom:null,
-  age:null, genre:null, poids:null, taille:null,
+  age:null, ddn:null, genre:null, poids:null, taille:null,
   epworth:Array(EPWORTH_ITEMS.length).fill(null),
   pichot:Array(PICHOT_ITEMS.length).fill(null),
   had:Array(HAD_ITEMS.length).fill(null),
@@ -1481,7 +1499,27 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // Inputs identité
   document.getElementById('nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
   document.getElementById('prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
+  // L'âge se déduit de la date de naissance : le patient ne saisit qu'une fois
+  // son identité, et le médecin retrouve ses documents antérieurs sur une clé
+  // fiable (les homonymes ne partagent pas la même date).
+  function majAgeDepuisDDN(v){
+    if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v || '')) return
+    const n = new Date(v), t = new Date()
+    if(isNaN(n.getTime())) return
+    let a = t.getFullYear() - n.getFullYear()
+    const m = t.getMonth() - n.getMonth()
+    if(m < 0 || (m === 0 && t.getDate() < n.getDate())) a--
+    if(a < 0 || a > 120) return
+    ;['age','pedia-age','ppc-age'].forEach(function(id){
+      const el = document.getElementById(id)
+      if(el && !String(el.value || '').trim() && el.offsetParent !== null){
+        el.value = String(a)
+        el.dispatchEvent(new Event('input', { bubbles:true }))
+      }
+    })
+  }
   document.getElementById('age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
+  document.getElementById('ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
   document.getElementById('poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="genre"]').forEach(b=>{
@@ -1520,6 +1558,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('pedia-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
   document.getElementById('pedia-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
   document.getElementById('pedia-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
+  document.getElementById('pedia-ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
   document.getElementById('pedia-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('pedia-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="pedia-genre"]').forEach(b=>{
@@ -1563,6 +1602,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('ppc-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
   document.getElementById('ppc-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
   document.getElementById('ppc-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
+  document.getElementById('ppc-ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
   document.getElementById('ppc-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('ppc-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="ppc-genre"]').forEach(b=>{
@@ -1701,6 +1741,7 @@ function generateQR(){
       nom: state.nom,
       prenom: state.prenom,
       age: state.age,
+      dn: state.ddn,
       g: state.genre,
       p: state.poids,
       t: state.taille,
@@ -1736,6 +1777,7 @@ function generateQR(){
       nom: state.nom,
       prenom: state.prenom,
       age: state.age,
+      dn: state.ddn,
       g: state.genre,
       p: state.poids,
       t: state.taille,
@@ -1769,6 +1811,7 @@ function generateQR(){
       nom: state.nom,
       prenom: state.prenom,
       age: state.age,
+      dn: state.ddn,
       g: state.genre,
       p: state.poids,
       t: state.taille,
