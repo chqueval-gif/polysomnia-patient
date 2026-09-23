@@ -53,6 +53,20 @@
   }
   input[type=number]:focus,input[type=text]:focus{border-color:#0e7490;outline:none}
 
+  /* Date de naissance : trois champs courts plutot que le selecteur natif,
+     qui impose de faire defiler les annees une a une sur un telephone. */
+  .ddn{display:flex;align-items:center;gap:6px}
+  .ddn input[type=number]{text-align:center;padding:12px 4px}
+  .ddn input[id$="-j"],.ddn input[id$="-m"]{flex:0 0 66px}
+  .ddn input[id$="-a"]{flex:0 0 92px}
+  .row>.col-pleine{grid-column:1/-1}
+  .ddn-sep{color:#94a3b8;font-size:18px;font-weight:600}
+  .ddn.ko input[type=number]{border-color:#dc2626;background:#fef2f2}
+  /* Les fleches du champ numerique volent de la place sur ces champs etroits. */
+  .ddn input::-webkit-outer-spin-button,
+  .ddn input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .ddn input[type=number]{-moz-appearance:textfield}
+
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
   .btn{
@@ -190,9 +204,18 @@
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <div>
+        <div class="col-pleine">
           <h3>Date de naissance</h3>
-          <input type="date" id="ddn">
+          <div class="ddn" data-ddn="ddn">
+            <input type="number" id="ddn-j" inputmode="numeric" placeholder="JJ"
+                   min="1" max="31" maxlength="2" aria-label="Jour de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="ddn-m" inputmode="numeric" placeholder="MM"
+                   min="1" max="12" maxlength="2" aria-label="Mois de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="ddn-a" inputmode="numeric" placeholder="AAAA"
+                   min="1900" max="2030" maxlength="4" aria-label="Annee de naissance">
+          </div>
         </div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -463,9 +486,18 @@
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <div>
+        <div class="col-pleine">
           <h3>Date de naissance de l’enfant</h3>
-          <input type="date" id="pedia-ddn">
+          <div class="ddn" data-ddn="pedia-ddn">
+            <input type="number" id="pedia-ddn-j" inputmode="numeric" placeholder="JJ"
+                   min="1" max="31" maxlength="2" aria-label="Jour de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="pedia-ddn-m" inputmode="numeric" placeholder="MM"
+                   min="1" max="12" maxlength="2" aria-label="Mois de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="pedia-ddn-a" inputmode="numeric" placeholder="AAAA"
+                   min="1900" max="2030" maxlength="4" aria-label="Annee de naissance">
+          </div>
         </div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -675,9 +707,18 @@
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <div>
+        <div class="col-pleine">
           <h3>Date de naissance</h3>
-          <input type="date" id="ppc-ddn">
+          <div class="ddn" data-ddn="ppc-ddn">
+            <input type="number" id="ppc-ddn-j" inputmode="numeric" placeholder="JJ"
+                   min="1" max="31" maxlength="2" aria-label="Jour de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="ppc-ddn-m" inputmode="numeric" placeholder="MM"
+                   min="1" max="12" maxlength="2" aria-label="Mois de naissance">
+            <span class="ddn-sep">/</span>
+            <input type="number" id="ppc-ddn-a" inputmode="numeric" placeholder="AAAA"
+                   min="1900" max="2030" maxlength="4" aria-label="Annee de naissance">
+          </div>
         </div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -1502,6 +1543,55 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // L'âge se déduit de la date de naissance : le patient ne saisit qu'une fois
   // son identité, et le médecin retrouve ses documents antérieurs sur une clé
   // fiable (les homonymes ne partagent pas la même date).
+  /**
+   * Date de naissance en trois champs.
+   *
+   * Le passage d'un champ au suivant se fait tout seul des que la saisie ne
+   * peut plus s'allonger (deux chiffres pour le jour et le mois, quatre pour
+   * l'annee) : sans cela, il faudrait viser trois petites cibles a la suite.
+   * La date n'est transmise que complete et plausible, pour qu'un jour a
+   * moitie tape ne fasse pas calculer un age absurde.
+   */
+  function brancherDDN(id, surChangement){
+    const g = document.querySelector('[data-ddn="' + id + '"]')
+    if(!g) return
+    const j = document.getElementById(id + '-j')
+    const m = document.getElementById(id + '-m')
+    const a = document.getElementById(id + '-a')
+
+    function valeur(){
+      const jj = parseInt(j.value, 10), mm = parseInt(m.value, 10), aa = parseInt(a.value, 10)
+      if(!jj || !mm || !aa) return null
+      if(jj < 1 || jj > 31 || mm < 1 || mm > 12) return null
+      if(String(a.value).length !== 4) return null
+      const iso = aa + '-' + String(mm).padStart(2, '0') + '-' + String(jj).padStart(2, '0')
+      // Le 31 février ne doit pas passer : on relit la date construite.
+      const d = new Date(iso + 'T00:00:00')
+      if(isNaN(d.getTime()) || d.getDate() !== jj || (d.getMonth() + 1) !== mm) return null
+      if(aa < 1900 || d > new Date()) return null
+      return iso
+    }
+
+    function verifier(){
+      const complet = j.value && m.value && a.value && String(a.value).length === 4
+      const v = valeur()
+      g.classList.toggle('ko', !!complet && !v)
+      return v
+    }
+
+    ;[[j, 2, m], [m, 2, a], [a, 4, null]].forEach(function(trio){
+      const champ = trio[0], taille = trio[1], suivant = trio[2]
+      champ.addEventListener('input', function(){
+        // Un champ numerique ignore maxlength : on borne a la main.
+        if(champ.value.length > taille) champ.value = champ.value.slice(0, taille)
+        const v = verifier()
+        if(v) surChangement(v)
+        if(champ.value.length >= taille && suivant) suivant.focus()
+      })
+      champ.addEventListener('blur', verifier)
+    })
+  }
+
   function majAgeDepuisDDN(v){
     if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v || '')) return
     const n = new Date(v), t = new Date()
@@ -1512,14 +1602,24 @@ window.addEventListener('DOMContentLoaded', ()=>{
     if(a < 0 || a > 120) return
     ;['age','pedia-age','ppc-age'].forEach(function(id){
       const el = document.getElementById(id)
-      if(el && !String(el.value || '').trim() && el.offsetParent !== null){
-        el.value = String(a)
-        el.dispatchEvent(new Event('input', { bubbles:true }))
-      }
+      if(!el || el.offsetParent === null) return
+      // L'age se recalcule quand la date change, sauf s'il a ete tape a la
+      // main : depuis que la date se saisit en trois champs, une date complete
+      // se reforme des la premiere correction, et un age fige a la premiere
+      // frappe resterait faux jusqu'au bout du questionnaire.
+      const saisiAlaMain = String(el.value || '').trim() && el.dataset.auto !== '1'
+      if(saisiAlaMain) return
+      el.value = String(a)
+      el.dataset.auto = '1'
+      el.dispatchEvent(new Event('input', { bubbles:true }))
     })
   }
-  document.getElementById('age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
-  document.getElementById('ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
+  document.getElementById('age').addEventListener('input', function(e){
+    // Une frappe du patient reprend la main sur le calcul automatique.
+    if(e.isTrusted) e.target.dataset.auto = ''
+    state.age = parseInt(e.target.value) || null
+  })
+  brancherDDN('ddn', function(v){ state.ddn = v; majAgeDepuisDDN(v) })
   document.getElementById('poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="genre"]').forEach(b=>{
@@ -1557,8 +1657,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // ====== Pédiatrie : inputs identité ======
   document.getElementById('pedia-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
   document.getElementById('pedia-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
-  document.getElementById('pedia-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
-  document.getElementById('pedia-ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
+  document.getElementById('pedia-age').addEventListener('input', function(e){
+    // Une frappe du patient reprend la main sur le calcul automatique.
+    if(e.isTrusted) e.target.dataset.auto = ''
+    state.age = parseInt(e.target.value) || null
+  })
+  brancherDDN('pedia-ddn', function(v){ state.ddn = v; majAgeDepuisDDN(v) })
   document.getElementById('pedia-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('pedia-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="pedia-genre"]').forEach(b=>{
@@ -1601,8 +1705,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // ====== Renouv PPC : inputs identité ======
   document.getElementById('ppc-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
   document.getElementById('ppc-prenom').addEventListener('input', e=>state.prenom=e.target.value.trim()||null)
-  document.getElementById('ppc-age').addEventListener('input', e=>state.age=parseInt(e.target.value)||null)
-  document.getElementById('ppc-ddn').addEventListener('change', e=>{ state.ddn = e.target.value || null; majAgeDepuisDDN(e.target.value) })
+  document.getElementById('ppc-age').addEventListener('input', function(e){
+    // Une frappe du patient reprend la main sur le calcul automatique.
+    if(e.isTrusted) e.target.dataset.auto = ''
+    state.age = parseInt(e.target.value) || null
+  })
+  brancherDDN('ppc-ddn', function(v){ state.ddn = v; majAgeDepuisDDN(v) })
   document.getElementById('ppc-poids').addEventListener('input', e=>state.poids=parseFloat(e.target.value.replace(',','.'))||null)
   document.getElementById('ppc-taille').addEventListener('input', e=>state.taille=parseInt(e.target.value)||null)
   document.querySelectorAll('[data-name="ppc-genre"]').forEach(b=>{
