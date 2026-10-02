@@ -429,8 +429,19 @@
 
   <!-- ===== SECTION 11 : SPIELMAN (insomnie, optionnel) ===== -->
   <div class="section" data-section="10" style="display:none">
-    <h2>11. Si vous souffrez d'insomnie <span style="font-size:13px;font-weight:500;color:#64748b">(optionnel)</span></h2>
-    <p class="small"><strong>À remplir uniquement si l'insomnie est le motif principal de la consultation.</strong> Sinon, laissez tout vide et cliquez sur Terminer. Ces questions permettent de mieux comprendre votre insomnie selon le modèle de Spielman (facteurs qui ont préparé, déclenché et entretiennent vos troubles).</p>
+    <h2>11. Insomnie</h2>
+
+    <div class="card">
+      <h3>Souffrez-vous d'insomnie ?</h3>
+      <p class="small">Difficultés à vous endormir, réveils dans la nuit ou trop tôt le matin, plusieurs nuits par semaine.</p>
+      <div class="options" style="flex-direction:row;gap:8px">
+        <label class="opt" style="flex:1;text-align:center" data-name="insomnie" data-v="oui">Oui</label>
+        <label class="opt" style="flex:1;text-align:center" data-name="insomnie" data-v="non">Non</label>
+      </div>
+    </div>
+
+    <div id="bloc-insomnie" style="display:none">
+    <p class="small">Ces questions permettent de mieux comprendre votre insomnie : ce qui l'a préparée, déclenchée, et ce qui l'entretient.</p>
 
     <div class="card">
       <h3>Schéma typique de votre nuit</h3>
@@ -454,6 +465,7 @@
       <h3>Habitudes qui entretiennent le trouble</h3>
       <p class="small">Comportements actuels (souvent corrigeables en thérapie).</p>
       <div class="chips" id="chips-pp"></div>
+    </div>
     </div>
 
     <div class="nav">
@@ -1642,6 +1654,23 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
   document.getElementById('traitements-noms').addEventListener('input', e=>state.med_noms=e.target.value.trim()||null)
   document.getElementById('metier').addEventListener('input', e=>state.metier=e.target.value.trim()||null)
+  // « Souffrez-vous d'insomnie ? » : seul « Oui » ouvre les questions. « Non »
+  // les referme et efface ce qui avait été coché, pour que rien ne parte
+  // dans le QR code.
+  document.querySelectorAll('[data-name="insomnie"]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-name="insomnie"]').forEach(x=>x.classList.remove('on'))
+      b.classList.add('on')
+      const oui = b.dataset.v === 'oui'
+      document.getElementById('bloc-insomnie').style.display = oui ? '' : 'none'
+      if(!oui){
+        ;['sc','pd','pc','pp'].forEach(k=>{ state[k] = [] })
+        ;['chips-sc','chips-pd','chips-pc','chips-pp'].forEach(id=>{
+          document.querySelectorAll(`#${id} .chip.on`).forEach(c=>c.classList.remove('on'))
+        })
+      }
+    })
+  })
 
   // Échelles
   buildScale('epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
