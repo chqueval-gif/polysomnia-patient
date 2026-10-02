@@ -444,12 +444,6 @@
     <p class="small">Ces questions permettent de mieux comprendre votre insomnie : ce qui l'a préparée, déclenchée, et ce qui l'entretient.</p>
 
     <div class="card">
-      <h3>Schéma typique de votre nuit</h3>
-      <p class="small">Cochez ce qui décrit le mieux vos nuits actuelles.</p>
-      <div class="chips" id="chips-sc"></div>
-    </div>
-
-    <div class="card">
       <h3>Votre terrain <span style="font-size:13px;font-weight:500;color:#64748b">(avant que ça ne commence)</span></h3>
       <p class="small">Ce qui vous correspond depuis longtemps, avant même les troubles actuels.</p>
       <div class="chips" id="chips-pd"></div>
@@ -1687,7 +1681,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-traitements', TRAITEMENTS, 'traitements')
   buildChipsIndex('chips-atcdfam', ATCD_FAMILIAUX, 'atcdfam')
   // Spielman (insomnie, optionnel)
-  buildChipsIndex('chips-sc', SCHEMA_NUIT, 'sc')
+  // Schéma de nuit : plus de cases, la sévérité de l'endormissement, du
+  // maintien et du réveil précoce vient des questions 1 à 3 de l'ISI (« isd »).
   buildChipsIndex('chips-pd', TERRAIN_INS, 'pd')
   buildChipsIndex('chips-pc', DECLENCH_INS, 'pc')
   buildChipsIndex('chips-pp', ENTRETIEN_INS, 'pp')
@@ -1968,6 +1963,9 @@ function generateQR(){
       ha: hada,
       hd: hadd,
       is: isi,
+      // Détail des 7 réponses ISI (0 à 4, null si sans réponse) : Hypnote en
+      // déduit le type d'insomnie (endormissement, maintien, réveil précoce).
+      isd: state.isi,
       mo: state.motif,
       sn: state.symptn,
       sd: state.symptd,
