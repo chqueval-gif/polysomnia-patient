@@ -1089,11 +1089,14 @@ const RETENTISSEMENT = [
 // ====== Modèle Spielman (3P) : insomnie ====
 // Question optionnelle, à remplir uniquement si l'insomnie est le motif principal.
 // Aligné sur les sections 13a/b/c/d du questionnaire papier adulte.
-// Schéma de nuit volontairement minimal : la sévérité/le type d'insomnie
-// (endormissement / maintien / réveil précoce) est déjà mesuré par l'ISI.
-// On garde le seul marqueur d'orientation « endormissement long ».
+// Schéma de nuit : l'ISI mesure la sévérité, ces trois cases disent le type
+// d'insomnie (endormissement, maintien, réveil précoce) en mots du patient.
+// L'ORDRE doit rester celui de PATIENT_LISTS.sc dans Hypnote (consultation
+// adulte, insomnie, anesthésie).
 const SCHEMA_NUIT = [
   "Je mets plus de 30 minutes à m'endormir (endormissement long)",
+  "Je me réveille plusieurs fois dans la nuit (réveils multiples)",
+  "Je me réveille trop tôt le matin sans pouvoir me rendormir (réveil précoce)",
 ]
 const TERRAIN_INS = [
   "Anxieux/ruminant de nature",
