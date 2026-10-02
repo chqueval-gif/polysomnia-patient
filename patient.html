@@ -242,6 +242,13 @@
         </div>
       </div>
     </div>
+
+    <div class="card">
+      <h3>Votre métier</h3>
+      <input type="text" id="metier" placeholder="ex : conducteur de bus, infirmière de nuit, retraité…" autocomplete="off">
+      <p class="small" style="margin-top:10px">Cochez aussi si votre activité correspond à l'une de ces catégories.</p>
+      <div class="chips" id="chips-prof"></div>
+    </div>
     <div class="nav">
       <button class="btn" data-next="1">Suivant →</button>
     </div>
@@ -250,7 +257,7 @@
   
   <!-- ===== SECTION 2 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
   <div class="section" data-section="1" style="display:none">
-    <h2>2. Antécédents, traitements et profession</h2>
+    <h2>2. Antécédents et traitements</h2>
 
     <div class="card">
       <h3>Antécédents médicaux personnels</h3>
@@ -270,12 +277,6 @@
       <div class="chips" id="chips-traitements"></div>
       <label class="small" style="display:block;margin-top:10px">Nom du médicament, si vous vous en souvenez</label>
       <input type="text" id="traitements-noms" placeholder="ex : Lévothyrox, Doliprane… (facultatif)">
-    </div>
-
-    <div class="card">
-      <h3>Profession à risque</h3>
-      <p class="small">Cochez si votre activité actuelle correspond à l'une de ces catégories.</p>
-      <div class="chips" id="chips-prof"></div>
     </div>
 
     <div class="nav">
@@ -1000,12 +1001,16 @@ const ISI_ITEMS = [
 // ⚠️ ORDRE IMPORTANT : strictement aligné sur PATIENT_LISTS de
 // forms/formulaire_consultation_adulte.html (lignes 1527-1627).
 // Toute modification ici doit être répliquée là-bas.
+// Seul l'ORDRE compte : le QR transmet l'indice, et Hypnote le traduit avec sa
+// propre liste. Le libellé montré au patient peut donc être en mots courants
+// (« arythmie », « cholestérol », « pipi la nuit ») pendant que Hypnote reçoit
+// le terme médical (fibrillation auriculaire, dyslipidémie, nycturie).
 const SYMPT_NOCTURNES = [
   "ronflements",
   "pauses respiratoires rapportées par l'entourage","éveils en suffocation",
   "respiration buccale nocturne","bouche sèche au réveil",
   "sueurs nocturnes profuses","palpitations nocturnes",
-  "nycturie",
+  "pipi la nuit",
   "impatiences des membres inférieurs au coucher",
   "mouvements involontaires des jambes pendant le sommeil",
 ]
@@ -1019,9 +1024,9 @@ const SYMPT_DIURNES = [
 ]
 const COMORBIDITES = [
   // Cardio-métabolique
-  "HTA traitée","HTA résistante (≥ 3 médicaments)","fibrillation auriculaire",
+  "HTA traitée","HTA résistante (≥ 3 médicaments)","arythmie",
   "coronaropathie / antécédent d'infarctus","insuffisance cardiaque",
-  "AVC ou AIT","diabète type 2","dyslipidémie",
+  "AVC ou AIT","diabète type 2","cholestérol",
   "obésité (IMC ≥ 30)","obésité morbide (IMC ≥ 40)",
   // Pneumo / ORL
   "BPCO","asthme","rhinite chronique","antécédent d'amygdalectomie",
@@ -1152,13 +1157,13 @@ const PPC_SYMPTRES = [
   "amélioration de la somnolence diurne","amélioration de la fatigue",
   "persistance d'une somnolence diurne","persistance d'une fatigue",
   "ronflements résiduels","endormissements involontaires",
-  "maux de tête le matin","nycturie persistante",
+  "maux de tête le matin","pipi la nuit persistant",
   "sensation de sommeil non réparateur",
 ]
 const PPC_COMOEVO = [
   "évolution stable des comorbidités, sans modification notable",
   "amélioration du contrôle tensionnel","HTA toujours non contrôlée",
-  "apparition d'une fibrillation auriculaire","amélioration du diabète",
+  "apparition d'une arythmie","amélioration du diabète",
   "prise de poids significative","perte de poids significative",
 ]
 
@@ -1340,6 +1345,7 @@ const state = {
   heure_coucher:null,
   heure_lever:null,
   med_noms:null,
+  metier:null,
 }
 
 // ====== Helpers UI ======
@@ -1632,6 +1638,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('heure-coucher').addEventListener('input', e=>state.heure_coucher=e.target.value||null)
   document.getElementById('heure-lever').addEventListener('input', e=>state.heure_lever=e.target.value||null)
   document.getElementById('traitements-noms').addEventListener('input', e=>state.med_noms=e.target.value.trim()||null)
+  document.getElementById('metier').addEventListener('input', e=>state.metier=e.target.value.trim()||null)
 
   // Échelles
   buildScale('epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
@@ -1937,6 +1944,7 @@ function generateQR(){
       hy: state.hygiene,
       tr: state.traitements,
       mn: state.med_noms,
+      me: state.metier,
       af: state.atcdfam,
       re: state.retent,
       hc: state.heure_coucher,
