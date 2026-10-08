@@ -460,6 +460,37 @@
       <p class="small">Comportements actuels (souvent corrigeables en thérapie).</p>
       <div class="chips" id="chips-pp"></div>
     </div>
+
+    <!-- Bilan du programme TCC-I (mêmes questions que tcc.html) : ce qui est
+         répondu ici dispense le patient de refaire le bilan dans le programme. -->
+    <div class="card">
+      <h3>Ce que vous pensez du sommeil</h3>
+      <p class="small">Pour chaque phrase, de 0 (pas du tout d'accord) à 10 (tout à fait d'accord). Il n'y a pas de bonne réponse.</p>
+      <div id="tcc-dbas"></div>
+    </div>
+    <div class="card">
+      <h3>Au moment de vous endormir</h3>
+      <p class="small">Quand vous essayez de dormir, à quel point ressentez-vous ceci ? De 1 (pas du tout) à 5 (extrêmement).</p>
+      <div id="tcc-psas"></div>
+    </div>
+    <div class="card">
+      <h3>Du matin ou du soir ?</h3>
+      <div id="tcc-meq"></div>
+    </div>
+    <div class="card">
+      <h3>Votre moral, ces deux dernières semaines</h3>
+      <div id="tcc-phq"></div>
+    </div>
+    <div class="card">
+      <h3>Votre situation</h3>
+      <p class="small">Cochez ce qui vous concerne : cela sert à adapter un éventuel programme de traitement de l'insomnie à votre sécurité.</p>
+      <div class="chips" id="tcc-situ"></div>
+    </div>
+    <div class="card">
+      <h3>Votre lever habituel</h3>
+      <p class="small">L'heure à laquelle vous devez ou souhaitez être levé(e), la semaine comme le week-end.</p>
+      <input type="time" id="tcc-lever" value="07:00">
+    </div>
     </div>
 
     <div class="nav">
@@ -1301,6 +1332,134 @@ const CONNERS_OPTIONS = [
 ]
 
 const MOTIFS_PEDIA =["ronflements habituels", "ronflements bruyants", "pauses respiratoires observées par les parents", "respiration buccale nocturne", "sommeil agité", "énurésie nocturne secondaire", "difficultés scolaires", "troubles de l'attention / TDAH", "hyperactivité diurne", "insomnie chronique de l'enfant", "terreurs nocturnes", "somnambulisme", "cauchemars répétés", "bruxisme nocturne", "suivi de SAOS connu"]
+// ====== Bilan TCC-I : listes reprises de tcc.html (mêmes indices, ne pas réordonner) ======
+const DBAS_ITEMS = [
+  "J'ai besoin de 8 heures de sommeil pour me sentir reposé(e) et bien fonctionner dans la journée.",
+  "Quand je ne dors pas assez une nuit, je dois rattraper le lendemain par une sieste, ou la nuit suivante en dormant plus longtemps.",
+  "Je crains que l'insomnie chronique ait des conséquences graves sur ma santé.",
+  "Je m'inquiète de perdre le contrôle de mon sommeil.",
+  "Après une mauvaise nuit, je sais que cela va perturber mes activités le lendemain.",
+  "Pour être alerte et bien fonctionner dans la journée, je crois qu'il vaut mieux prendre un somnifère que de passer une mauvaise nuit.",
+  "Quand je me sens irritable, déprimé(e) ou anxieux(se) dans la journée, c'est surtout parce que j'ai mal dormi la nuit précédente.",
+  "Quand je dors mal une nuit, je sais que cela perturbera mon sommeil toute la semaine.",
+  "Sans une bonne nuit de sommeil, je peux difficilement fonctionner le lendemain.",
+  "Je ne peux jamais prévoir si je vais bien ou mal dormir.",
+  "J'ai peu de moyens pour faire face aux conséquences d'une nuit perturbée.",
+  "Quand je me sens fatigué(e), sans énergie ou que je fonctionne mal dans la journée, c'est généralement parce que j'ai mal dormi.",
+  "Je crois que l'insomnie est essentiellement le résultat d'un déséquilibre chimique.",
+  "Je sens que l'insomnie ruine ma capacité à profiter de la vie et m'empêche de faire ce que je veux.",
+  "Les somnifères sont probablement la seule solution à mes problèmes de sommeil.",
+  "J'évite ou j'annule des obligations (sorties, famille) après une mauvaise nuit.",
+]
+const PSAS_ITEMS = [
+  "Le cœur qui bat vite ou fort","Une sensation de nervosité, des tremblements","Une respiration courte ou haletante","Une tension dans les muscles",
+  "L'estomac serré, des nausées","Des mains moites, de la transpiration","La bouche ou la gorge sèche","Une sensation de froid",
+  "L'inquiétude de ne pas réussir à m'endormir","Des pensées qui défilent sans arrêt","L'analyse des événements de la journée",
+  "Des pensées tristes ou anxieuses","Des préoccupations sans rapport avec le sommeil","L'impossibilité d'arrêter mon esprit",
+  "Des pensées qui m'envahissent malgré moi","L'attention attirée par les bruits",
+]
+const MEQ_ITEMS = [
+  { q:"Si vous étiez entièrement libre d'organiser votre journée, à quelle heure vous lèveriez-vous ?", opts:[["5 h – 6 h 30",5],["6 h 30 – 7 h 45",4],["7 h 45 – 9 h 45",3],["9 h 45 – 11 h",2],["11 h – 12 h",1]] },
+  { q:"Pendant la première demi-heure après le réveil, comment vous sentez-vous ?", opts:[["Très fatigué(e)",1],["Plutôt fatigué(e)",2],["Plutôt en forme",3],["Très en forme",4]] },
+  { q:"Le soir, à quelle heure vous sentez-vous fatigué(e) au point d'avoir besoin de dormir ?", opts:[["20 h – 21 h",5],["21 h – 22 h 15",4],["22 h 15 – 0 h 45",3],["0 h 45 – 2 h",2],["2 h – 3 h",1]] },
+  { q:"À quel moment de la journée vous sentez-vous au meilleur de votre forme ?", opts:[["5 h – 8 h",5],["8 h – 10 h",4],["10 h – 17 h",3],["17 h – 22 h",2],["22 h – 5 h",1]] },
+  { q:"On parle de gens « du matin » et de gens « du soir ». Vous êtes :", opts:[["Nettement du matin",6],["Plutôt du matin",4],["Plutôt du soir",2],["Nettement du soir",0]] },
+]
+const PHQ_ITEMS = [
+  { q:"Vous avez eu peu d'intérêt ou de plaisir à faire les choses", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous vous êtes senti(e) triste, déprimé(e) ou désespéré(e)", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+]
+const SITU = ["Conducteur / conductrice professionnel(le)","Je conduis plus d'une heure par jour","Métier à risque (machines, hauteur, garde)",
+  "Trouble bipolaire connu","Épilepsie","Grossesse en cours","Travail posté ou horaires de nuit",
+  "J'ai une machine PPC","Apnées du sommeil connues, sans appareil","Somnambulisme ou terreurs nocturnes"]
+const SEC_Q = "Vous avez pensé que vous seriez mieux mort(e), ou à vous faire du mal"
+
+function tccEchelle(cont, items, cle, min, max, legende){
+  cont.innerHTML = ''
+  items.forEach((txt, i) => {
+    const q = document.createElement('div'); q.className = 'question'
+    q.innerHTML = `<div class="q">${i + 1}. ${txt}</div><div class="scale" style="display:flex;gap:4px"></div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:4px"><span>${legende[0]}</span><span>${legende[1]}</span></div>`
+    const sc = q.querySelector('.scale')
+    for(let v = min; v <= max; v++){
+      const el = document.createElement('div'); el.textContent = v
+      el.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px'
+      const on = () => { el.style.background = '#0e7490'; el.style.borderColor = '#0e7490'; el.style.color = '#fff'; el.style.fontWeight = '600' }
+      if(state[cle][i] === v) on()
+      el.addEventListener('click', () => { state[cle][i] = v; sc.querySelectorAll('div').forEach(x => { x.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px' }); on(); sauvegarderReponses() })
+      sc.appendChild(el)
+    }
+    cont.appendChild(q)
+  })
+}
+function tccOptions(cont, items, cle){
+  cont.innerHTML = ''
+  items.forEach((it, i) => {
+    const q = document.createElement('div'); q.className = 'question'
+    q.innerHTML = `<div class="q">${i + 1}. ${it.q}</div><div class="options"></div>`
+    const opts = q.querySelector('.options')
+    it.opts.forEach((o, j) => {
+      const lab = Array.isArray(o) ? o[0] : o, val = Array.isArray(o) ? o[1] : j
+      const el = document.createElement('label'); el.className = 'opt'; el.textContent = lab
+      if(state[cle][i] === val) el.classList.add('on')
+      el.addEventListener('click', () => { state[cle][i] = val; opts.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauvegarderReponses() })
+      opts.appendChild(el)
+    })
+    cont.appendChild(q)
+  })
+}
+function rendreBilanTcc(){
+  tccEchelle(document.getElementById('tcc-dbas'), DBAS_ITEMS, 'dbas', 0, 10, ["pas du tout d'accord", 'tout à fait d\'accord'])
+  tccEchelle(document.getElementById('tcc-psas'), PSAS_ITEMS, 'psas', 1, 5, ['pas du tout', 'extrêmement'])
+  tccOptions(document.getElementById('tcc-meq'), MEQ_ITEMS, 'meq')
+  tccOptions(document.getElementById('tcc-phq'), PHQ_ITEMS, 'phq')
+  const sec = document.createElement('div'); sec.className = 'question'
+  sec.innerHTML = `<div class="q">3. ${SEC_Q}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
+  sec.querySelectorAll('.opt').forEach(el => { if(state.sec === Number(el.dataset.v)) el.classList.add('on')
+    el.addEventListener('click', () => { state.sec = Number(el.dataset.v); sec.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauvegarderReponses() }) })
+  document.getElementById('tcc-phq').appendChild(sec)
+  const z = document.getElementById('tcc-situ'); z.innerHTML = ''
+  SITU.forEach((txt, i) => { const el = document.createElement('label'); el.className = 'chip'; el.textContent = txt
+    if(state.situ.includes(i)) el.classList.add('on')
+    el.addEventListener('click', () => { const k = state.situ.indexOf(i); if(k >= 0) state.situ.splice(k, 1); else state.situ.push(i); el.classList.toggle('on'); sauvegarderReponses() }); z.appendChild(el) })
+  const lv = document.getElementById('tcc-lever'); lv.value = state.lever || '07:00'; lv.addEventListener('change', e => { state.lever = e.target.value || '07:00'; sauvegarderReponses() })
+}
+const bilanTccComplet = () => ['dbas','psas','meq','phq'].every(k => state[k].every(v => v != null)) && state.sec != null
+// Mode de sécurité : mêmes règles que calculerMode() dans tcc.html.
+function modeTcc(){
+  const s = state.situ, epw = state.epworth.reduce((a, b) => a + (b || 0), 0), a = state.age
+  const sans = [], mod = []
+  if(state.sec === 1) sans.push("idées noires signalées : votre médecin doit vous voir avant de commencer")
+  if(s.includes(0)) sans.push('conduite professionnelle')
+  if(s.includes(2)) sans.push('métier à risque')
+  if(s.includes(3)) sans.push('trouble bipolaire')
+  if(s.includes(4)) sans.push('épilepsie')
+  if(s.includes(5)) sans.push('grossesse')
+  if(s.includes(9)) sans.push('parasomnie')
+  if(epw >= 16) sans.push(`somnolence marquée (Epworth ${epw})`)
+  if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
+  if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
+  if(a != null && a >= 70) mod.push(`${a} ans`)
+  if(s.includes(1)) mod.push('conduite quotidienne')
+  if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
+  if(sans.length) return { mode:'s', motif:sans.join(', ') }
+  if(mod.length) return { mode:'m', motif:mod.join(', ') }
+  return { mode:'c', motif:'aucun signal de sécurité' }
+}
+// Le programme TCC-I (tcc.html, même site) lit cette clé : le patient qui a
+// répondu ici n'a pas à refaire le bilan.
+function deposerBilanTcc(){
+  if(state.insomnie !== 'oui' || !bilanTccComplet()) return
+  try {
+    if(localStorage.getItem('hypnote_tcc_v1')) return     // un programme existe déjà : on ne l'écrase pas
+    const r = modeTcc(), iso = state.ddn || ''
+    const d = iso ? iso.split('-').reverse().join('/') : null
+    const prog = { v:1, cree:Date.now(), ident:{ n:(state.nom || '').toUpperCase(), p:state.prenom, d, s:state.genre, po:state.poids, ta:state.taille }, situ:state.situ,
+      bilan:{ isi:state.isi, dbas:state.dbas, psas:state.psas, meq:state.meq, epw:state.epworth, phq:state.phq, sec:state.sec, hab:[], date:new Date().toISOString().slice(0, 10) },
+      mode:r.mode, motif:r.motif, fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:state.lever || '07:00', seances:{}, cartes:{}, plan:'', depuisConsultation:true }
+    localStorage.setItem('hypnote_tcc_v1', JSON.stringify(prog))
+  } catch(e) {}
+}
+
 // ====== État ======
 // ====== Reprise du questionnaire sur ce telephone ======
 // Les réponses sont conservées UNIQUEMENT dans ce navigateur (localStorage) :
@@ -1330,6 +1489,8 @@ function effacerReponses(){
 
 const state = {
   mode: null,  // 'ad' | 'pe' | 'ppc'
+  // Bilan TCC-I (ouvert par « Souffrez-vous d'insomnie ? » = oui)
+  insomnie:null, dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), phq:Array(2).fill(null), sec:null, situ:[], lever:'07:00',
   nom:null, prenom:null,
   age:null, ddn:null, genre:null, poids:null, taille:null,
   epworth:Array(EPWORTH_ITEMS.length).fill(null),
@@ -1656,8 +1817,11 @@ window.addEventListener('DOMContentLoaded', ()=>{
       document.querySelectorAll('[data-name="insomnie"]').forEach(x=>x.classList.remove('on'))
       b.classList.add('on')
       const oui = b.dataset.v === 'oui'
+      state.insomnie = oui ? 'oui' : 'non'
       document.getElementById('bloc-insomnie').style.display = oui ? '' : 'none'
+      if(oui) rendreBilanTcc()
       if(!oui){
+        state.dbas = Array(16).fill(null); state.psas = Array(16).fill(null); state.meq = Array(5).fill(null); state.phq = Array(2).fill(null); state.sec = null; state.situ = []
         ;['sc','pd','pc','pp'].forEach(k=>{ state[k] = [] })
         ;['chips-sc','chips-pd','chips-pc','chips-pp'].forEach(id=>{
           document.querySelectorAll(`#${id} .chip.on`).forEach(c=>c.classList.remove('on'))
@@ -1966,6 +2130,8 @@ function generateQR(){
       // Détail des 7 réponses ISI (0 à 4, null si sans réponse) : Hypnote en
       // déduit le type d'insomnie (endormissement, maintien, réveil précoce).
       isd: state.isi,
+      // Bilan TCC-I (si « Souffrez-vous d'insomnie ? » = oui et bilan complet)
+      ...(state.insomnie === 'oui' && bilanTccComplet() ? { db:state.dbas, ps:state.psas, mq:state.meq, ph:state.phq, sc2:state.sec, st:state.situ, lv:state.lever, tm:modeTcc().mode, tt:modeTcc().motif } : {}),
       mo: state.motif,
       sn: state.symptn,
       sd: state.symptd,
@@ -1987,6 +2153,7 @@ function generateQR(){
     }
   }
 
+  deposerBilanTcc()
   const json = JSON.stringify(payload)
   const data = 'SLEEP-V3::' + json
 

@@ -923,7 +923,13 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
     const n = Object.keys(state.nuits).length
     $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
     const lues = Object.values(state.seances || {}).filter(s => s.lue).length
-    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
+    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'}${state.depuisConsultation ? ' avec le questionnaire de consultation' : ''} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
+    rendreBilan()
+  } else if(state && state.bilan && state.depuisConsultation){
+    // Bilan rempli dans le questionnaire de salle d'attente (patient.html, même site).
+    $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
+    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Votre bilan a été fait avec le questionnaire de consultation (${state.bilan.date.split('-').reverse().join('/')}). Votre médecin valide le mode, puis votre agenda commence.`
+    $('btn-revoir-bilan').textContent = 'Voir mon bilan et son QR code'
     rendreBilan()
   } else if(state && state.bilan){
     rendreBilan(); $('consent').checked = true; $('btn-commencer').disabled = false
