@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mon programme sommeil — TCC-I</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#0e7490">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1f2937;
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);max-width:560px;margin:0 auto;line-height:1.5;font-size:16px}
+  h1{font-size:22px;margin:24px 0 8px;color:#1e3a8a}
+  h2{font-size:18px;margin:24px 0 8px;color:#0e7490;border-bottom:2px solid #cffafe;padding-bottom:4px}
+  h3{font-size:15px;margin:18px 0 4px;color:#334155}
+  p{margin:8px 0}
+  .small{font-size:13px;color:#6b7280}
+  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+  .progress{position:sticky;top:0;background:#fff;z-index:10;padding:8px 0;border-bottom:1px solid #e5e7eb;margin:0 -16px 12px;text-align:center;font-size:13px;color:#6b7280}
+  .progress-bar{height:4px;background:#e5e7eb;border-radius:2px;margin-top:6px;overflow:hidden}
+  .progress-fill{height:100%;background:#0e7490;transition:width .3s}
+  .question{margin-bottom:16px}
+  .question .q{font-weight:600;margin-bottom:8px}
+  .options{display:flex;flex-direction:column;gap:6px}
+  .opt{display:block;padding:12px 14px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:15px;-webkit-tap-highlight-color:transparent}
+  .opt.on{background:#cffafe;border-color:#0e7490;font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-block;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:999px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
+  .chip.on{background:#cffafe;border-color:#0e7490;color:#0e7490;font-weight:600}
+  .scale{display:flex;gap:4px}
+  .scale .s{flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
+  .scale .s.on{background:#0e7490;border-color:#0e7490;color:#fff;font-weight:600}
+  .scale-legend{display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:4px}
+  input[type=number],input[type=text],input[type=time]{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;font-family:inherit;background:#fff}
+  input:focus{border-color:#0e7490;outline:none}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ddn{display:flex;align-items:center;gap:6px}
+  .ddn input{text-align:center;padding:12px 4px}
+  .ddn input.j,.ddn input.m{flex:0 0 66px}
+  .ddn input.a{flex:0 0 92px}
+  .ddn-sep{color:#94a3b8;font-size:18px;font-weight:600}
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;background:#0e7490;color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent}
+  .btn:disabled{background:#94a3b8;cursor:not-allowed}
+  .btn.secondary{background:#fff;color:#0e7490;border:2px solid #0e7490}
+  .btn.ghost{background:transparent;color:#6b7280;border:none;font-weight:500}
+  .consent{background:#fef3c7;border:1px solid #f59e0b;padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
+  .alerte{background:#fee2e2;border:1px solid #dc2626;padding:14px;border-radius:10px;margin:12px 0;font-size:14px;color:#7f1d1d}
+  .info{background:#ecfeff;border:1px solid #67e8f9;padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14px}
+  .step{display:none}
+  .step.active{display:block}
+  .tabs{display:flex;gap:6px;margin:12px 0}
+  .tabs button{flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;font-weight:600;color:#6b7280;cursor:pointer}
+  .tabs button.on{border-color:#0e7490;color:#0e7490;background:#cffafe}
+  .kpi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+  .kpi div{background:#f8fafc;border-radius:10px;padding:10px;text-align:center}
+  .kpi b{display:block;font-size:20px;color:#1e3a8a}
+  .kpi span{font-size:12px;color:#6b7280}
+  .nuit{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px}
+  .nuit .eff{font-weight:600}
+  .faces{display:flex;gap:6px}
+  .faces .s{font-size:22px;padding:6px 0}
+  .qr-container{text-align:center;padding:24px;background:#fff !important;border-radius:12px;color:#000;isolation:isolate;filter:none !important}
+  .qr-container img{display:block;margin:0 auto;max-width:100%;image-rendering:pixelated}
+  textarea{width:100%;font-size:12px;font-family:monospace;padding:8px;border:1px solid #e2e8f0;border-radius:8px}
+  .courbe{width:100%;height:auto}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" style="display:none"><span id="progress-text"></span><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div></div>
+
+<!-- ================= ACCUEIL ================= -->
+<div class="step active" id="step-home">
+  <h1>Mon programme sommeil</h1>
+  <p class="small">Thérapie cognitivo-comportementale de l'insomnie (TCC-I), proposée par votre médecin du sommeil.</p>
+  <div class="card" id="home-nouveau">
+    <p>Ce programme dure <strong>six semaines</strong>. Il demande chaque matin une minute pour noter votre nuit, et chaque semaine dix minutes de lecture et un exercice.</p>
+    <p>Aujourd'hui, vous allez répondre à un <strong>bilan d'entrée</strong> d'une quinzaine de minutes. Il se termine par un QR code à montrer à votre médecin, qui validera la suite.</p>
+    <div class="consent">
+      <strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer"><input type="checkbox" id="consent" style="width:18px;height:18px;margin-top:3px"> J'ai compris.</label>
+    </div>
+    <button class="btn" id="btn-commencer" disabled>Commencer le bilan →</button>
+  </div>
+  <div class="card" id="home-reprise" style="display:none">
+    <p id="home-reprise-txt"></p>
+    <button class="btn" id="btn-agenda">Mon agenda du sommeil →</button>
+    <button class="btn secondary" id="btn-revoir-bilan">Revoir mon bilan et son QR code</button>
+    <button class="btn ghost" id="btn-effacer">Effacer mes données de ce téléphone</button>
+  </div>
+</div>
+
+<!-- ================= IDENTITÉ ================= -->
+<div class="step" id="step-id">
+  <h2>1. Vous</h2>
+  <div class="card">
+    <div class="row">
+      <div><label class="small">Nom</label><input type="text" id="nom" autocomplete="off"></div>
+      <div><label class="small">Prénom</label><input type="text" id="prenom" autocomplete="off"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div><label class="small">Date de naissance</label>
+        <div class="ddn"><input type="number" class="j" id="ddn-j" placeholder="JJ" inputmode="numeric"><span class="ddn-sep">/</span><input type="number" class="m" id="ddn-m" placeholder="MM" inputmode="numeric"><span class="ddn-sep">/</span><input type="number" class="a" id="ddn-a" placeholder="AAAA" inputmode="numeric"></div>
+      </div>
+      <div><label class="small">Vous êtes</label>
+        <div class="chips" id="chips-sexe"><label class="chip" data-v="F">Une femme</label><label class="chip" data-v="M">Un homme</label></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div><label class="small">Poids (kg)</label><input type="number" id="poids" inputmode="decimal"></div>
+      <div><label class="small">Taille (cm)</label><input type="number" id="taille" inputmode="numeric"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Votre situation</h3>
+    <p class="small">Cochez ce qui vous concerne. Ces réponses servent à adapter le programme à votre sécurité.</p>
+    <div class="chips" id="chips-situ"></div>
+  </div>
+  <button class="btn" id="btn-id-suite">Continuer →</button>
+</div>
+
+<!-- ================= ÉCHELLES ================= -->
+<div class="step" id="step-isi">
+  <h2>2. Votre insomnie ces deux dernières semaines</h2>
+  <div class="card" id="isi-q"></div>
+  <p class="small" style="text-align:right" id="isi-total"></p>
+  <button class="btn" data-next="step-dbas">Continuer →</button>
+</div>
+
+<div class="step" id="step-dbas">
+  <h2>3. Ce que vous pensez du sommeil</h2>
+  <p class="small">Pour chaque phrase, indiquez à quel point vous êtes d'accord, de 0 (pas du tout) à 10 (tout à fait). Il n'y a pas de bonne réponse.</p>
+  <div class="card" id="dbas-q"></div>
+  <button class="btn" data-next="step-psas">Continuer →</button>
+</div>
+
+<div class="step" id="step-psas">
+  <h2>4. Au moment de vous endormir</h2>
+  <p class="small">Quand vous essayez de dormir, à quel point ressentez-vous ceci ? De 1 (pas du tout) à 5 (extrêmement).</p>
+  <div class="card" id="psas-q"></div>
+  <button class="btn" data-next="step-meq">Continuer →</button>
+</div>
+
+<div class="step" id="step-meq">
+  <h2>5. Du matin ou du soir ?</h2>
+  <div class="card" id="meq-q"></div>
+  <button class="btn" data-next="step-epw">Continuer →</button>
+</div>
+
+<div class="step" id="step-epw">
+  <h2>6. Somnolence dans la journée</h2>
+  <p class="small">Quelle est votre probabilité de vous assoupir dans ces situations ? 0 = jamais, 1 = faible, 2 = moyenne, 3 = forte.</p>
+  <div class="card" id="epw-q"></div>
+  <p class="small" style="text-align:right" id="epw-total"></p>
+  <button class="btn" data-next="step-phq">Continuer →</button>
+</div>
+
+<div class="step" id="step-phq">
+  <h2>7. Votre moral</h2>
+  <p class="small">Au cours des deux dernières semaines…</p>
+  <div class="card" id="phq-q"></div>
+  <button class="btn" data-next="step-hab">Continuer →</button>
+</div>
+
+<div class="step" id="step-hab">
+  <h2>8. Vos habitudes</h2>
+  <div class="card">
+    <p class="small">Cochez ce qui vous arrive la plupart des jours.</p>
+    <div class="chips" id="chips-hab"></div>
+  </div>
+  <div class="card">
+    <h3>Votre lever habituel</h3>
+    <p class="small">L'heure à laquelle vous devez ou souhaitez être levé(e), la semaine comme le week-end. Elle servira de repère au programme.</p>
+    <input type="time" id="lever-cible" value="07:00">
+  </div>
+  <button class="btn" id="btn-terminer-bilan">Terminer le bilan →</button>
+</div>
+
+<!-- ================= RÉSULTAT ================= -->
+<div class="step" id="step-resultat">
+  <h2>Votre bilan</h2>
+  <div id="resultat-alerte"></div>
+  <div class="card" id="resultat-card"></div>
+  <div class="card">
+    <h3>Montrez ce QR code à votre médecin</h3>
+    <p class="small">Il contient vos réponses et le mode proposé. Votre médecin le valide ou le modifie, puis votre agenda peut commencer.</p>
+    <div class="qr-container"><img id="qr-img" alt="QR code du bilan" width="320" height="320" style="display:none"><div id="qr-loading" class="small">⏳ Génération…</div></div>
+    <div id="qr-fallback" style="display:none"><p class="small">Le QR code n'a pas pu être dessiné. Recopiez ce texte :</p><textarea id="qr-fallback-data" rows="4" readonly></textarea></div>
+  </div>
+  <button class="btn" id="btn-vers-agenda">Commencer mon agenda du sommeil →</button>
+  <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
+<!-- ================= AGENDA ================= -->
+<div class="step" id="step-agenda">
+  <h2>Mon agenda du sommeil</h2>
+  <div class="tabs"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Ma semaine</button><button data-tab="suivi">Pour le médecin</button></div>
+
+  <div id="tab-jour">
+    <div id="agenda-pause"></div>
+    <div class="card" id="saisie-card">
+      <h3 id="saisie-titre">La nuit dernière</h3>
+      <div class="row">
+        <div><label class="small">Je me suis couché(e) à</label><input type="time" id="n-hc"></div>
+        <div><label class="small">Je me suis levé(e) à</label><input type="time" id="n-hl"></div>
+      </div>
+      <div class="question" style="margin-top:12px"><div class="q">Temps pour m'endormir</div><div class="scale" id="n-lat"></div></div>
+      <div class="question"><div class="q">Nombre de réveils dans la nuit</div><div class="scale" id="n-nrev"></div></div>
+      <div class="question" id="n-waso-wrap"><div class="q">Temps total éveillé pendant la nuit</div><div class="scale" id="n-waso"></div></div>
+      <div class="question"><div class="q">Ma nuit</div><div class="scale faces" id="n-q"></div></div>
+      <div class="chips" id="n-extras"></div>
+      <button class="btn" id="btn-nuit-ok">Enregistrer cette nuit</button>
+      <p class="small" id="saisie-retour"></p>
+    </div>
+    <div class="card" id="fenetre-card"></div>
+    <div class="card">
+      <h3>Code du médecin</h3>
+      <p class="small">Si votre médecin vous a donné un code, saisissez-le ici : il règle votre fenêtre de sommeil ou relance le programme.</p>
+      <div class="row"><input type="text" id="code-medecin" placeholder="ex : M0700026" autocomplete="off" style="text-transform:uppercase"><button class="btn" id="btn-code" style="margin-top:0">Appliquer</button></div>
+      <p class="small" id="code-retour"></p>
+    </div>
+  </div>
+
+  <div id="tab-semaine" style="display:none">
+    <div class="card"><div class="kpi" id="kpi"></div><svg class="courbe" id="courbe" viewBox="0 0 520 220"></svg><p class="small" id="semaine-mot"></p></div>
+    <div class="card"><h3>Mes nuits</h3><div id="liste-nuits"></div></div>
+    <div class="card" id="hebdo-card"></div>
+  </div>
+
+  <div id="tab-suivi" style="display:none">
+    <div class="card">
+      <h3>QR code de suivi</h3>
+      <p class="small">Il résume vos semaines (efficacité, temps de sommeil, fenêtre, signaux) sans le détail de chaque nuit. Montrez-le à la consultation ou envoyez-en une photo au secrétariat.</p>
+      <button class="btn" id="btn-qr-suivi">Afficher mon QR de suivi</button>
+      <div class="qr-container" id="qr-suivi-wrap" style="display:none"><img id="qr-suivi-img" alt="QR code de suivi" width="320" height="320"></div>
+      <div id="qr-suivi-fallback" style="display:none"><textarea id="qr-suivi-data" rows="4" readonly></textarea></div>
+    </div>
+    <div class="card">
+      <h3>Refaire le questionnaire d'insomnie (ISI)</h3>
+      <p class="small">À la fin du programme, ou quand votre médecin le demande.</p>
+      <button class="btn secondary" id="btn-isi-fin">Refaire l'ISI</button>
+      <div id="isi-fin-q" style="display:none"></div>
+    </div>
+  </div>
+  <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
+<div class="step" id="step-isi-fin">
+  <h2>Votre insomnie ces deux dernières semaines</h2>
+  <div class="card" id="isi2-q"></div>
+  <p class="small" style="text-align:right" id="isi2-total"></p>
+  <button class="btn" id="btn-isi2-ok">Enregistrer →</button>
+</div>
+
+<script src="qrcode.min.js"></script>
+<script>
+'use strict'
+// ======================================================================
+// Mon programme sommeil (TCC-I) — tout reste dans ce navigateur.
+// Les données partent vers Hypnote uniquement par le QR code (TCC-V1::).
+// ======================================================================
+const CLE = 'hypnote_tcc_v1'
+const $ = id => document.getElementById(id)
+
+// ---------------------------------------------------------------- Échelles
+const ISI_ITEMS = [
+  { q:"Difficultés à vous endormir", opts:["Aucune","Légères","Moyennes","Importantes","Très importantes"] },
+  { q:"Difficultés à rester endormi(e)", opts:["Aucune","Légères","Moyennes","Importantes","Très importantes"] },
+  { q:"Réveil(s) trop tôt le matin", opts:["Aucun","Léger","Moyen","Important","Très important"] },
+  { q:"Satisfaction par rapport à votre sommeil actuel", opts:["Très satisfait(e)","Satisfait(e)","Plutôt neutre","Insatisfait(e)","Très insatisfait(e)"] },
+  { q:"Votre problème de sommeil est-il visible pour les autres en termes de qualité de vie ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+  { q:"Êtes-vous préoccupé(e) par votre problème de sommeil ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+  { q:"Dans quelle mesure votre problème de sommeil interfère avec votre fonctionnement quotidien ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+]
+// Ordre fixe : Hypnote lit les indices. Ne pas réordonner.
+const DBAS_ITEMS = [
+  "J'ai besoin de 8 heures de sommeil pour me sentir reposé(e) et bien fonctionner dans la journée.",
+  "Quand je ne dors pas assez une nuit, je dois rattraper le lendemain par une sieste, ou la nuit suivante en dormant plus longtemps.",
+  "Je crains que l'insomnie chronique ait des conséquences graves sur ma santé.",
+  "Je m'inquiète de perdre le contrôle de mon sommeil.",
+  "Après une mauvaise nuit, je sais que cela va perturber mes activités le lendemain.",
+  "Pour être alerte et bien fonctionner dans la journée, je crois qu'il vaut mieux prendre un somnifère que de passer une mauvaise nuit.",
+  "Quand je me sens irritable, déprimé(e) ou anxieux(se) dans la journée, c'est surtout parce que j'ai mal dormi la nuit précédente.",
+  "Quand je dors mal une nuit, je sais que cela perturbera mon sommeil toute la semaine.",
+  "Sans une bonne nuit de sommeil, je peux difficilement fonctionner le lendemain.",
+  "Je ne peux jamais prévoir si je vais bien ou mal dormir.",
+  "J'ai peu de moyens pour faire face aux conséquences d'une nuit perturbée.",
+  "Quand je me sens fatigué(e), sans énergie ou que je fonctionne mal dans la journée, c'est généralement parce que j'ai mal dormi.",
+  "Je crois que l'insomnie est essentiellement le résultat d'un déséquilibre chimique.",
+  "Je sens que l'insomnie ruine ma capacité à profiter de la vie et m'empêche de faire ce que je veux.",
+  "Les somnifères sont probablement la seule solution à mes problèmes de sommeil.",
+  "J'évite ou j'annule des obligations (sorties, famille) après une mauvaise nuit.",
+]
+const DBAS_COURT = ["besoin de 8 h","rattraper le sommeil","santé en danger","perte de contrôle","journée gâchée",
+  "somnifère plutôt qu'une mauvaise nuit","humeur = sommeil","une nuit gâche la semaine","impossible de fonctionner",
+  "sommeil imprévisible","sans recours","fatigue = sommeil","déséquilibre chimique","vie ruinée","somnifères seule solution","éviter les obligations"]
+const PSAS_ITEMS = [
+  "Le cœur qui bat vite ou fort","Une sensation de nervosité, des tremblements","Une respiration courte ou haletante","Une tension dans les muscles",
+  "L'estomac serré, des nausées","Des mains moites, de la transpiration","La bouche ou la gorge sèche","Une sensation de froid",
+  "L'inquiétude de ne pas réussir à m'endormir","Des pensées qui défilent sans arrêt","L'analyse des événements de la journée",
+  "Des pensées tristes ou anxieuses","Des préoccupations sans rapport avec le sommeil","L'impossibilité d'arrêter mon esprit",
+  "Des pensées qui m'envahissent malgré moi","L'attention attirée par les bruits",
+]
+const MEQ_ITEMS = [
+  { q:"Si vous étiez entièrement libre d'organiser votre journée, à quelle heure vous lèveriez-vous ?", opts:[["5 h – 6 h 30",5],["6 h 30 – 7 h 45",4],["7 h 45 – 9 h 45",3],["9 h 45 – 11 h",2],["11 h – 12 h",1]] },
+  { q:"Pendant la première demi-heure après le réveil, comment vous sentez-vous ?", opts:[["Très fatigué(e)",1],["Plutôt fatigué(e)",2],["Plutôt en forme",3],["Très en forme",4]] },
+  { q:"Le soir, à quelle heure vous sentez-vous fatigué(e) au point d'avoir besoin de dormir ?", opts:[["20 h – 21 h",5],["21 h – 22 h 15",4],["22 h 15 – 0 h 45",3],["0 h 45 – 2 h",2],["2 h – 3 h",1]] },
+  { q:"À quel moment de la journée vous sentez-vous au meilleur de votre forme ?", opts:[["5 h – 8 h",5],["8 h – 10 h",4],["10 h – 17 h",3],["17 h – 22 h",2],["22 h – 5 h",1]] },
+  { q:"On parle de gens « du matin » et de gens « du soir ». Vous êtes :", opts:[["Nettement du matin",6],["Plutôt du matin",4],["Plutôt du soir",2],["Nettement du soir",0]] },
+]
+const EPW_ITEMS = [
+  "Assis(e) en train de lire","En train de regarder la télévision","Assis(e) inactif(ve) dans un lieu public (théâtre, réunion)",
+  "Comme passager(ère) en voiture pendant 1 heure sans interruption","Allongé(e) l'après-midi pour vous reposer quand les circonstances le permettent",
+  "Assis(e) en parlant avec quelqu'un","Assis(e) au calme après un repas sans alcool","Au volant, en voiture, immobilisé(e) dans un embouteillage pendant quelques minutes",
+]
+const PHQ_ITEMS = [
+  { q:"Vous avez eu peu d'intérêt ou de plaisir à faire les choses", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous vous êtes senti(e) triste, déprimé(e) ou désespéré(e)", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+]
+const SEC_Q = "Vous avez pensé que vous seriez mieux mort(e), ou à vous faire du mal"
+// Ordre fixe (indices transmis). Ne pas réordonner.
+const SITU = ["Conducteur / conductrice professionnel(le)","Je conduis plus d'une heure par jour","Métier à risque (machines, hauteur, garde)",
+  "Trouble bipolaire connu","Épilepsie","Grossesse en cours","Travail posté ou horaires de nuit",
+  "J'ai une machine PPC","Apnées du sommeil connues, sans appareil","Somnambulisme ou terreurs nocturnes"]
+const HAB = ["Café, thé ou boisson énergisante après 16 h","Alcool le soir","Écrans au lit (téléphone, télévision)","Sieste de plus de 30 minutes",
+  "Somnifère la plupart des nuits","Horaires de coucher très variables","Je travaille ou regarde la télévision dans mon lit","Peu ou pas d'activité physique"]
+const LAT = [["0–15 min",8],["15–30",22],["30–45",38],["45–60",52],["1–2 h",90],["> 2 h",150]]
+const NREV = [["0",0],["1",1],["2",2],["3",3],["4",4],["5+",5]]
+const WASO = [["0–15 min",8],["15–30",22],["30–60",45],["1–2 h",90],["> 2 h",150]]
+const FACES = ["😣","😕","😐","🙂","😄"]
+const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PPC portée toute la nuit"]
+
+// ---------------------------------------------------------------- État
+let state = null
+const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00' })
+function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} }
+function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); return (o && o.v === 1) ? o : null } catch(e){ return null } }
+
+// ---------------------------------------------------------------- Navigation
+const ETAPES = ['step-id','step-isi','step-dbas','step-psas','step-meq','step-epw','step-phq','step-hab']
+function show(id){
+  document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', s.id === id))
+  const i = ETAPES.indexOf(id)
+  $('progress').style.display = i >= 0 ? 'block' : 'none'
+  if(i >= 0){ $('progress-text').textContent = `Bilan d'entrée — étape ${i + 1} / ${ETAPES.length}`; $('progress-fill').style.width = `${(i + 1) / ETAPES.length * 100}%` }
+  window.scrollTo(0, 0)
+}
+document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => {
+  const cour = document.querySelector('.step.active').id
+  if(ETAPES.includes(cour) && !etapeComplete(cour)){ alert('Merci de répondre à toutes les questions de cette page.'); return }
+  sauver(); show(b.dataset.next)
+}))
+
+// ---------------------------------------------------------------- Rendu des échelles
+function rendreOptions(cont, items, cle, getLabel){
+  cont.innerHTML = ''
+  items.forEach((it, i) => {
+    const q = document.createElement('div'); q.className = 'question'
+    q.innerHTML = `<div class="q">${i + 1}. ${it.q || it}</div><div class="options"></div>`
+    const opts = q.querySelector('.options')
+    const liste = it.opts || getLabel(it)
+    liste.forEach((o, j) => {
+      const lab = Array.isArray(o) ? o[0] : o, val = Array.isArray(o) ? o[1] : j
+      const el = document.createElement('label'); el.className = 'opt'; el.textContent = lab
+      if(state.bilan[cle][i] === val) el.classList.add('on')
+      el.addEventListener('click', () => { state.bilan[cle][i] = val; opts.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver(); majTotaux() })
+      opts.appendChild(el)
+    })
+    cont.appendChild(q)
+  })
+}
+function rendreEchelle(cont, items, cle, min, max, legende){
+  cont.innerHTML = ''
+  items.forEach((txt, i) => {
+    const q = document.createElement('div'); q.className = 'question'
+    q.innerHTML = `<div class="q">${i + 1}. ${txt}</div><div class="scale"></div><div class="scale-legend"><span>${legende[0]}</span><span>${legende[1]}</span></div>`
+    const sc = q.querySelector('.scale')
+    for(let v = min; v <= max; v++){
+      const el = document.createElement('div'); el.className = 's'; el.textContent = v
+      if(state.bilan[cle][i] === v) el.classList.add('on')
+      el.addEventListener('click', () => { state.bilan[cle][i] = v; sc.querySelectorAll('.s').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() })
+      sc.appendChild(el)
+    }
+    cont.appendChild(q)
+  })
+}
+function rendreChips(cont, items, tableau){
+  cont.innerHTML = ''
+  items.forEach((txt, i) => {
+    const el = document.createElement('label'); el.className = 'chip'; el.textContent = txt
+    if(tableau.includes(i)) el.classList.add('on')
+    el.addEventListener('click', () => { const k = tableau.indexOf(i); if(k >= 0) tableau.splice(k, 1); else tableau.push(i); el.classList.toggle('on'); sauver() })
+    cont.appendChild(el)
+  })
+}
+const somme = a => a.reduce((s, v) => s + (v == null ? 0 : v), 0)
+function majTotaux(){
+  const b = state.bilan
+  $('isi-total').textContent = b.isi.every(v => v != null) ? `Score ISI : ${somme(b.isi)} / 28` : ''
+  $('epw-total').textContent = b.epw.every(v => v != null) ? `Score : ${somme(b.epw)} / 24` : ''
+}
+function etapeComplete(id){
+  const b = state.bilan
+  const plein = a => a.every(v => v != null)
+  return { 'step-isi':plein(b.isi), 'step-dbas':plein(b.dbas), 'step-psas':plein(b.psas), 'step-meq':plein(b.meq),
+           'step-epw':plein(b.epw), 'step-phq':plein(b.phq) && b.sec != null, 'step-id':true, 'step-hab':true }[id] ?? true
+}
+function rendreBilan(){
+  rendreOptions($('isi-q'), ISI_ITEMS, 'isi')
+  rendreEchelle($('dbas-q'), DBAS_ITEMS, 'dbas', 0, 10, ['pas du tout d\'accord', 'tout à fait d\'accord'])
+  rendreEchelle($('psas-q'), PSAS_ITEMS, 'psas', 1, 5, ['pas du tout', 'extrêmement'])
+  rendreOptions($('meq-q'), MEQ_ITEMS, 'meq')
+  rendreEchelle($('epw-q'), EPW_ITEMS, 'epw', 0, 3, ['jamais', 'forte'])
+  rendreOptions($('phq-q'), PHQ_ITEMS, 'phq')
+  const sec = document.createElement('div'); sec.className = 'question'
+  sec.innerHTML = `<div class="q">3. ${SEC_Q}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
+  sec.querySelectorAll('.opt').forEach(el => { if(state.bilan.sec === Number(el.dataset.v)) el.classList.add('on')
+    el.addEventListener('click', () => { state.bilan.sec = Number(el.dataset.v); sec.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() }) })
+  $('phq-q').appendChild(sec)
+  rendreChips($('chips-hab'), HAB, state.bilan.hab)
+  rendreChips($('chips-situ'), SITU, state.situ)
+  majTotaux()
+}
+
+// ---------------------------------------------------------------- Identité
+function lireIdentite(){
+  const j = $('ddn-j').value, m = $('ddn-m').value, a = $('ddn-a').value
+  state.ident = { n:$('nom').value.trim().toUpperCase(), p:$('prenom').value.trim(), s:state.ident.s || null,
+    d:(j && m && a) ? `${String(j).padStart(2,'0')}/${String(m).padStart(2,'0')}/${a}` : null,
+    po:parseFloat($('poids').value) || null, ta:parseInt($('taille').value) || null }
+}
+document.querySelectorAll('#chips-sexe .chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('#chips-sexe .chip').forEach(x => x.classList.remove('on')); c.classList.add('on'); state.ident.s = c.dataset.v; sauver()
+}))
+$('btn-id-suite').addEventListener('click', () => {
+  lireIdentite()
+  if(!state.ident.n || !state.ident.p || !state.ident.d){ alert('Nom, prénom et date de naissance sont nécessaires pour que votre médecin vous retrouve.'); return }
+  sauver(); show('step-isi')
+})
+function age(){
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(state.ident.d || ''); if(!m) return null
+  const n = new Date(), d = new Date(+m[3], +m[2] - 1, +m[1])
+  let a = n.getFullYear() - d.getFullYear(); if(n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--
+  return a
+}
+
+// ---------------------------------------------------------------- Mode de sécurité
+// 'c' complet (fenêtre ≥ 5 h 30), 'm' modéré (≥ 6 h), 's' sans restriction.
+function calculerMode(){
+  const b = state.bilan, s = state.situ, epw = somme(b.epw), a = age()
+  const sans = [], mod = []
+  if(b.sec === 1) sans.push("idées noires signalées : votre médecin doit vous voir avant de commencer")
+  if(s.includes(0)) sans.push('conduite professionnelle')
+  if(s.includes(2)) sans.push('métier à risque')
+  if(s.includes(3)) sans.push('trouble bipolaire')
+  if(s.includes(4)) sans.push('épilepsie')
+  if(s.includes(5)) sans.push('grossesse')
+  if(s.includes(9)) sans.push('parasomnie')
+  if(epw >= 16) sans.push(`somnolence marquée (Epworth ${epw})`)
+  if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
+  if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
+  if(a != null && a >= 70) mod.push(`${a} ans`)
+  if(s.includes(1)) mod.push('conduite quotidienne')
+  if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
+  if(sans.length) return { mode:'s', motif:sans.join(', ') }
+  if(mod.length) return { mode:'m', motif:mod.join(', ') }
+  return { mode:'c', motif:'aucun signal de sécurité' }
+}
+const MODE_LIB = { c:'complet', m:'modéré', s:'sans restriction de sommeil' }
+const PLANCHER = { c:330, m:360, s:null }
+function chronotype(){ const t = somme(state.bilan.meq); return t <= 11 ? 'du soir' : t >= 18 ? 'du matin' : 'intermédiaire' }
+
+$('btn-terminer-bilan').addEventListener('click', () => {
+  state.lever = $('lever-cible').value || '07:00'
+  const r = calculerMode(); state.mode = r.mode; state.motif = r.motif; state.bilan.date = aujourdhui()
+  sauver(); afficherResultat(); show('step-resultat')
+})
+function afficherResultat(){
+  const b = state.bilan, isi = somme(b.isi), epw = somme(b.epw), dbasMoy = somme(b.dbas) / 16
+  const fortes = b.dbas.map((v, i) => v >= 7 ? DBAS_COURT[i] : null).filter(Boolean)
+  const psasC = somme(b.psas.slice(8)), psasS = somme(b.psas.slice(0, 8))
+  $('resultat-alerte').innerHTML = b.sec === 1 ? `<div class="alerte"><strong>Vous avez signalé des idées noires.</strong> Ce programme ne remplace pas une aide. Parlez-en à votre médecin dès maintenant ; en cas d'urgence, appelez le <strong>3114</strong> (24 h/24, gratuit) ou le 15.</div>` : ''
+  $('resultat-card').innerHTML = `
+    <p><strong>Insomnie (ISI) : ${isi} / 28</strong> — ${isi >= 22 ? 'sévère' : isi >= 15 ? 'modérée' : isi >= 8 ? 'légère' : 'pas d\'insomnie cliniquement significative'}.</p>
+    <p><strong>Croyances sur le sommeil :</strong> ${fortes.length ? fortes.length + ' croyance' + (fortes.length > 1 ? 's' : '') + ' à travailler (' + fortes.join(', ') + ')' : 'aucune croyance forte repérée'}.</p>
+    <p><strong>Au coucher :</strong> éveil mental ${psasC} / 40, éveil physique ${psasS} / 40.</p>
+    <p><strong>Rythme :</strong> plutôt ${chronotype()}. <strong>Somnolence :</strong> Epworth ${epw} / 24.</p>
+    <div class="info"><strong>Mode proposé : ${MODE_LIB[state.mode]}</strong><br><span class="small">${state.motif}.</span><br><span class="small">${state.mode === 's' ? 'Le programme travaillera le contrôle du lit, les croyances et la détente, sans réduire votre temps au lit.' : state.mode === 'm' ? 'Votre temps au lit ne descendra jamais sous 6 heures.' : 'Votre temps au lit pourra être resserré jusqu\'à 5 h 30 si votre agenda le justifie.'} Votre médecin confirme ce choix.</span></div>`
+  rendreQR(payloadBilan(), $('qr-img'), $('qr-loading'), $('qr-fallback'), $('qr-fallback-data'))
+}
+
+// ---------------------------------------------------------------- QR
+function payloadBilan(){
+  const b = state.bilan, i = state.ident
+  return 'TCC-V1::' + JSON.stringify({ v:1, k:'b', dt:b.date, n:i.n, p:i.p, d:i.d, s:i.s, po:i.po, ta:i.ta,
+    isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, lv:state.lever })
+}
+function payloadSuivi(){
+  const i = state.ident, sem = semaines()
+  return 'TCC-V1::' + JSON.stringify({ v:1, k:'s', dt:aujourdhui(), n:i.n, p:i.p, d:i.d, mo:state.mode, pa:state.pause ? 1 : 0,
+    fen:state.fen ? { l:state.fen.l, d:state.fen.d } : null, nn:Object.keys(state.nuits).length,
+    sem:sem.map(s => ({ i:s.i, n:s.n, ef:s.eff, ts:s.tst, tl:s.tib, la:s.lat, wa:s.waso, q:s.q, pp:s.ppc, fe:s.fen })),
+    sig:state.sig.map(x => ({ s:x.s, t:x.t })), hb:state.hebdo.map(h => ({ s:h.s, a:h.acc })),
+    isi:state.isiFin ? state.isiFin.isi : null, idt:state.isiFin ? state.isiFin.dt : null })
+}
+function rendreQR(data, img, loading, fallback, fallbackData){
+  if(loading) loading.style.display = 'block'
+  if(typeof QRCode === 'undefined' || !QRCode.toCanvas){ montrerFallback(); return }
+  const c = document.createElement('canvas')
+  const opts = { width:320, margin:3, errorCorrectionLevel:'M', color:{ dark:'#000000', light:'#FFFFFF' } }
+  QRCode.toCanvas(c, data, opts, err => {
+    if(err){ QRCode.toCanvas(c, data, Object.assign({}, opts, { errorCorrectionLevel:'L' }), err2 => { if(err2){ montrerFallback(); return } fini() }); return }
+    fini()
+  })
+  function fini(){ img.src = c.toDataURL('image/png'); img.style.display = 'block'; if(loading) loading.style.display = 'none'; if(fallback) fallback.style.display = 'none' }
+  function montrerFallback(){ img.style.display = 'none'; if(loading) loading.style.display = 'none'; if(fallback){ fallback.style.display = 'block'; fallbackData.value = data } }
+}
+
+// ---------------------------------------------------------------- Agenda
+const aujourdhui = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+const minutes = hhmm => { const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || ''); return m ? (+m[1]) * 60 + (+m[2]) : null }
+const hm = min => `${Math.floor(min / 60)} h ${String(Math.round(min % 60)).padStart(2,'0')}`
+const hhmm = min => `${String(Math.floor(((min % 1440) + 1440) % 1440 / 60)).padStart(2,'0')}:${String(Math.round(min % 60)).padStart(2,'0')}`
+function calculNuit(n){
+  const hc = minutes(n.hc), hl = minutes(n.hl); if(hc == null || hl == null) return null
+  const tib = ((hl - hc) + 1440) % 1440 || 1440
+  const tst = Math.max(0, tib - (n.lat || 0) - (n.waso || 0))
+  return { tib, tst, eff:tib ? Math.round(tst / tib * 100) : null }
+}
+let saisie = { lat:null, nrev:null, waso:null, q:null, extras:[] }
+function rendreSaisie(){
+  const date = aujourdhui()
+  const deja = state.nuits[date]
+  $('saisie-titre').textContent = deja ? 'La nuit dernière (déjà enregistrée, vous pouvez corriger)' : 'La nuit dernière'
+  saisie = deja ? { lat:deja.lat, nrev:deja.nrev, waso:deja.waso, q:deja.q, extras:[...(deja.ex || [])] } : { lat:null, nrev:null, waso:null, q:null, extras:[] }
+  $('n-hc').value = deja ? deja.hc : (state.fen ? hhmm(minutes(state.fen.l) - state.fen.d) : '')
+  $('n-hl').value = deja ? deja.hl : (state.fen ? state.fen.l : state.lever)
+  const echelle = (cont, items, cle) => { cont.innerHTML = ''; items.forEach(([lab, val]) => { const el = document.createElement('div'); el.className = 's'; el.textContent = lab
+    if(saisie[cle] === val) el.classList.add('on'); el.addEventListener('click', () => { saisie[cle] = val; cont.querySelectorAll('.s').forEach(x => x.classList.remove('on')); el.classList.add('on')
+      if(cle === 'nrev') $('n-waso-wrap').style.display = val === 0 ? 'none' : 'block'; if(cle === 'nrev' && val === 0) saisie.waso = 0 }); cont.appendChild(el) }) }
+  echelle($('n-lat'), LAT, 'lat'); echelle($('n-nrev'), NREV, 'nrev'); echelle($('n-waso'), WASO, 'waso')
+  echelle($('n-q'), FACES.map((f, i) => [f, i + 1]), 'q')
+  $('n-waso-wrap').style.display = saisie.nrev === 0 ? 'none' : 'block'
+  const ex = $('n-extras'); ex.innerHTML = ''
+  EXTRAS.forEach((t, i) => { if(i === 3 && !state.situ.includes(7)) return
+    const el = document.createElement('label'); el.className = 'chip'; el.textContent = t; if(saisie.extras.includes(i)) el.classList.add('on')
+    el.addEventListener('click', () => { const k = saisie.extras.indexOf(i); if(k >= 0) saisie.extras.splice(k, 1); else saisie.extras.push(i); el.classList.toggle('on') }); ex.appendChild(el) })
+  $('saisie-retour').textContent = ''
+}
+$('btn-nuit-ok').addEventListener('click', () => {
+  const n = { hc:$('n-hc').value, hl:$('n-hl').value, lat:saisie.lat, nrev:saisie.nrev, waso:saisie.nrev === 0 ? 0 : saisie.waso, q:saisie.q, ex:saisie.extras }
+  if(!n.hc || !n.hl || n.lat == null || n.nrev == null || n.waso == null || n.q == null){ $('saisie-retour').textContent = 'Il manque une réponse.'; return }
+  const c = calculNuit(n); if(!c){ $('saisie-retour').textContent = 'Heures invalides.'; return }
+  state.nuits[aujourdhui()] = n; sauver()
+  $('saisie-retour').textContent = `Enregistré : ${hm(c.tst)} de sommeil estimé, efficacité ${c.eff} %.`
+  verifierSignauxNuits(); rendreFenetre(); rendreSemaine()
+})
+function nuitsTriees(){ return Object.keys(state.nuits).sort().map(d => Object.assign({ d }, state.nuits[d], calculNuit(state.nuits[d]))) }
+function moyenne7(){
+  const n = nuitsTriees().slice(-7); if(n.length < 5) return { n:n.length }
+  const m = k => Math.round(n.reduce((s, x) => s + x[k], 0) / n.length)
+  return { n:n.length, eff:m('eff'), tst:m('tst'), tib:m('tib') }
+}
+function semaines(){
+  const n = nuitsTriees(); if(!n.length) return []
+  const t0 = new Date(n[0].d).getTime(), out = []
+  n.forEach(x => { const i = Math.floor((new Date(x.d).getTime() - t0) / (7 * 864e5)); (out[i] = out[i] || []).push(x) })
+  return out.map((liste, i) => { if(!liste) return null
+    const m = k => Math.round(liste.reduce((s, x) => s + (x[k] || 0), 0) / liste.length * 10) / 10
+    const h = state.hebdo.find(z => z.s === i)
+    return { i, n:liste.length, eff:Math.round(m('eff')), tst:Math.round(m('tst')), tib:Math.round(m('tib')), lat:Math.round(m('lat')), waso:Math.round(m('waso')), q:m('q'),
+      ppc:state.situ.includes(7) ? liste.filter(x => (x.ex || []).includes(3)).length : null, fen:h ? h.fen : (state.fen ? state.fen.d : null) }
+  }).filter(Boolean)
+}
+// ---- Fenêtre de sommeil
+function proposerFenetre(){
+  if(state.mode === 's' || state.pause) return null
+  const m = moyenne7(); if(m.n < 5) return { attente:m.n }
+  const plancher = PLANCHER[state.mode]
+  if(!state.fen){
+    const d = Math.max(plancher, Math.round(m.tst / 15) * 15)
+    return { nouvelle:true, d, l:state.lever, raison:`votre temps de sommeil moyen est de ${hm(m.tst)} sur ${m.n} nuits` }
+  }
+  const sig = state.sig.find(x => x.s === semaineCourante() && (x.t === 'volant' || x.t === 'somnolence'))
+  let d = state.fen.d, raison
+  if(sig){ d += 30; raison = 'vous avez signalé une somnolence : la fenêtre est rallongée' }
+  else if(m.eff >= 90){ d += 15; raison = `efficacité ${m.eff} % : la fenêtre peut s'allonger de 15 min` }
+  else if(m.eff < 80){ d = Math.max(plancher, d - 15); raison = d === state.fen.d ? `efficacité ${m.eff} %, mais la fenêtre est déjà au plancher` : `efficacité ${m.eff} % : la fenêtre est resserrée de 15 min` }
+  else raison = `efficacité ${m.eff} % : la fenêtre reste la même`
+  return { d, l:state.fen.l, raison, change:d !== state.fen.d }
+}
+const semaineCourante = () => { const n = nuitsTriees(); return n.length ? Math.floor((Date.now() - new Date(n[0].d).getTime()) / (7 * 864e5)) : 0 }
+function rendreFenetre(){
+  const c = $('fenetre-card'), p = proposerFenetre()
+  if(state.mode === 's'){ c.innerHTML = `<h3>Votre fenêtre de sommeil</h3><p class="small">Mode sans restriction : gardez votre heure de lever (${state.lever}) et sortez du lit si vous ne dormez pas après 20 minutes.</p>`; return }
+  if(state.pause){ c.innerHTML = `<h3>Programme en pause</h3><p class="small">${state.pause}</p>`; return }
+  let html = `<h3>Votre fenêtre de sommeil</h3>`
+  if(state.fen) html += `<p>Coucher à partir de <strong>${hhmm(minutes(state.fen.l) - state.fen.d)}</strong>, lever à <strong>${state.fen.l}</strong> (${hm(state.fen.d)} au lit).</p>`
+  if(!p) html += ''
+  else if(p.attente != null) html += `<p class="small">Encore ${5 - p.attente} nuit${5 - p.attente > 1 ? 's' : ''} d'agenda avant une proposition.</p>`
+  else if(p.nouvelle) html += `<p>Proposition : <strong>${hm(p.d)} au lit</strong>, lever à ${p.l}, car ${p.raison}.</p><button class="btn" id="btn-fen-ok">J'applique</button><p class="small">Votre médecin peut la modifier par un code.</p>`
+  else if(p.change) html += `<p>Proposition pour cette semaine : <strong>${hm(p.d)} au lit</strong> (${p.raison}).</p><button class="btn" id="btn-fen-ok">J'applique</button><button class="btn secondary" id="btn-fen-non">Je garde ma fenêtre actuelle</button>`
+  else html += `<p class="small">${p.raison[0].toUpperCase() + p.raison.slice(1)}.</p>`
+  c.innerHTML = html
+  const h = () => { const s = semaineCourante(); const k = state.hebdo.findIndex(z => z.s === s); const o = { s, fen:state.fen.d, acc:true }; if(k >= 0) state.hebdo[k] = Object.assign(state.hebdo[k], o); else state.hebdo.push(o) }
+  $('btn-fen-ok')?.addEventListener('click', () => { state.fen = { l:p.l, d:p.d, depuis:aujourdhui() }; h(); sauver(); rendreFenetre(); rendreSaisie() })
+  $('btn-fen-non')?.addEventListener('click', () => { h(); state.hebdo[state.hebdo.length - 1].acc = false; state.hebdo[state.hebdo.length - 1].refus = p.d; sauver(); rendreFenetre() })
+}
+// ---- Signaux
+function signaler(t, texte){ const s = semaineCourante(); if(state.sig.some(x => x.s === s && x.t === t)) return; state.sig.push({ s, t, d:aujourdhui() }); if(texte) state.pause = texte; sauver() }
+function verifierSignauxNuits(){
+  const n = nuitsTriees().slice(-3)
+  if(n.length === 3 && n.every(x => x.tst < 240) && state.fen){ state.fen.d += 30; signaler('tst4'); }
+  const vides = (Date.now() - new Date(nuitsTriees().slice(-1)[0]?.d || Date.now()).getTime()) / 864e5
+  if(vides > 7) signaler('vide')
+}
+function rendreHebdo(){
+  const c = $('hebdo-card'), s = semaineCourante(), fait = state.hebdo.find(z => z.s === s && z.q)
+  if(fait){ c.innerHTML = `<h3>Point de la semaine</h3><p class="small">Fait. Merci.</p>`; return }
+  c.innerHTML = `<h3>Point de la semaine</h3>
+    <div class="question"><div class="q">Cette semaine, avez-vous somnolé au volant, ou lutté contre le sommeil au travail ?</div><div class="chips" id="h-volant"><label class="chip" data-v="0">Non</label><label class="chip" data-v="1">Oui</label></div></div>
+    <div class="question"><div class="q">Avez-vous eu des idées noires ?</div><div class="chips" id="h-noir"><label class="chip" data-v="0">Non</label><label class="chip" data-v="1">Oui</label></div></div>
+    <div class="question"><div class="q">Vous êtes-vous senti(e) inhabituellement en forme et sans besoin de dormir, plusieurs jours de suite ?</div><div class="chips" id="h-humeur"><label class="chip" data-v="0">Non</label><label class="chip" data-v="1">Oui</label></div></div>
+    <button class="btn" id="btn-hebdo-ok">Valider</button>`
+  const rep = {}
+  ;['h-volant','h-noir','h-humeur'].forEach(id => $(id).querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => { rep[id] = +ch.dataset.v; $(id).querySelectorAll('.chip').forEach(x => x.classList.remove('on')); ch.classList.add('on') })))
+  $('btn-hebdo-ok').addEventListener('click', () => {
+    if(Object.keys(rep).length < 3) return
+    const k = state.hebdo.findIndex(z => z.s === s); const o = { s, q:1, fen:state.fen ? state.fen.d : null }
+    if(k >= 0) Object.assign(state.hebdo[k], o); else state.hebdo.push(o)
+    if(rep['h-volant']) signaler('volant')
+    if(rep['h-noir']) signaler('noir', "Vous avez signalé des idées noires : le programme est en pause. Parlez-en à votre médecin ; en urgence, appelez le 3114 ou le 15.")
+    if(rep['h-humeur']) signaler('humeur', "Vous avez signalé une période inhabituelle de grande forme sans sommeil : le programme est en pause jusqu'à l'avis de votre médecin.")
+    sauver(); rendreHebdo(); rendreFenetre(); rendreSemaine()
+  })
+}
+function rendreSemaine(){
+  const m = moyenne7(), n = nuitsTriees()
+  $('kpi').innerHTML = m.n >= 5 ? `<div><b>${m.eff} %</b><span>efficacité (7 nuits)</span></div><div><b>${hm(m.tst)}</b><span>sommeil estimé</span></div><div><b>${state.fen ? hm(state.fen.d) : hm(m.tib)}</b><span>${state.fen ? 'fenêtre' : 'temps au lit'}</span></div>`
+    : `<div style="grid-column:1/-1"><b>${n.length}</b><span>nuit${n.length > 1 ? 's' : ''} enregistrée${n.length > 1 ? 's' : ''} — 5 nuits pour une première lecture</span></div>`
+  // Courbe : efficacité par nuit (points) et moyenne glissante sur 7 nuits (ligne), zone cible 85–90 %.
+  const svg = $('courbe'); const W = 520, H = 220, L = 36, R = 10, T = 14, B = 28
+  const x = i => L + (n.length > 1 ? i / (n.length - 1) : 0.5) * (W - L - R), y = v => T + (100 - v) / 60 * (H - T - B)
+  let s = `<rect x="${L}" y="${y(90)}" width="${W - L - R}" height="${y(85) - y(90)}" fill="#cffafe"/>`
+  ;[40, 60, 80, 100].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e5e7eb"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="#6b7280">${v} %</text>` })
+  if(n.length){
+    s += n.map((p, i) => `<circle cx="${x(i)}" cy="${y(Math.max(40, p.eff))}" r="3.5" fill="#94a3b8"/>`).join('')
+    const roul = n.map((_, i) => { const t = n.slice(Math.max(0, i - 6), i + 1); return t.reduce((a, b) => a + b.eff, 0) / t.length })
+    s += `<polyline fill="none" stroke="#0e7490" stroke-width="2.5" points="${roul.map((v, i) => `${x(i)},${y(Math.max(40, v))}`).join(' ')}"/>`
+    s += `<text x="${L}" y="${H - 8}" font-size="11" fill="#6b7280">${n[0].d.slice(8)}/${n[0].d.slice(5, 7)}</text><text x="${W - R}" y="${H - 8}" font-size="11" text-anchor="end" fill="#6b7280">${n[n.length - 1].d.slice(8)}/${n[n.length - 1].d.slice(5, 7)}</text>`
+  }
+  svg.innerHTML = s
+  const prem = semaines()[0]
+  $('semaine-mot').textContent = m.n >= 5 && prem && n.length > 7 ? `Cette semaine, vous avez dormi ${hm(m.tst)} en moyenne, ${m.tst >= prem.tst ? hm(m.tst - prem.tst) + ' de plus' : hm(prem.tst - m.tst) + ' de moins'} qu'au départ.` : ''
+  $('liste-nuits').innerHTML = n.slice().reverse().slice(0, 14).map(p => `<div class="nuit"><span>${p.d.slice(8)}/${p.d.slice(5, 7)} · ${p.hc} → ${p.hl} ${FACES[(p.q || 3) - 1]}</span><span>${hm(p.tst)} · <span class="eff">${p.eff} %</span></span></div>`).join('') || '<p class="small">Aucune nuit pour l\'instant.</p>'
+  rendreHebdo()
+}
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b))
+  ;['jour','semaine','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
+}))
+function ouvrirAgenda(){
+  $('agenda-pause').innerHTML = state.pause ? `<div class="alerte">${state.pause}</div>` : ''
+  rendreSaisie(); rendreFenetre(); rendreSemaine(); show('step-agenda')
+}
+$('btn-qr-suivi').addEventListener('click', () => { $('qr-suivi-wrap').style.display = 'block'; rendreQR(payloadSuivi(), $('qr-suivi-img'), null, $('qr-suivi-fallback'), $('qr-suivi-data')) })
+
+// ---- Code du médecin : lettre du mode + heure de lever HHMM + durée en quarts d'heure (2 chiffres), ex. M070026 = modéré, lever 7 h, 6 h 30.
+$('btn-code').addEventListener('click', () => {
+  const m = /^([CMS])(\d{2})(\d{2})(\d{2})$/.exec(($('code-medecin').value || '').trim().toUpperCase())
+  if(!m){ $('code-retour').textContent = 'Code non reconnu.'; return }
+  state.mode = m[1].toLowerCase(); state.pause = null
+  const l = `${m[2]}:${m[3]}`, d = +m[4] * 15
+  state.lever = l; if(state.mode !== 's' && d >= 240) state.fen = { l, d, depuis:aujourdhui(), medecin:true }
+  state.hebdo.push({ s:semaineCourante(), code:1, fen:state.fen ? state.fen.d : null, acc:true })
+  sauver(); $('code-retour').textContent = `Appliqué : mode ${MODE_LIB[state.mode]}${state.fen ? ', ' + hm(state.fen.d) + ' au lit, lever à ' + l : ''}.`; rendreFenetre(); rendreSaisie()
+})
+
+// ---- ISI de fin
+$('btn-isi-fin').addEventListener('click', () => {
+  state.isiFin = { isi:Array(7).fill(null), dt:aujourdhui() }
+  const cont = $('isi2-q'); cont.innerHTML = ''
+  ISI_ITEMS.forEach((it, i) => { const q = document.createElement('div'); q.className = 'question'; q.innerHTML = `<div class="q">${i + 1}. ${it.q}</div><div class="options"></div>`
+    it.opts.forEach((o, j) => { const el = document.createElement('label'); el.className = 'opt'; el.textContent = o
+      el.addEventListener('click', () => { state.isiFin.isi[i] = j; q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); $('isi2-total').textContent = state.isiFin.isi.every(v => v != null) ? `Score : ${somme(state.isiFin.isi)} / 28` : '' })
+      q.querySelector('.options').appendChild(el) }); cont.appendChild(q) })
+  show('step-isi-fin')
+})
+$('btn-isi2-ok').addEventListener('click', () => { if(!state.isiFin.isi.every(v => v != null)){ alert('Merci de répondre aux 7 questions.'); return } sauver(); ouvrirAgenda() })
+
+// ---------------------------------------------------------------- Accueil
+$('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
+$('btn-commencer').addEventListener('click', () => { state = vide(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(2).fill(null), sec:null, hab:[] }; sauver(); rendreBilan(); show('step-id') })
+$('btn-agenda').addEventListener('click', ouvrirAgenda)
+$('btn-vers-agenda').addEventListener('click', ouvrirAgenda)
+$('btn-revoir-bilan').addEventListener('click', () => { afficherResultat(); show('step-resultat') })
+$('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définitivement votre bilan et votre agenda de ce téléphone ?')){ localStorage.removeItem(CLE); location.reload() } })
+
+;(function init(){
+  state = charger()
+  if(state && state.bilan && state.mode){
+    const n = Object.keys(state.nuits).length
+    $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
+    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda.`
+    rendreBilan()
+  } else if(state && state.bilan){
+    rendreBilan(); $('consent').checked = true; $('btn-commencer').disabled = false
+  } else state = vide()
+})()
+</script>
+</body>
+</html>
