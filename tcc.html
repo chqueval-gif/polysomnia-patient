@@ -494,7 +494,7 @@ function afficherResultat(){
 function payloadBilan(){
   const b = state.bilan, i = state.ident
   return 'TCC-V1::' + JSON.stringify({ v:1, k:'b', dt:b.date, n:i.n, p:i.p, d:i.d, s:i.s, po:i.po, ta:i.ta,
-    isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, lv:state.lever })
+    isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, mt:state.motif, lv:state.lever })
 }
 function payloadSuivi(){
   const i = state.ident, sem = semaines()
