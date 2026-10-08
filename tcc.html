@@ -195,7 +195,7 @@
 <!-- ================= AGENDA ================= -->
 <div class="step" id="step-agenda">
   <h2>Mon agenda du sommeil</h2>
-  <div class="tabs"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Ma semaine</button><button data-tab="suivi">Pour le médecin</button></div>
+  <div class="tabs" style="font-size:13px"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Semaine</button><button data-tab="seances">Séances</button><button data-tab="croyances">Croyances</button><button data-tab="suivi">Médecin</button></div>
 
   <div id="tab-jour">
     <div id="agenda-pause"></div>
@@ -228,6 +228,14 @@
     <div class="card" id="hebdo-card"></div>
   </div>
 
+  <div id="tab-seances" style="display:none">
+    <div class="card"><h3>Mon programme en six séances</h3><p class="small">Une séance par semaine, dix minutes de lecture et un exercice. La suivante s'ouvre après cinq nuits d'agenda.</p><div id="liste-seances"></div></div>
+  </div>
+
+  <div id="tab-croyances" style="display:none">
+    <div class="card"><h3>Ce que je crois sur mon sommeil</h3><p class="small" id="croyances-intro"></p><div id="liste-cartes"></div></div>
+  </div>
+
   <div id="tab-suivi" style="display:none">
     <div class="card">
       <h3>QR code de suivi</h3>
@@ -244,6 +252,19 @@
     </div>
   </div>
   <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
+<div class="step" id="step-seance">
+  <h2 id="seance-titre"></h2>
+  <div class="card" id="seance-corps"></div>
+  <div style="display:flex;gap:8px"><button class="btn secondary" id="seance-prec" style="flex:1">← Précédent</button><button class="btn" id="seance-suiv" style="flex:2">Suivant →</button></div>
+  <button class="btn ghost" id="seance-retour">Retour aux séances</button>
+</div>
+
+<div class="step" id="step-carte">
+  <h2>Une croyance, mes chiffres</h2>
+  <div class="card" id="carte-corps"></div>
+  <button class="btn ghost" id="carte-retour">Retour aux croyances</button>
 </div>
 
 <div class="step" id="step-isi-fin">
@@ -333,9 +354,9 @@ const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PP
 
 // ---------------------------------------------------------------- État
 let state = null
-const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00' })
+const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'' })
 function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} }
-function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); return (o && o.v === 1) ? o : null } catch(e){ return null } }
+function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
 
 // ---------------------------------------------------------------- Navigation
 const ETAPES = ['step-id','step-isi','step-dbas','step-psas','step-meq','step-epw','step-phq','step-hab']
@@ -502,7 +523,10 @@ function payloadSuivi(){
     fen:state.fen ? { l:state.fen.l, d:state.fen.d } : null, nn:Object.keys(state.nuits).length,
     sem:sem.map(s => ({ i:s.i, n:s.n, ef:s.eff, ts:s.tst, tl:s.tib, la:s.lat, wa:s.waso, q:s.q, pp:s.ppc, fe:s.fen })),
     sig:state.sig.map(x => ({ s:x.s, t:x.t })), hb:state.hebdo.map(h => ({ s:h.s, a:h.acc })),
-    isi:state.isiFin ? state.isiFin.isi : null, idt:state.isiFin ? state.isiFin.dt : null })
+    isi:state.isiFin ? state.isiFin.isi : null, idt:state.isiFin ? state.isiFin.dt : null,
+    se:Object.keys(state.seances).filter(k => state.seances[k].lue).map(Number).sort(), re:Object.values(state.seances).reduce((s, x) => s + (x.reports || 0), 0),
+    ca:[Object.values(state.cartes).filter(c => c.reformulation).length, cartesCiblees().length], cr:Object.keys(state.cartes).filter(k => state.cartes[k].relecture === 'non').map(Number),
+    pl:state.plan ? state.plan.slice(0, 200) : null, hb2:state.habitudeChoisie != null ? HAB[state.habitudeChoisie] : null })
 }
 function rendreQR(data, img, loading, fallback, fallbackData){
   if(loading) loading.style.display = 'block'
@@ -658,11 +682,13 @@ function rendreSemaine(){
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b))
-  ;['jour','semaine','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
+  ;['jour','semaine','seances','croyances','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
+  if(b.dataset.tab === 'seances') rendreSeances()
+  if(b.dataset.tab === 'croyances') rendreCartes()
 }))
 function ouvrirAgenda(){
   $('agenda-pause').innerHTML = state.pause ? `<div class="alerte">${state.pause}</div>` : ''
-  rendreSaisie(); rendreFenetre(); rendreSemaine(); show('step-agenda')
+  verifierReports(); rendreSaisie(); rendreFenetre(); rendreSemaine(); rendreSeances(); rendreCartes(); show('step-agenda')
 }
 $('btn-qr-suivi').addEventListener('click', () => { $('qr-suivi-wrap').style.display = 'block'; rendreQR(payloadSuivi(), $('qr-suivi-img'), null, $('qr-suivi-fallback'), $('qr-suivi-data')) })
 
@@ -689,6 +715,200 @@ $('btn-isi-fin').addEventListener('click', () => {
 })
 $('btn-isi2-ok').addEventListener('click', () => { if(!state.isiFin.isi.every(v => v != null)){ alert('Merci de répondre aux 7 questions.'); return } sauver(); ouvrirAgenda() })
 
+
+// ================================================================ Séances
+// Six séances, une par semaine. Une séance = trois écrans de lecture, un
+// exercice pour la semaine, une question de fin dont la réponse part au
+// médecin. La suivante s'ouvre après cinq nuits d'agenda et cinq jours.
+const joursEntre = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5)
+function nuitsDepuis(date){ return Object.keys(state.nuits).filter(d => d > date).length }
+function cartesCiblees(){ return state.bilan ? state.bilan.dbas.map((v, i) => v >= 7 ? i : null).filter(x => x != null) : [] }
+function statsAgenda(){
+  const n = nuitsTriees(); if(!n.length) return null
+  const m = k => Math.round(n.reduce((s, x) => s + x[k], 0) / n.length)
+  const courtes = n.filter(x => x.tst < 360), bonnesApresCourte = courtes.filter(x => (x.q || 0) >= 4).length
+  const tsts = n.map(x => x.tst)
+  const prem = n.slice(0, 7), der = n.slice(-7)
+  const mo = l => Math.round(l.reduce((s, x) => s + x.tst, 0) / l.length), me = l => Math.round(l.reduce((s, x) => s + x.eff, 0) / l.length)
+  return { n:n.length, tst:m('tst'), eff:m('eff'), tstMin:Math.min(...tsts), tstMax:Math.max(...tsts), courtes:courtes.length, bonnesApresCourte,
+    bonnes:n.filter(x => (x.q || 0) >= 4).length, rattrapages:n.filter(x => (x.ex || []).includes(0)).length, somni:n.filter(x => (x.ex || []).includes(2)).length,
+    tst1:mo(prem), tstD:mo(der), eff1:me(prem), effD:me(der), lat:m('lat'), waso:m('waso') }
+}
+function etatSeance(k){
+  const s = state.seances[k] || {}
+  if(s.lue) return 'lue'
+  if(state.pause) return 'pause'
+  if(k === 1) return 'ouverte'
+  const p = state.seances[k - 1]
+  if(!p || !p.lue) return 'verrouillee'
+  const j = joursEntre(p.lue, aujourdhui()), nn = nuitsDepuis(p.lue)
+  if(j >= 5 && nn >= 5) return 'ouverte'
+  return `dans ${Math.max(5 - j, 5 - nn)} jour${Math.max(5 - j, 5 - nn) > 1 ? 's' : ''}`
+}
+const P = (...xs) => xs.map(x => `<p>${x}</p>`).join('')
+const SEANCES = [
+  { t:'Comprendre son sommeil', question:"Quelle habitude allez-vous changer cette semaine ?", ecrans:[
+    () => P("<strong>Le sommeil obéit à deux forces.</strong> La première est la <em>pression de sommeil</em> : elle monte à chaque heure passée éveillé, et retombe pendant la nuit. La seconde est l'<em>horloge interne</em>, qui ouvre une porte au sommeil le soir et la referme le matin, à heures à peu près fixes.",
+           "On s'endort facilement quand les deux sont d'accord : une pression élevée, au moment où l'horloge ouvre la porte. Une sieste, une grasse matinée ou un coucher très tôt font baisser la pression ou décalent l'horloge : on se couche, et rien ne vient."),
+    () => { const b = state.bilan, h = (b.hab || []).map(i => HAB[i]); return P("<strong>Pourquoi l'insomnie dure.</strong> Elle commence souvent avec un événement (stress, maladie, naissance). Puis elle s'entretient toute seule, par ce qu'on fait pour y faire face : se coucher plus tôt, rester au lit pour « se reposer », faire la sieste, surveiller l'heure. Chacun de ces gestes semble logique. Ensemble, ils affaiblissent la pression de sommeil et apprennent au cerveau que le lit est un lieu d'éveil.",
+           "Le programme s'attaque à ces facteurs d'entretien. C'est pour cela qu'il agit même quand l'insomnie dure depuis des années.", h.length ? `Au bilan, vous avez signalé : <strong>${h.join(', ')}</strong>.` : "Au bilan, vous n'avez signalé aucune habitude particulière.") },
+    () => P("<strong>Ce qui aide vraiment.</strong> Les conseils d'hygiène du sommeil ne guérissent pas une insomnie installée, mais ils enlèvent des obstacles : pas de café ni de thé après 16 h, pas d'alcool pour s'endormir (il morcelle la seconde moitié de nuit), pas d'écran dans le lit, une sieste courte (20 minutes, avant 15 h) ou pas de sieste, de l'activité physique dans la journée, un lever à heure fixe tous les jours.",
+           "<strong>Exercice de la semaine :</strong> choisissez <em>une seule</em> habitude à changer, celle qui vous paraît la plus réaliste. Une à la fois tient mieux que tout à la fois.")],
+    exo:'habitude' },
+  { t:'Reprendre le contrôle du lit', question:"Qu'est-ce qui sera le plus difficile cette semaine ?", ecrans:[
+    () => P("<strong>Le lit sert à dormir.</strong> Chez quelqu'un qui dort bien, le lit déclenche le sommeil comme la table déclenche l'appétit. Chez une personne insomniaque, le lit est devenu le lieu où l'on attend, où l'on rumine, où l'on regarde l'heure. Le cerveau a appris : lit = éveil. Il faut lui réapprendre l'inverse.",
+           "Cinq règles, toutes importantes : ne vous couchez que quand vous avez sommeil ; si vous ne dormez pas après ce qui vous semble 20 minutes, levez-vous et faites quelque chose de calme ailleurs, jusqu'à ce que le sommeil revienne ; le lit ne sert ni à travailler, ni à manger, ni aux écrans ; levez-vous à la même heure tous les jours ; pas de sieste."),
+    () => { const f = state.fen, m = moyenne7(); return state.mode === 's'
+      ? P("<strong>Votre programme ne réduit pas votre temps au lit</strong> : votre médecin l'a décidé pour votre sécurité. Les cinq règles ci-dessus, tenues chaque nuit, suffisent à reconstruire le lien entre le lit et le sommeil. Gardez votre heure de lever (" + state.lever + ") sept jours sur sept.")
+      : P("<strong>La fenêtre de sommeil.</strong> Votre agenda mesure le temps que vous dormez réellement" + (m.n >= 5 ? ` : en moyenne <strong>${hm(m.tst)}</strong> sur vos sept dernières nuits, pour <strong>${hm(m.tib)}</strong> passées au lit.` : '.') + " Le programme ajuste votre temps au lit sur ce temps de sommeil réel : moins d'heures éveillé au lit, une pression de sommeil plus forte, un sommeil plus profond et plus continu.",
+           f ? `Votre fenêtre actuelle : coucher à partir de <strong>${hhmm(minutes(f.l) - f.d)}</strong>, lever à <strong>${f.l}</strong>.` : "Votre fenêtre vous sera proposée dans l'onglet « Ce matin » dès que cinq nuits seront notées ; elle ne descendra jamais sous " + hm(PLANCHER[state.mode]) + ".",
+           "Les premiers jours sont fatigants : c'est attendu, et c'est le signe que la pression de sommeil remonte. Chaque semaine, si votre sommeil est efficace, la fenêtre s'allonge de 15 minutes.") },
+    () => P("<strong>Pour tenir la semaine.</strong> Prévoyez ce que vous ferez si vous vous levez la nuit : une pièce, une lumière faible, un livre ou une activité tranquille, jamais d'écran ni de travail. Ne regardez pas l'heure : retournez l'horloge, laissez le téléphone hors de la chambre.",
+           "Ne conduisez pas si vous vous sentez somnolent, et dites-le au point hebdomadaire : le programme rallongera votre fenêtre.",
+           "<strong>Exercice de la semaine :</strong> tenir la fenêtre et l'heure de lever, sept jours sur sept, et se lever quand on ne dort pas.")],
+    exo:'fenetre' },
+  { t:'Ce que je crois sur mon sommeil', question:"Quelle croyance a été la plus difficile à remettre en question ?", ecrans:[
+    () => P("<strong>Les croyances entretiennent l'insomnie.</strong> « J'ai besoin de huit heures », « une mauvaise nuit gâche ma journée », « je ne contrôle plus rien » : ces pensées ne sont pas fausses par bêtise, elles viennent de l'expérience. Mais elles font monter l'inquiétude le soir, et l'inquiétude empêche de dormir. Elles poussent aussi aux gestes qui entretiennent l'insomnie : se coucher tôt, rester au lit, annuler sa journée.",
+           "On ne lutte pas contre une croyance en se répétant le contraire. On la confronte à des faits : les vôtres."),
+    () => { const c = cartesCiblees(); return P(`<strong>Vos croyances.</strong> Au bilan, ${c.length ? `vous avez fortement adhéré à <strong>${c.length}</strong> affirmation${c.length > 1 ? 's' : ''}` : "vous n'avez fortement adhéré à aucune affirmation"} sur le sommeil.` + (c.length ? ` Chacune a sa carte dans l'onglet « Croyances » : la croyance, ce que montrent vos propres nuits d'agenda, et une question. Vous écrivez votre réponse ; elle vous sera représentée deux semaines plus tard.` : " L'onglet « Croyances » vous propose tout de même quelques cartes générales."),
+           "Une carte par jour suffit. L'important n'est pas de « bien répondre », mais de regarder ses chiffres avant de croire sa pensée.") },
+    () => { const s = statsAgenda(); return P("<strong>Un exemple avec vos chiffres.</strong> " + (s && s.courtes ? `Sur vos ${s.n} nuits notées, ${s.courtes} ont été courtes (moins de 6 heures). Le lendemain, vous avez pourtant jugé la nuit « bonne » ou « très bonne » ${s.bonnesApresCourte} fois sur ${s.courtes}.` : "Votre agenda n'a pas encore de nuit courte : regardez, les prochaines semaines, ce que deviennent vos journées après une nuit courte.") + " Le lien entre la durée d'une nuit et la journée qui suit est beaucoup plus lâche qu'on ne le croit.",
+           "<strong>Exercice de la semaine :</strong> une carte de croyance par jour, dans l'onglet « Croyances ».") }],
+    exo:'cartes' },
+  { t:'Les pensées du soir', question:"À quel moment de la soirée les pensées vous rattrapent-elles le plus ?", ecrans:[
+    () => P("<strong>Ruminer dans le lit.</strong> Le soir, le cerveau n'a plus rien pour l'occuper : il ressort les soucis du jour, prépare ceux du lendemain, et surveille le sommeil qui ne vient pas. Plus on <em>essaie</em> de dormir, moins on dort : le sommeil n'obéit pas à la volonté, il arrive quand on cesse de l'attendre.",
+           "Deux outils cette semaine : le temps d'inquiétude, et le carnet des soucis."),
+    () => P("<strong>Le temps d'inquiétude.</strong> Chaque jour, en début de soirée (jamais au lit), prenez 15 minutes pour écrire vos soucis et, pour chacun, la prochaine petite action possible, ou « rien à faire pour l'instant ». Puis fermez le carnet. Quand une pensée revient au lit, vous pouvez lui répondre : « c'est noté, on verra demain ». Elle revient moins, parce qu'elle a déjà été entendue.",
+           "<strong>L'intention paradoxale</strong>, si l'effort pour dormir domine : au lit, laissez-vous rester éveillé sans rien faire, yeux fermés, en vous disant que vous n'avez pas besoin de dormir tout de suite. Retirer l'effort, c'est souvent ce qui permet au sommeil d'arriver."),
+    () => P("<strong>La nuit, quand ça tourne.</strong> Si les pensées vous tiennent éveillé plus de 20 minutes, appliquez la règle de la séance 2 : levez-vous, et reprenez le carnet ou une activité calme. Rester au lit à ruminer apprend au cerveau exactement ce qu'on veut lui désapprendre.",
+           "<strong>Exercice de la semaine :</strong> 15 minutes de temps d'inquiétude chaque soir, carnet fermé avant d'aller au lit.")],
+    exo:'inquietude' },
+  { t:'Apaiser le corps', question:"Avez-vous réussi à placer la respiration lente chaque soir ? Qu'est-ce qui a gêné ?", ecrans:[
+    () => { const b = state.bilan, ps = b ? somme(b.psas.slice(0, 8)) : null; return P("<strong>L'éveil du corps.</strong> Cœur qui bat, muscles tendus, chaleur : le corps peut rester en alerte alors que l'esprit est prêt à dormir." + (ps != null ? ` Au bilan, votre éveil physique au coucher était de <strong>${ps} / 40</strong>.` : '') + " On ne commande pas directement ce système, mais on peut lui envoyer un signal de sécurité par la respiration.",
+           "La <strong>respiration lente</strong> : inspirez 5 secondes, expirez 5 secondes, pendant 5 à 10 minutes. Six respirations par minute, c'est le rythme qui ralentit le cœur. Votre médecin a une fiche de cohérence cardiaque si vous voulez un guide.") },
+    () => P("<strong>La relaxation musculaire.</strong> Allongé ou assis, contractez un groupe de muscles 5 secondes (les poings, puis les bras, les épaules, le visage, le ventre, les jambes), puis relâchez d'un coup et sentez la différence pendant 15 secondes. Dix minutes, une fois par jour, en dehors du lit d'abord. Une fois apprise, elle s'utilise aussi la nuit.",
+           "<strong>Le rituel de décélération.</strong> Les 30 dernières minutes avant la fenêtre de sommeil se ressemblent chaque soir : lumière basse, pas d'écran, une activité lente. Le cerveau apprend que ce rituel annonce le sommeil."),
+    () => P("<strong>Ce qui n'aide pas.</strong> L'alcool détend sur le moment et morcelle la nuit. Le sport intense tard le soir réveille. Le lit chaud et la chambre surchauffée gênent la baisse de température qui accompagne l'endormissement : chambre fraîche, corps au chaud.",
+           "<strong>Exercice de la semaine :</strong> 10 minutes de respiration lente avant la fenêtre de sommeil, chaque soir.")],
+    exo:'respiration' },
+  { t:'Garder ce qui marche', question:"Quel est le premier signe qui vous dira que l'insomnie revient ?", ecrans:[
+    () => { const s = statsAgenda(), b = state.bilan; return P("<strong>Votre bilan.</strong> " + (s ? `Vous avez noté <strong>${s.n} nuits</strong>. Première semaine : ${hm(s.tst1)} de sommeil, efficacité ${s.eff1} %. Dernière semaine : <strong>${hm(s.tstD)}</strong>, efficacité <strong>${s.effD} %</strong>.` : "Votre agenda est encore vide.") + (b ? ` Votre ISI à l'entrée était de ${somme(b.isi)} / 28` + (state.isiFin ? `, il est aujourd'hui de <strong>${somme(state.isiFin.isi)} / 28</strong>.` : " ; refaites-le dans l'onglet « Médecin » pour mesurer le chemin parcouru.") : '')) },
+    () => P("<strong>Ce qui a marché pour vous</strong>, c'est ce qu'il faudra reprendre si l'insomnie revient. Pas tout le programme : les deux ou trois règles qui ont fait la différence. Pour la plupart des gens : le lever à heure fixe, sortir du lit quand on ne dort pas, et ne pas rattraper.",
+           "<strong>Les rechutes sont normales.</strong> Une période de stress, un voyage, une maladie ramènent de mauvaises nuits. Ce n'est pas un échec : c'est le moment de reprendre les règles pendant deux semaines, sans attendre que l'insomnie se réinstalle."),
+    () => P("<strong>Votre plan en trois lignes.</strong> Écrivez : le signe qui vous alertera (par exemple « trois mauvaises nuits de suite »), la première règle que vous reprendrez, et la seconde. Ce plan part dans votre QR de fin pour votre médecin.",
+           "<strong>Exercice :</strong> refaire l'ISI, et écrire votre plan ci-dessous.")],
+    exo:'plan' },
+]
+let seanceCour = { k:1, i:0 }
+function rendreSeances(){
+  const l = $('liste-seances'); l.innerHTML = ''
+  SEANCES.forEach((s, idx) => {
+    const k = idx + 1, et = etatSeance(k), sv = state.seances[k] || {}
+    const div = document.createElement('div'); div.className = 'nuit'; div.style.alignItems = 'center'
+    const lab = et === 'lue' ? `lue le ${sv.lue.split('-').reverse().slice(0, 2).join('/')}` : et === 'ouverte' ? 'à lire' : et === 'verrouillee' ? 'après la séance précédente' : et === 'pause' ? 'programme en pause' : et
+    div.innerHTML = `<span><strong>${k}. ${s.t}</strong><br><span class="small">${lab}</span></span>`
+    const b = document.createElement('button'); b.className = 'btn' + (et === 'lue' ? ' secondary' : ''); b.style.cssText = 'width:auto;margin:0;padding:8px 14px;font-size:14px'
+    b.textContent = et === 'lue' ? 'Relire' : 'Ouvrir'; b.disabled = !(et === 'lue' || et === 'ouverte')
+    b.addEventListener('click', () => ouvrirSeance(k)); div.appendChild(b); l.appendChild(div)
+  })
+}
+function ouvrirSeance(k){ seanceCour = { k, i:0 }; state.seances[k] = state.seances[k] || { ouverte:aujourdhui() }; sauver(); rendreEcranSeance(); show('step-seance') }
+function rendreEcranSeance(){
+  const s = SEANCES[seanceCour.k - 1], i = seanceCour.i, corps = $('seance-corps')
+  $('seance-titre').textContent = `Séance ${seanceCour.k} — ${s.t}`
+  $('seance-prec').style.visibility = i === 0 ? 'hidden' : 'visible'
+  if(i < 3){ corps.innerHTML = `<p class="small">Écran ${i + 1} / 3</p>` + s.ecrans[i](); $('seance-suiv').textContent = i === 2 ? "L'exercice →" : 'Suivant →'; return }
+  if(i === 3){ corps.innerHTML = rendreExercice(s); $('seance-suiv').textContent = 'Suivant →'; return }
+  const sv = state.seances[seanceCour.k]
+  corps.innerHTML = `<p><strong>${s.question}</strong></p><textarea id="seance-reponse" rows="3" placeholder="En une ou deux phrases, pour votre médecin.">${sv.reponse || ''}</textarea>
+    <p class="small" style="margin-top:8px">Votre réponse part dans le QR de suivi. ${sv.lue ? 'Séance déjà validée.' : ''}</p>`
+  $('seance-suiv').textContent = sv.lue ? 'Terminer' : 'Valider la séance'
+}
+function rendreExercice(s){
+  const k = seanceCour.k
+  if(s.exo === 'habitude'){
+    const b = state.bilan, liste = (b.hab && b.hab.length) ? b.hab : HAB.map((_, i) => i)
+    return `<p><strong>Exercice de la semaine</strong> : l'habitude que je change.</p><div class="options">${liste.map(i => `<label class="opt ${state.habitudeChoisie === i ? 'on' : ''}" data-h="${i}">${HAB[i]}</label>`).join('')}</div><p class="small" id="exo-retour" style="margin-top:8px"></p>`
+  }
+  if(s.exo === 'fenetre') return P("<strong>Exercice de la semaine :</strong> tenir la fenêtre et l'heure de lever sept jours sur sept, et se lever si je ne dors pas après 20 minutes.", state.fen ? `Ma fenêtre : coucher à partir de ${hhmm(minutes(state.fen.l) - state.fen.d)}, lever à ${state.fen.l}.` : state.mode === 's' ? `Mon heure de lever : ${state.lever}.` : "Ma fenêtre me sera proposée dans « Ce matin » après cinq nuits d'agenda.")
+  if(s.exo === 'cartes'){ const c = cartesCiblees(); return P(`<strong>Exercice de la semaine :</strong> une carte de croyance par jour, dans l'onglet « Croyances » (${c.length} carte${c.length > 1 ? 's' : ''} pour vous).`) }
+  if(s.exo === 'inquietude') return P("<strong>Exercice de la semaine :</strong> chaque soir, 15 minutes de temps d'inquiétude avec un carnet, en début de soirée et hors du lit ; carnet fermé avant le coucher. Si une pensée revient au lit : « c'est noté, on verra demain ».")
+  if(s.exo === 'respiration') return P("<strong>Exercice de la semaine :</strong> 10 minutes de respiration lente (5 secondes à l'inspiration, 5 à l'expiration) avant la fenêtre de sommeil, chaque soir, puis le rituel des 30 dernières minutes.")
+  if(s.exo === 'plan') return `<p><strong>Mon plan en trois lignes</strong> (le signe d'alerte, la première règle à reprendre, la seconde) :</p><textarea id="plan-texte" rows="4" placeholder="1. Si je passe trois mauvaises nuits de suite…&#10;2. Je reprends…&#10;3. Et je…">${state.plan || ''}</textarea>
+    <p class="small" style="margin-top:8px">${state.isiFin ? `ISI de fin fait le ${state.isiFin.dt.split('-').reverse().join('/')} : ${somme(state.isiFin.isi)} / 28.` : "Pensez aussi à refaire l'ISI dans l'onglet « Médecin »."}</p>`
+  return ''
+}
+$('seance-corps').addEventListener('click', e => {
+  const o = e.target.closest('.opt[data-h]'); if(!o) return
+  state.habitudeChoisie = +o.dataset.h; $('seance-corps').querySelectorAll('.opt').forEach(x => x.classList.remove('on')); o.classList.add('on'); sauver()
+  $('exo-retour').textContent = `Cette semaine : ${HAB[state.habitudeChoisie]}.`
+})
+$('seance-corps').addEventListener('input', e => { if(e.target.id === 'plan-texte'){ state.plan = e.target.value; sauver() } if(e.target.id === 'seance-reponse'){ state.seances[seanceCour.k].reponse = e.target.value; sauver() } })
+$('seance-prec').addEventListener('click', () => { if(seanceCour.i > 0){ seanceCour.i--; rendreEcranSeance(); window.scrollTo(0, 0) } })
+$('seance-suiv').addEventListener('click', () => {
+  if(seanceCour.i < 4){ seanceCour.i++; rendreEcranSeance(); window.scrollTo(0, 0); return }
+  const sv = state.seances[seanceCour.k]
+  if(!sv.lue){ sv.lue = aujourdhui(); sauver() }
+  rendreSeances(); show('step-agenda')
+})
+$('seance-retour').addEventListener('click', () => { rendreSeances(); show('step-agenda') })
+
+// ================================================================ Cartes de croyances
+// Une carte par croyance forte du DBAS : la croyance, ce que montrent les
+// propres nuits du patient, une question. Jamais de contradiction frontale.
+const CARTES = [
+  { f:s => s ? `Vos ${s.n} nuits notées : en moyenne <strong>${hm(s.tst)}</strong> de sommeil, de ${hm(s.tstMin)} à ${hm(s.tstMax)}. Vous avez jugé la nuit bonne ou très bonne ${s.bonnes} fois, dont ${s.bonnesApresCourte} après une nuit de moins de 6 heures.` : '', q:"Les adultes dorment entre 6 et 9 heures, et le besoin baisse avec l'âge. D'après vos nuits, de combien d'heures avez-vous vraiment besoin pour une journée correcte ?" },
+  { f:s => s ? `Vous avez noté ${s.rattrapages} sieste${s.rattrapages > 1 ? 's' : ''} sur ${s.n} jours. Votre efficacité de sommeil moyenne est de <strong>${s.eff} %</strong> : le temps « récupéré » dans la journée manque le soir à la pression de sommeil.` : '', q:"Après une sieste ou une grasse matinée, comment s'est passée la nuit suivante ? Que se passerait-il si vous ne rattrapiez pas ?" },
+  { f:() => "L'insomnie chronique pèse sur l'humeur et la fatigue, et c'est pour cela qu'on la traite. Mais l'idée qu'elle « détruit la santé » n'est pas ce que montrent les études : c'est l'inquiétude à son sujet qui retarde l'endormissement chaque soir.", q:"Ce soir, au coucher, quelle est la pensée exacte qui vous inquiète ? Que pourriez-vous vous dire à la place, qui soit vrai ?" },
+  { f:s => s && s.n >= 7 ? `Depuis le début du programme : ${hm(s.tst1)} de sommeil la première semaine, <strong>${hm(s.tstD)}</strong> la dernière ; efficacité de ${s.eff1} % à <strong>${s.effD} %</strong>. Ce sont vos règles qui ont produit ce changement.` : "Votre agenda commence : dans deux semaines, cette carte vous montrera ce que vos règles ont changé.", q:"Sur quoi avez-vous aujourd'hui une prise : l'heure du lever, le temps au lit, ce que vous faites la nuit ? Qu'est-ce qui, au contraire, ne dépend pas de vous ?" },
+  { f:s => s && s.courtes ? `Vous avez eu ${s.courtes} nuit${s.courtes > 1 ? 's' : ''} de moins de 6 heures. Le lendemain, vous avez noté la nuit bonne ou très bonne ${s.bonnesApresCourte} fois sur ${s.courtes}.` : "Observez les deux prochaines nuits courtes : notez le soir, sur 10, ce que vous prédisez pour le lendemain, puis le lendemain ce qui s'est passé.", q:"Quelle note auriez-vous donnée à votre journée d'hier, de 1 à 10 ? Et à la nuit qui l'a précédée ? Les deux vont-elles vraiment ensemble ?" },
+  { f:s => s ? `Vous avez noté ${s.somni} prise${s.somni > 1 ? 's' : ''} de somnifère sur ${s.n} nuits. Un somnifère donne un sommeil plus léger et perd son effet en quelques semaines ; une mauvaise nuit sans lui n'a pas de conséquence durable.` : "Un somnifère donne un sommeil plus léger et perd son effet en quelques semaines ; une mauvaise nuit sans lui n'a pas de conséquence durable.", q:"Qu'est-ce qu'une mauvaise nuit vous coûte vraiment le lendemain ? Et que vous coûte la dépendance au somnifère à plus long terme ? (Le sevrage, lui, se décide avec votre médecin.)" },
+  { f:() => "L'humeur du jour dépend de beaucoup de choses : ce qui s'est passé, la lumière, l'activité, les contrariétés. Le sommeil en fait partie, mais quand tout lui est attribué, chaque mauvaise nuit devient une menace, et la menace empêche de dormir.", q:"Hier, qu'est-ce qui a pesé sur votre humeur, à part le sommeil ? Listez trois choses." },
+  { f:s => s && s.n >= 7 ? `Regardez vos nuits dans « Semaine » : après vos nuits les plus courtes, la nuit suivante a-t-elle été courte aussi ? En général, une nuit courte augmente la pression de sommeil, et la suivante est meilleure.` : "Regardez, dans les prochaines semaines, ce qui suit une nuit courte : en général, la pression de sommeil remonte et la nuit suivante est meilleure.", q:"Dans votre agenda, trouvez une nuit courte. Comment ont été les deux nuits suivantes ?" },
+  { f:s => s ? `Vous avez eu ${s.courtes} nuit${s.courtes > 1 ? 's' : ''} de moins de 6 heures, et vous avez fonctionné ces jours-là : vous avez rempli l'agenda, et vos journées ont continué.` : "Vous avez déjà traversé de mauvaises nuits et fait votre journée quand même.", q:"Après une mauvaise nuit, qu'avez-vous tout de même fait de votre journée ? Qu'est-ce qui a été plus lent, et qu'est-ce qui a été normal ?" },
+  { f:s => s ? `Votre sommeil suit des règles : vos nuits sont meilleures quand la pression de sommeil est haute et le lever fixe. Efficacité moyenne de <strong>${s.eff} %</strong>, endormissement en ${s.lat} minutes en moyenne.` : '', q:"Quelle est la règle du programme qui, chez vous, prédit le mieux une bonne nuit ?" },
+  { f:() => "Vous avez maintenant des outils : vous lever quand vous ne dormez pas, la fenêtre de sommeil, le temps d'inquiétude, la respiration lente. Ce sont des recours, à portée de main, chaque nuit.", q:"La prochaine fois que vous êtes éveillé(e) au milieu de la nuit, quelle est la première chose que vous ferez ?" },
+  { f:() => "La fatigue a beaucoup de causes : l'inactivité, l'ennui, le stress, l'humeur, un repas lourd, le manque de lumière. Le sommeil en est une parmi d'autres. L'attribuer toujours au sommeil pousse à rester au lit, ce qui entretient l'insomnie.", q:"Aujourd'hui, à quel moment avez-vous été le plus fatigué(e), et que faisiez-vous ? Est-ce vraiment la nuit qui l'explique ?" },
+  { f:() => "L'insomnie chronique s'entretient surtout par des habitudes et des pensées, c'est pour cela qu'un programme comme celui-ci agit sans médicament. Il n'y a pas de « déséquilibre » à corriger chimiquement chez la plupart des personnes insomniaques.", q:"Si l'insomnie était d'abord une habitude apprise, qu'est-ce que cela changerait à ce que vous pouvez faire ?" },
+  { f:s => s ? `Vos journées ont continué pendant ces ${s.n} nuits notées, bonnes et mauvaises. Les activités évitées « à cause du sommeil » sont celles qui, en revenant, redonnent une vie à part entière, et du même coup une meilleure pression de sommeil.` : '', q:"Qu'avez-vous arrêté de faire à cause de l'insomnie ? Laquelle de ces choses pourriez-vous reprendre cette semaine, même en dormant mal ?" },
+  { f:() => "Le programme que vous suivez est le traitement de référence de l'insomnie chronique, recommandé avant tout médicament. Son effet dure, parce qu'il change ce qui entretient l'insomnie. Un somnifère agit sur la nuit où on le prend, pas sur les suivantes.", q:"Qu'est-ce qui, dans ce programme, a déjà eu un effet sur vos nuits ?" },
+  { f:() => "Annuler une sortie après une mauvaise nuit protège sur le moment, mais retire ce qui fait une journée pleine, et donc la pression de sommeil du soir. Les gens qui dorment bien ont parfois de mauvaises nuits : ils font leur journée quand même.", q:"La prochaine fois, quelle obligation garderez-vous malgré une mauvaise nuit ? Comment vous sentirez-vous après l'avoir honorée ?" },
+]
+function rendreCartes(){
+  const l = $('liste-cartes'), c = cartesCiblees(), lues = Object.keys(state.cartes).length
+  $('croyances-intro').textContent = c.length ? `${c.length} carte${c.length > 1 ? 's' : ''} pour vous, d'après votre bilan. Une par jour. Chaque réponse vous sera représentée deux semaines plus tard.` : "Votre bilan n'a relevé aucune croyance forte. Voici tout de même quelques cartes générales."
+  l.innerHTML = ''
+  const liste = c.length ? c : [0, 2, 4, 8]
+  liste.forEach(i => {
+    const sv = state.cartes[i] || {}, div = document.createElement('div'); div.className = 'nuit'; div.style.alignItems = 'center'
+    const aRelire = sv.reformulation && !sv.relecture && joursEntre(sv.date, aujourdhui()) >= 14
+    div.innerHTML = `<span><strong>${DBAS_COURT[i]}</strong><br><span class="small">${sv.reformulation ? (aRelire ? 'à relire : votre réponse tient-elle ?' : sv.relecture ? `relue : ${sv.relecture === 'tient' ? 'elle tient' : 'à retravailler'}` : `répondue le ${sv.date.split('-').reverse().slice(0, 2).join('/')}`) : 'à faire'}</span></span>`
+    const b = document.createElement('button'); b.className = 'btn' + (sv.reformulation && !aRelire ? ' secondary' : ''); b.style.cssText = 'width:auto;margin:0;padding:8px 14px;font-size:14px'
+    b.textContent = aRelire ? 'Relire' : sv.reformulation ? 'Revoir' : 'Ouvrir'; b.addEventListener('click', () => ouvrirCarte(i)); div.appendChild(b); l.appendChild(div)
+  })
+}
+function ouvrirCarte(i){
+  const s = statsAgenda(), carte = CARTES[i], sv = state.cartes[i] || {}, corps = $('carte-corps')
+  const aRelire = sv.reformulation && !sv.relecture && joursEntre(sv.date, aujourdhui()) >= 14
+  corps.innerHTML = `<p class="small">Ce que vous avez affirmé au bilan (${state.bilan.dbas[i]} / 10) :</p><p><strong>« ${DBAS_ITEMS[i]} »</strong></p>
+    <h3>Vos chiffres</h3><p>${carte.f(s) || "Votre agenda ne contient pas encore assez de nuits : revenez dans quelques jours."}</p>
+    <h3>Une question</h3><p>${carte.q}</p>
+    <textarea id="carte-texte" rows="4" placeholder="Votre réponse, avec vos mots.">${sv.reformulation || ''}</textarea>
+    ${aRelire ? `<div class="info">Vous aviez écrit cela le ${sv.date.split('-').reverse().join('/')}. Deux semaines plus tard, cette réponse tient-elle toujours ?</div><div style="display:flex;gap:8px"><button class="btn" id="carte-tient" style="flex:1">Oui, elle tient</button><button class="btn secondary" id="carte-non" style="flex:1">Pas vraiment</button></div>` : `<button class="btn" id="carte-ok">Enregistrer</button>`}`
+  const fin = () => { sauver(); rendreCartes(); show('step-agenda') }
+  $('carte-ok')?.addEventListener('click', () => { const v = $('carte-texte').value.trim(); if(!v){ alert('Écrivez votre réponse, même courte.'); return } state.cartes[i] = { date:sv.date || aujourdhui(), reformulation:v }; fin() })
+  $('carte-tient')?.addEventListener('click', () => { state.cartes[i].relecture = 'tient'; state.cartes[i].reformulation = $('carte-texte').value.trim() || sv.reformulation; fin() })
+  $('carte-non')?.addEventListener('click', () => { state.cartes[i] = { date:aujourdhui(), reformulation:$('carte-texte').value.trim() || sv.reformulation, relecture:'non', precedente:sv.reformulation }; fin() })
+  show('step-carte')
+}
+$('carte-retour').addEventListener('click', () => { rendreCartes(); show('step-agenda') })
+
+// Un signal quand une séance est reportée deux fois : on compte les séances
+// ouvertes depuis plus de 14 jours sans être validées.
+function verifierReports(){
+  Object.entries(state.seances).forEach(([k, s]) => { if(!s.lue && s.ouverte && joursEntre(s.ouverte, aujourdhui()) >= 14 && !s.signale){ s.signale = true; s.reports = (s.reports || 0) + 2; signaler('report') } })
+}
+
 // ---------------------------------------------------------------- Accueil
 $('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
 $('btn-commencer').addEventListener('click', () => { state = vide(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(2).fill(null), sec:null, hab:[] }; sauver(); rendreBilan(); show('step-id') })
@@ -702,7 +922,8 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
   if(state && state.bilan && state.mode){
     const n = Object.keys(state.nuits).length
     $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
-    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda.`
+    const lues = Object.values(state.seances || {}).filter(s => s.lue).length
+    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
     rendreBilan()
   } else if(state && state.bilan){
     rendreBilan(); $('consent').checked = true; $('btn-commencer').disabled = false
