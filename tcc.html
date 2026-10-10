@@ -221,10 +221,15 @@
 <!-- ================= OFFRES ================= -->
 <div class="step" id="step-offres">
   <h2>Choisir ma formule</h2>
-  <p class="small">L'agenda, les séances et les cartes font partie d'un programme payant. Deux formules, sans engagement, résiliables à tout moment.</p>
+  <p class="small">Le programme se compose de trois choses, qui font partie d'une formule payante (sans engagement, résiliable à tout moment) :</p>
+  <div class="card" style="font-size:14px">
+    <p><strong>L'agenda du sommeil</strong> : chaque matin, une minute pour noter votre nuit (coucher, endormissement, réveils, lever, qualité). C'est lui qui produit vos chiffres : efficacité du sommeil, durée réelle, tendance de la semaine.</p>
+    <p><strong>Six séances</strong>, une par semaine, dix minutes chacune : trois écrans qui expliquent un mécanisme du sommeil avec vos propres chiffres (vos nuits, votre fenêtre), puis un exercice concret à pratiquer jusqu'à la séance suivante, et une question à laquelle vous répondez pour votre médecin. La suivante s'ouvre quand vous avez noté cinq nuits.</p>
+    <p><strong>Les cartes</strong> : au bilan, vous avez dit à quel point vous étiez d'accord avec seize idées sur le sommeil (« il me faut 8 heures », « une mauvaise nuit gâche la journée »…). Chaque idée à laquelle vous tenez fortement devient une carte : elle met cette idée en face de ce que disent vos propres nuits, vous pose une question, et vous écrivez votre réponse. Deux semaines plus tard, elle vous demande si cette réponse tient toujours.</p>
+  </div>
   <div class="card">
     <h3>En autonomie — <span id="prix-autonomie">15 €</span> / mois</h3>
-    <p class="small">Agenda du sommeil chaque matin, six séances hebdomadaires, cartes de croyances alimentées par vos chiffres, partage avec votre médecin et application de ses décisions.</p>
+    <p class="small">L'agenda chaque matin, les six séances hebdomadaires avec leur exercice, les cartes sur vos idées du sommeil, le partage de vos chiffres avec votre médecin et l'application de ses décisions.</p>
     <button class="btn" id="btn-offre-autonomie">Choisir l'autonomie</button>
   </div>
   <div class="card">
@@ -274,11 +279,12 @@
   </div>
 
   <div id="tab-seances" style="display:none">
+    <p class="small" style="margin:0 0 8px"><strong>Six séances</strong>, une par semaine, dix minutes chacune : trois écrans qui expliquent un mécanisme du sommeil avec vos propres chiffres (vos nuits, votre fenêtre), puis un exercice concret à pratiquer jusqu'à la séance suivante, et une question à laquelle vous répondez pour votre médecin. La suivante s'ouvre quand vous avez noté cinq nuits.</p>
     <div class="card"><h3>Mon programme en six séances</h3><p class="small">Une séance par semaine, dix minutes de lecture et un exercice. La suivante s'ouvre après cinq nuits d'agenda.</p><div id="liste-seances"></div></div>
   </div>
 
   <div id="tab-croyances" style="display:none">
-    <div class="card"><h3>Ce que je crois sur mon sommeil</h3><p class="small" id="croyances-intro"></p><div id="liste-cartes"></div></div>
+    <div class="card"><h3>Ce que je crois sur mon sommeil</h3><p class="small"><strong>Les cartes</strong> : au bilan, vous avez dit à quel point vous étiez d'accord avec seize idées sur le sommeil (« il me faut 8 heures », « une mauvaise nuit gâche la journée »…). Chaque idée à laquelle vous tenez fortement devient une carte : elle met cette idée en face de ce que disent vos propres nuits, vous pose une question, et vous écrivez votre réponse. Deux semaines plus tard, elle vous demande si cette réponse tient toujours.</p><p class="small" id="croyances-intro"></p><div id="liste-cartes"></div></div>
   </div>
 
   <div id="tab-messages" style="display:none">
