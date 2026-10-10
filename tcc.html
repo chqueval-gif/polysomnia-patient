@@ -1228,7 +1228,16 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
   rendrePartage()
   try {
     const q = new URLSearchParams(location.search)
-    if(q.get('paiement') === 'ok'){ alert('Merci, votre paiement est enregistré. Si l\'accès n\'apparaît pas tout de suite, patientez quelques secondes et rouvrez la page.'); history.replaceState(null, '', location.pathname) }
+    if(q.get('paiement') === 'ok'){
+      const sid = q.get('session_id'), offre = q.get('offre')
+      history.replaceState(null, '', location.pathname)
+      if(sid && state && state.partage){
+        apiPatient('/paiement', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, session_id:sid }) })
+          .then(j => { adopterDroits(j.droits); alert('Merci, votre paiement est enregistré.' + (offre === 'bilan' ? ' Vos deux PDF sont disponibles sur l\'écran de votre bilan.' : ' Votre programme est ouvert.')); if(offre === 'bilan'){ afficherResultat(); show('step-resultat'); rendrePdf() } else ouvrirAgenda() })
+          .catch(e => alert('Paiement reçu, mais la confirmation a échoué : ' + e.message + '. Rouvrez la page dans un instant.'))
+      } else alert('Merci, votre paiement est enregistré.')
+    }
+    if(q.get('paiement') === 'annule') history.replaceState(null, '', location.pathname)
   } catch(e) {}
   if(state && state.partage){ synchroniser(); rafraichirDroits(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
 })()
