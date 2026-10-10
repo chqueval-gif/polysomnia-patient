@@ -5,53 +5,53 @@
 <title>Questionnaire de pré-consultation — Sommeil</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light only">
-<meta name="theme-color" content="#0e7490">
+<meta name="theme-color" content="#1746b8">
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:#f0f4f8;color:#1f2937;
+    background:#f0f4f8;color:#1d1d1f;
     padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
     max-width:560px;margin:0 auto;
     line-height:1.5;font-size:16px;
   }
-  h1{font-size:22px;margin:24px 0 8px;color:#1e3a8a}
-  h2{font-size:18px;margin:24px 0 8px;color:#0e7490;border-bottom:2px solid #cffafe;padding-bottom:4px}
-  h3{font-size:15px;margin:18px 0 4px;color:#334155}
+  h1{font-size:22px;margin:24px 0 8px;color:#1d1d1f}
+  h2{font-size:18px;margin:24px 0 8px;color:#1746b8;border-bottom:2px solid #e8efff;padding-bottom:4px}
+  h3{font-size:15px;margin:18px 0 4px;color:#3a3a3c}
   p{margin:8px 0}
-  .small{font-size:13px;color:#6b7280}
+  .small{font-size:13px;color:#6e6e73}
   .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
-  .progress{position:sticky;top:0;background:#fff;z-index:10;padding:8px 0;border-bottom:1px solid #e5e7eb;margin:0 -16px 12px;text-align:center;font-size:13px;color:#6b7280}
-  .progress-bar{height:4px;background:#e5e7eb;border-radius:2px;margin-top:6px;overflow:hidden}
-  .progress-fill{height:100%;background:#0e7490;transition:width .3s}
+  .progress{position:sticky;top:0;background:#fff;z-index:10;padding:8px 0;border-bottom:1px solid #e5e5ea;margin:0 -16px 12px;text-align:center;font-size:13px;color:#6e6e73}
+  .progress-bar{height:4px;background:#e5e5ea;border-radius:2px;margin-top:6px;overflow:hidden}
+  .progress-fill{height:100%;background:#1746b8;transition:width .3s}
 
   .question{margin-bottom:16px}
   .question .q{font-weight:600;margin-bottom:8px}
   .options{display:flex;flex-direction:column;gap:6px}
   .opt{
-    display:block;padding:12px 14px;background:#f8fafc;border:2px solid #e2e8f0;
+    display:block;padding:12px 14px;background:#fafafa;border:2px solid #e5e5ea;
     border-radius:10px;cursor:pointer;font-size:15px;transition:all .15s;
     -webkit-tap-highlight-color:transparent;
   }
-  .opt:active{background:#e2e8f0}
-  .opt.on{background:#cffafe;border-color:#0e7490;font-weight:600}
+  .opt:active{background:#e5e5ea}
+  .opt.on{background:#e8efff;border-color:#1746b8;font-weight:600}
   .opt input{display:none}
 
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{
-    display:inline-block;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;
+    display:inline-block;padding:8px 12px;background:#fafafa;border:1.5px solid #e5e5ea;
     border-radius:999px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent;
   }
-  .chip:active{background:#e2e8f0}
-  .chip.on{background:#cffafe;border-color:#0e7490;color:#0e7490;font-weight:600}
+  .chip:active{background:#e5e5ea}
+  .chip.on{background:#e8efff;border-color:#1746b8;color:#1746b8;font-weight:600}
   .chip input{display:none}
 
   input[type=number],input[type=text]{
-    width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;
+    width:100%;padding:12px;border:2px solid #e5e5ea;border-radius:10px;
     font-size:16px;font-family:inherit;
   }
-  input[type=number]:focus,input[type=text]:focus{border-color:#0e7490;outline:none}
+  input[type=number]:focus,input[type=text]:focus{border-color:#1746b8;outline:none}
 
   /* Date de naissance : trois champs courts plutot que le selecteur natif,
      qui impose de faire defiler les annees une a une sur un telephone. */
@@ -60,8 +60,8 @@
   .ddn input[id$="-j"],.ddn input[id$="-m"]{flex:0 0 66px}
   .ddn input[id$="-a"]{flex:0 0 92px}
   .row>.col-pleine{grid-column:1/-1}
-  .ddn-sep{color:#94a3b8;font-size:18px;font-weight:600}
-  .ddn.ko input[type=number]{border-color:#dc2626;background:#fef2f2}
+  .ddn-sep{color:#aeaeb2;font-size:18px;font-weight:600}
+  .ddn.ko input[type=number]{border-color:#d70015;background:#fdecea}
   /* Les fleches du champ numerique volent de la place sur ces champs etroits. */
   .ddn input::-webkit-outer-spin-button,
   .ddn input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -71,13 +71,13 @@
 
   .btn{
     display:block;width:100%;padding:14px;border:none;border-radius:10px;
-    background:#0e7490;color:#fff;font-size:16px;font-weight:600;cursor:pointer;
+    background:#1746b8;color:#fff;font-size:16px;font-weight:600;cursor:pointer;
     margin-top:12px;-webkit-tap-highlight-color:transparent;
   }
-  .btn:disabled{background:#94a3b8;cursor:not-allowed}
-  .btn.secondary{background:#fff;color:#0e7490;border:2px solid #0e7490}
+  .btn:disabled{background:#aeaeb2;cursor:not-allowed}
+  .btn.secondary{background:#fff;color:#1746b8;border:2px solid #1746b8}
 
-  .consent{background:#fef3c7;border:1px solid #f59e0b;padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
+  .consent{background:#fff6e5;border:1px solid #ff9f0a;padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
   .consent label{display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-top:8px}
   .consent input{margin-top:4px;flex-shrink:0;width:18px;height:18px}
 
@@ -114,11 +114,11 @@
     margin-bottom:12px;cursor:pointer;border:2px solid transparent;transition:all .15s;
     -webkit-tap-highlight-color:transparent;
   }
-  .mode-card:active{background:#f8fafc}
-  .mode-card.selected{border-color:#0e7490;background:#ecfeff}
-  .mode-card .title{font-weight:600;font-size:17px;color:#0e7490;margin-bottom:4px}
-  .mode-card .desc{font-size:13px;color:#475569}
-  .mode-card .badge{display:inline-block;font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;margin-left:6px}
+  .mode-card:active{background:#fafafa}
+  .mode-card.selected{border-color:#1746b8;background:#e8efff}
+  .mode-card .title{font-weight:600;font-size:17px;color:#1746b8;margin-bottom:4px}
+  .mode-card .desc{font-size:13px;color:#6e6e73}
+  .mode-card .badge{display:inline-block;font-size:11px;background:#fff6e5;color:#c25e00;padding:2px 8px;border-radius:6px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -146,9 +146,9 @@
 
   <p class="small">⏱️ Durée estimée : 5 à 10 minutes. Vous pouvez sauter une question si vous ne savez pas répondre.</p>
 
-  <div id="reprise-box" style="display:none;background:#ecfeff;border:1px solid #0e7490;border-radius:10px;padding:14px 16px;margin:16px 0">
-    <p style="margin:0 0 4px;font-weight:600;color:#0e7490">Vous avez déjà rempli ce questionnaire</p>
-    <p class="small" style="margin:0 0 10px;color:#334155" id="reprise-date"></p>
+  <div id="reprise-box" style="display:none;background:#e8efff;border:1px solid #1746b8;border-radius:10px;padding:14px 16px;margin:16px 0">
+    <p style="margin:0 0 4px;font-weight:600;color:#1746b8">Vous avez déjà rempli ce questionnaire</p>
+    <p class="small" style="margin:0 0 10px;color:#3a3a3c" id="reprise-date"></p>
     <button class="btn" id="btn-reprise" type="button">Réafficher mon QR code</button>
     <button class="btn secondary" id="btn-effacer-reprise" type="button" style="margin-top:8px">Effacer mes réponses</button>
   </div>
@@ -370,7 +370,7 @@
 
     <div id="epworth-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="epworth-total">Total : 0 / 24</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="epworth-total">Total : 0 / 24</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="5">← Retour</button>
@@ -389,7 +389,7 @@
 
     <div id="pichot-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pichot-total">Total : 0 / 32</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="pichot-total">Total : 0 / 32</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="6">← Retour</button>
@@ -404,7 +404,7 @@
 
     <div id="had-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="7">← Retour</button>
@@ -419,7 +419,7 @@
 
     <div id="isi-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="isi-total">Total : 0 / 28</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="isi-total">Total : 0 / 28</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="8">← Retour</button>
@@ -444,7 +444,7 @@
     <p class="small">Ces questions permettent de mieux comprendre votre insomnie : ce qui l'a préparée, déclenchée, et ce qui l'entretient.</p>
 
     <div class="card">
-      <h3>Votre terrain <span style="font-size:13px;font-weight:500;color:#64748b">(avant que ça ne commence)</span></h3>
+      <h3>Votre terrain <span style="font-size:13px;font-weight:500;color:#6e6e73">(avant que ça ne commence)</span></h3>
       <p class="small">Ce qui vous correspond depuis longtemps, avant même les troubles actuels.</p>
       <div class="chips" id="chips-pd"></div>
     </div>
@@ -668,7 +668,7 @@
 
     <div id="psq-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="psq-total">Score : 0 / 22</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="psq-total">Score : 0 / 22</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="5">← Retour</button>
@@ -683,7 +683,7 @@
 
     <div id="pedia-epworth-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pedia-epworth-total">Total : 0 / 24</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="pedia-epworth-total">Total : 0 / 24</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="6">← Retour</button>
@@ -711,7 +711,7 @@
 
       <div id="pedia-conners-questions"></div>
 
-      <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="pedia-conners-total">Total : 0 / 30</p>
+      <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="pedia-conners-total">Total : 0 / 30</p>
     </div>
 
     <div class="nav">
@@ -867,7 +867,7 @@
 
     <div id="ppc-epworth-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="ppc-epworth-total">Total : 0 / 24</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="ppc-epworth-total">Total : 0 / 24</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="4">← Retour</button>
@@ -886,7 +886,7 @@
 
     <div id="ppc-pichot-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="ppc-pichot-total">Total : 0 / 32</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="ppc-pichot-total">Total : 0 / 32</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="5">← Retour</button>
@@ -901,7 +901,7 @@
 
     <div id="ppc-had-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#0e7490;margin-top:12px" id="ppc-had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
+    <p style="text-align:right;font-weight:600;color:#1746b8;margin-top:12px" id="ppc-had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="6">← Retour</button>
@@ -918,33 +918,33 @@
   <div class="card" id="resume-insomnie" style="display:none;margin-bottom:14px">
     <h3 style="margin:0 0 6px">Votre bilan d'insomnie</h3>
     <div id="resume-insomnie-txt" style="font-size:15px;line-height:1.5"></div>
-    <p class="small" style="margin-top:8px;color:#475569">Ce résumé vous est donné à titre d'information ; votre médecin l'interprète avec vous et décide, s'il y a lieu, du programme d'insomnie en ligne (TCC-I) et de son mode.</p>
+    <p class="small" style="margin-top:8px;color:#6e6e73">Ce résumé vous est donné à titre d'information ; votre médecin l'interprète avec vous et décide, s'il y a lieu, du programme d'insomnie en ligne (TCC-I) et de son mode.</p>
   </div>
 
   <div class="qr-container">
     <img id="qrcode-img" alt="QR code des réponses" width="384" height="384" style="display:none">
-    <div id="qrcode-loading" style="padding:60px 20px;color:#0e7490;font-weight:600">⏳ Génération du QR code…</div>
-    <p class="small" style="margin-top:12px;color:#475569">Vos réponses sont contenues dans ce QR code.<br>Elles ne sont stockées nulle part.</p>
+    <div id="qrcode-loading" style="padding:60px 20px;color:#1746b8;font-weight:600">⏳ Génération du QR code…</div>
+    <p class="small" style="margin-top:12px;color:#6e6e73">Vos réponses sont contenues dans ce QR code.<br>Elles ne sont stockées nulle part.</p>
     <button class="btn" id="btn-fullscreen-qr" type="button" style="margin-top:14px;display:none">🔍 Agrandir en plein écran</button>
     <button class="btn secondary" id="btn-save-qr" type="button" style="margin-top:10px;display:none">📥 Enregistrer / partager le QR (image)</button>
-    <p id="save-qr-status" class="small" style="display:none;margin-top:6px;color:#475569"></p>
-    <p class="small" style="margin-top:14px;color:#475569">Inutile d'enregistrer l'image : vos réponses restent <strong>sur ce téléphone</strong> pendant 7 jours. Rouvrez simplement ce lien le jour du rendez-vous pour réafficher ce QR code.</p>
+    <p id="save-qr-status" class="small" style="display:none;margin-top:6px;color:#6e6e73"></p>
+    <p class="small" style="margin-top:14px;color:#6e6e73">Inutile d'enregistrer l'image : vos réponses restent <strong>sur ce téléphone</strong> pendant 7 jours. Rouvrez simplement ce lien le jour du rendez-vous pour réafficher ce QR code.</p>
     <button class="btn secondary" id="btn-effacer-final" type="button" style="margin-top:8px">Effacer mes réponses de ce téléphone</button>
-    <p id="effacer-final-status" class="small" style="display:none;margin-top:6px;color:#0e7490"></p>
+    <p id="effacer-final-status" class="small" style="display:none;margin-top:6px;color:#1746b8"></p>
   </div>
 
   <!-- Overlay plein écran : QR maximal + Wake Lock pour empêcher l'écran de se mettre en veille -->
   <div id="qr-fullscreen-overlay" style="display:none;position:fixed;inset:0;width:100vw;height:100vh;background:#ffffff !important;z-index:9999;color-scheme:light only;color:#000;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);filter:none !important;-webkit-filter:none !important;mix-blend-mode:normal !important;isolation:isolate">
-    <button id="btn-close-fullscreen" type="button" style="position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;background:#0e7490;color:#fff;border:none;border-radius:999px;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;line-height:1" aria-label="Fermer">✕</button>
+    <button id="btn-close-fullscreen" type="button" style="position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;background:#1746b8;color:#fff;border:none;border-radius:999px;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;line-height:1" aria-label="Fermer">✕</button>
     <img id="qrcode-img-fullscreen" alt="QR code des réponses (plein écran)" style="display:block;width:min(90vmin,90vw);height:min(90vmin,90vw);background:#ffffff;image-rendering:pixelated;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;filter:none !important;-webkit-filter:none !important">
-    <p style="margin-top:18px;font-size:14px;color:#334155;text-align:center;max-width:420px">Approchez le téléphone à 20-30 cm de la webcam de votre médecin.<br><span style="color:#0e7490;font-weight:600">L'écran reste allumé tant que ce mode est actif.</span></p>
-    <button id="btn-save-qr-fs" type="button" style="margin-top:16px;background:#0e7490;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer">📥 Enregistrer / partager le QR</button>
-    <p id="save-qr-fs-status" style="display:none;margin-top:8px;font-size:13px;color:#334155;text-align:center;max-width:420px"></p>
+    <p style="margin-top:18px;font-size:14px;color:#3a3a3c;text-align:center;max-width:420px">Approchez le téléphone à 20-30 cm de la webcam de votre médecin.<br><span style="color:#1746b8;font-weight:600">L'écran reste allumé tant que ce mode est actif.</span></p>
+    <button id="btn-save-qr-fs" type="button" style="margin-top:16px;background:#1746b8;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer">📥 Enregistrer / partager le QR</button>
+    <p id="save-qr-fs-status" style="display:none;margin-top:8px;font-size:13px;color:#3a3a3c;text-align:center;max-width:420px"></p>
   </div>
 
   <!-- Fallback texte si QR ne se charge pas -->
-  <div id="qr-fallback" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:16px;margin-top:16px">
-    <p style="font-weight:600;color:#92400e;margin:0 0 8px">⚠️ Mode de secours</p>
+  <div id="qr-fallback" style="display:none;background:#fff6e5;border:1px solid #ff9f0a;border-radius:10px;padding:16px;margin-top:16px">
+    <p style="font-weight:600;color:#c25e00;margin:0 0 8px">⚠️ Mode de secours</p>
     <p style="font-size:14px;color:#78350f;margin:0 0 10px" id="qr-fallback-reason"></p>
     <p style="font-size:14px;color:#78350f;margin:0 0 8px"><strong>Solution :</strong> montrez l'écran ci-dessous à votre médecin, ou utilisez le bouton "Copier" pour transmettre vos réponses par message.</p>
     <textarea id="qr-fallback-data" readonly style="width:100%;height:120px;font-family:monospace;font-size:11px;padding:8px;border:1px solid #fbbf24;border-radius:6px;background:#fff;resize:none"></textarea>
@@ -1383,14 +1383,14 @@ function tccEchelle(cont, items, cle, min, max, legende){
   cont.innerHTML = ''
   items.forEach((txt, i) => {
     const q = document.createElement('div'); q.className = 'question'
-    q.innerHTML = `<div class="q">${i + 1}. ${txt}</div><div class="scale" style="display:flex;gap:4px"></div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:4px"><span>${legende[0]}</span><span>${legende[1]}</span></div>`
+    q.innerHTML = `<div class="q">${i + 1}. ${txt}</div><div class="scale" style="display:flex;gap:4px"></div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-top:4px"><span>${legende[0]}</span><span>${legende[1]}</span></div>`
     const sc = q.querySelector('.scale')
     for(let v = min; v <= max; v++){
       const el = document.createElement('div'); el.textContent = v
-      el.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px'
-      const on = () => { el.style.background = '#0e7490'; el.style.borderColor = '#0e7490'; el.style.color = '#fff'; el.style.fontWeight = '600' }
+      el.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#fafafa;border:1.5px solid #e5e5ea;border-radius:8px;cursor:pointer;font-size:14px'
+      const on = () => { el.style.background = '#1746b8'; el.style.borderColor = '#1746b8'; el.style.color = '#fff'; el.style.fontWeight = '600' }
       if(state[cle][i] === v) on()
-      el.addEventListener('click', () => { state[cle][i] = v; sc.querySelectorAll('div').forEach(x => { x.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px' }); on(); sauvegarderReponses() })
+      el.addEventListener('click', () => { state[cle][i] = v; sc.querySelectorAll('div').forEach(x => { x.style.cssText = 'flex:1;text-align:center;padding:10px 0;background:#fafafa;border:1.5px solid #e5e5ea;border-radius:8px;cursor:pointer;font-size:14px' }); on(); sauvegarderReponses() })
       sc.appendChild(el)
     }
     cont.appendChild(q)
@@ -1451,7 +1451,7 @@ function rendreResumeInsomnie(){
     const m = modeTcc()
     const lib = { s:'sans restriction du temps au lit', m:'modéré (jamais moins de 6 h au lit)', c:'complet' }[m.mode]
     l.push(`<strong>Si un programme vous est proposé :</strong> mode ${lib} (${m.motif}).`)
-    if(state.sec === 1) l.push('<strong style="color:#b91c1c">Vous avez signalé des idées noires : parlez-en à votre médecin aujourd\'hui.</strong>')
+    if(state.sec === 1) l.push('<strong style="color:#b3261e">Vous avez signalé des idées noires : parlez-en à votre médecin aujourd\'hui.</strong>')
   } else {
     l.push('Le bilan détaillé (croyances, agitation au coucher, rythme) n\'est pas complet : votre médecin pourra le reprendre avec vous.')
   }
