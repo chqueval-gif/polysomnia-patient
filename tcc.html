@@ -240,7 +240,7 @@
 <!-- ================= AGENDA ================= -->
 <div class="step" id="step-agenda">
   <h2>Mon agenda du sommeil</h2>
-  <div class="tabs" style="font-size:13px"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Semaine</button><button data-tab="seances">Séances</button><button data-tab="croyances">Croyances</button><button data-tab="suivi">Médecin</button></div>
+  <div class="tabs" style="font-size:13px"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Semaine</button><button data-tab="seances">Séances</button><button data-tab="croyances">Croyances</button><button data-tab="messages" id="tab-btn-messages">Messages</button><button data-tab="suivi">Médecin</button></div>
 
   <div id="tab-jour">
     <div id="agenda-pause"></div>
@@ -281,6 +281,18 @@
     <div class="card"><h3>Ce que je crois sur mon sommeil</h3><p class="small" id="croyances-intro"></p><div id="liste-cartes"></div></div>
   </div>
 
+  <div id="tab-messages" style="display:none">
+    <div class="card">
+      <h3>Messages avec mon coach</h3>
+      <p class="small" id="messages-intro"></p>
+      <div id="fil-messages" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding:4px 0"></div>
+      <div id="messages-ecrire" style="display:none">
+        <textarea id="message-texte" rows="3" placeholder="Votre message… (réponse sous 48 h ouvrées)"></textarea>
+        <button class="btn secondary" id="btn-message-envoyer">Envoyer</button>
+      </div>
+      <p class="small" id="messages-retour"></p>
+    </div>
+  </div>
   <div id="tab-suivi" style="display:none">
     <div class="card">
       <h3>QR code de suivi</h3>
@@ -751,8 +763,9 @@ function rendreSemaine(){
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b))
-  ;['jour','semaine','seances','croyances','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
+  ;['jour','semaine','seances','croyances','messages','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
   if(b.dataset.tab === 'seances') rendreSeances()
+  if(b.dataset.tab === 'messages') chargerMessages()
   if(b.dataset.tab === 'croyances') rendreCartes()
 }))
 function ouvrirAgenda(){
@@ -853,6 +866,30 @@ async function rafraichirDroits(){
     if(j.offres){ j.offres.forEach(o => { const el = $('prix-' + o.id) || (o.id === 'bilan' ? $('pdf-prix') : null); if(el) el.textContent = (o.prix / 100).toLocaleString('fr-FR') + ' €' }) }
   } catch(e) {}
 }
+// ---- Messages avec le coach (formule coachée, ou programme offert)
+let messagesVus = 0
+async function chargerMessages(){
+  const fil = $('fil-messages'); if(!state.partage || !serveurPartage()){ fil.innerHTML = '<p class="small">Les messages demandent un programme partagé avec le serveur.</p>'; return }
+  try {
+    const j = await apiPatient(`/messages?cle=${encodeURIComponent(state.partage.cle)}`)
+    $('messages-ecrire').style.display = j.peut_ecrire ? 'block' : 'none'
+    $('messages-intro').textContent = j.peut_ecrire ? (j.coach ? 'Votre coach lit votre agenda et vous répond ici.' : 'Un coach va prendre votre programme en charge et se présentera ici.') : 'Les échanges écrits avec un coach font partie de la formule coachée (onglet Médecin → Mon abonnement).'
+    fil.innerHTML = j.messages.length ? '' : '<p class="small">Pas encore de message.</p>'
+    j.messages.forEach(m => { const d = document.createElement('div')
+      d.style.cssText = 'max-width:85%;padding:8px 12px;border-radius:12px;font-size:14px;white-space:pre-wrap;' + (m.auteur === 'patient' ? 'align-self:flex-end;background:var(--olive-pale)' : 'align-self:flex-start;background:var(--bronze-pale)')
+      d.innerHTML = `${m.texte.replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[c]))}<div class="small" style="margin-top:3px">${m.auteur === 'patient' ? 'Vous' : m.auteur === 'coach' ? 'Votre coach' : 'Votre médecin'} · ${new Date(m.quand).toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' })}</div>`
+      fil.appendChild(d) })
+    fil.scrollTop = fil.scrollHeight
+    messagesVus = j.messages.length; majBadgeMessages(0)
+  } catch(e){ fil.innerHTML = `<p class="small">${e.message}</p>` }
+}
+function majBadgeMessages(n){ const b = $('tab-btn-messages'); if(b) b.textContent = n ? `Messages (${n})` : 'Messages' }
+$('btn-message-envoyer').addEventListener('click', async () => {
+  const t = $('message-texte'), retour = $('messages-retour'); if(!t.value.trim()) return
+  try { await apiPatient('/messages', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, texte:t.value }) }); t.value = ''; retour.textContent = 'Envoyé.'; chargerMessages() }
+  catch(e){ retour.textContent = e.message }
+})
+
 // Le suivi (agenda, séances, cartes) n'est ouvert que si le programme est
 // réglé ou offert — uniquement quand la page est servie par Hypnote.
 function suiviOuvert(){ return !serveurPartage() || !state.partage || (droits && droits.actif) }
@@ -872,6 +909,7 @@ async function synchroniser(manuel){
     if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
     state.partage.derniere = new Date().toISOString(); state.partage.erreur = null
     adopterEtatServeur(j.etat); adopterDroits(j.droits)
+    if(j.messages_non_lus != null) majBadgeMessages(j.messages_non_lus)
     if(j.decision && j.decision_le && j.decision_le !== state.partage.decisionVue){
       state.partage.decisionVue = j.decision_le
       const res = appliquerCodeMedecin(j.decision)
