@@ -367,6 +367,9 @@
 // Les données partent vers Hypnote uniquement par le QR code (TCC-V1::).
 // ======================================================================
 const CLE = 'hypnote_tcc_v1'
+// La page sait si Hypnote la sert (partage, offres, inscription libre) ou si
+// elle est un simple fichier (GitHub Pages, ouverture locale).
+const SERVI = !!document.querySelector('meta[name="hypnote-serveur"]') || location.pathname.startsWith('/patient/')
 const $ = id => document.getElementById(id)
 
 // ---------------------------------------------------------------- Échelles
@@ -804,7 +807,7 @@ $('btn-code').addEventListener('click', () => {
 function serveurPartage(){
   const s = state.partage && state.partage.serveur
   if(s) return s.replace(/\/$/, '')
-  return location.pathname.startsWith('/patient/') ? location.origin : null
+  return SERVI ? location.origin : null
 }
 function anonymiserEtat(){
   const e = Object.assign({}, state); delete e.ident; delete e.partage; return e
@@ -823,7 +826,7 @@ async function apiPatient(chemin, options){
 // clé, aucune identité) dès le début, pour que le partage et les offres
 // existent sans code du médecin.
 async function inscrireSiBesoin(){
-  if(state.partage || !location.pathname.startsWith('/patient/')) return
+  if(state.partage || !SERVI) return
   try {
     const r = await fetch(`${location.origin}/api/tcc/patient/inscription`, { method:'POST' })
     const j = await r.json().catch(() => ({}))
@@ -949,7 +952,7 @@ function rendrePartage(){
   const actif = !!(state && state.partage)
   $('partage-actif').style.display = actif ? 'block' : 'none'
   $('partage-inactif').style.display = actif ? 'none' : 'block'
-  $('partage-serveur').style.display = location.pathname.startsWith('/patient/') ? 'none' : 'block'
+  $('partage-serveur').style.display = SERVI ? 'none' : 'block'
   if(actif){
     const p = state.partage
     const d = p.derniere ? new Date(p.derniere) : null
