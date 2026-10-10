@@ -5,65 +5,77 @@
 <title>Mon programme sommeil — TCC-I</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light only">
-<meta name="theme-color" content="#0e7490">
+<meta name="theme-color" content="#5f6b4f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
+  :root{
+    --ivoire:#f4efe4; --carte:#fffdf8; --encre:#2a2823; --texte:#3b3832; --sourd:#6e6757;
+    --olive:#5f6b4f; --olive-fonce:#4a5540; --olive-pale:#e9ecde; --olive-trait:#b8c0a6;
+    --bronze:#9d7f54; --bronze-pale:#f1e8d6; --or:#c9a96a;
+    --ligne:#e3dccb; --champ:#faf7ef; --rouge:#8a3b2e; --rouge-pale:#f6e9e5;
+  }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1f2937;
-    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);max-width:560px;margin:0 auto;line-height:1.5;font-size:16px}
-  h1{font-size:22px;margin:24px 0 8px;color:#1e3a8a}
-  h2{font-size:18px;margin:24px 0 8px;color:#0e7490;border-bottom:2px solid #cffafe;padding-bottom:4px}
-  h3{font-size:15px;margin:18px 0 4px;color:#334155}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--ivoire);color:var(--texte);
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);max-width:560px;margin:0 auto;line-height:1.55;font-size:16px}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:.01em;margin:26px 0 8px;color:var(--encre)}
+  h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:25px;font-weight:600;margin:24px 0 10px;color:var(--olive-fonce);border-bottom:1px solid var(--bronze);padding-bottom:6px}
+  h3{font-size:15px;margin:18px 0 4px;color:var(--encre);letter-spacing:.01em}
   p{margin:8px 0}
-  .small{font-size:13px;color:#6b7280}
-  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
-  .progress{position:sticky;top:0;background:#fff;z-index:10;padding:8px 0;border-bottom:1px solid #e5e7eb;margin:0 -16px 12px;text-align:center;font-size:13px;color:#6b7280}
-  .progress-bar{height:4px;background:#e5e7eb;border-radius:2px;margin-top:6px;overflow:hidden}
-  .progress-fill{height:100%;background:#0e7490;transition:width .3s}
+  .small{font-size:13px;color:var(--sourd)}
+  .card{background:var(--carte);padding:18px;border-radius:14px;border:1px solid var(--ligne);box-shadow:0 4px 18px rgba(42,40,35,.06);margin-bottom:16px}
+  .progress{position:sticky;top:0;background:var(--carte);z-index:10;padding:8px 0;border-bottom:1px solid var(--ligne);margin:0 -16px 12px;text-align:center;font-size:13px;color:var(--sourd)}
+  .progress-bar{height:3px;background:var(--ligne);border-radius:2px;margin-top:6px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--bronze);transition:width .3s}
   .question{margin-bottom:16px}
-  .question .q{font-weight:600;margin-bottom:8px}
+  .question .q{font-weight:600;margin-bottom:8px;color:var(--encre)}
   .options{display:flex;flex-direction:column;gap:6px}
-  .opt{display:block;padding:12px 14px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:15px;-webkit-tap-highlight-color:transparent}
-  .opt.on{background:#cffafe;border-color:#0e7490;font-weight:600}
+  .opt{display:block;padding:12px 14px;background:var(--champ);border:1.5px solid var(--ligne);border-radius:10px;cursor:pointer;font-size:15px;-webkit-tap-highlight-color:transparent}
+  .opt.on{background:var(--olive-pale);border-color:var(--olive);font-weight:600;color:var(--olive-fonce)}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{display:inline-block;padding:8px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:999px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
-  .chip.on{background:#cffafe;border-color:#0e7490;color:#0e7490;font-weight:600}
+  .chip{display:inline-block;padding:8px 12px;background:var(--champ);border:1.5px solid var(--ligne);border-radius:999px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
+  .chip.on{background:var(--olive-pale);border-color:var(--olive);color:var(--olive-fonce);font-weight:600}
   .scale{display:flex;gap:4px}
-  .scale .s{flex:1;text-align:center;padding:10px 0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
-  .scale .s.on{background:#0e7490;border-color:#0e7490;color:#fff;font-weight:600}
-  .scale-legend{display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-top:4px}
-  input[type=number],input[type=text],input[type=time]{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;font-family:inherit;background:#fff}
-  input:focus{border-color:#0e7490;outline:none}
+  .scale .s{flex:1;text-align:center;padding:10px 0;background:var(--champ);border:1.5px solid var(--ligne);border-radius:8px;cursor:pointer;font-size:14px;-webkit-tap-highlight-color:transparent}
+  .scale .s.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:600}
+  .scale-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--sourd);margin-top:4px}
+  input[type=number],input[type=text],input[type=time],input[type=url]{width:100%;padding:12px;border:1.5px solid var(--ligne);border-radius:10px;font-size:16px;font-family:inherit;background:var(--champ);color:var(--encre)}
+  input:focus{border-color:var(--bronze);outline:none}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .ddn{display:flex;align-items:center;gap:6px}
   .ddn input{text-align:center;padding:12px 4px}
   .ddn input.j,.ddn input.m{flex:0 0 66px}
   .ddn input.a{flex:0 0 92px}
-  .ddn-sep{color:#94a3b8;font-size:18px;font-weight:600}
-  .btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;background:#0e7490;color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent}
-  .btn:disabled{background:#94a3b8;cursor:not-allowed}
-  .btn.secondary{background:#fff;color:#0e7490;border:2px solid #0e7490}
-  .btn.ghost{background:transparent;color:#6b7280;border:none;font-weight:500}
-  .consent{background:#fef3c7;border:1px solid #f59e0b;padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
-  .alerte{background:#fee2e2;border:1px solid #dc2626;padding:14px;border-radius:10px;margin:12px 0;font-size:14px;color:#7f1d1d}
-  .info{background:#ecfeff;border:1px solid #67e8f9;padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14px}
+  .ddn-sep{color:var(--sourd);font-size:18px;font-weight:600}
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;background:var(--olive);color:#f4eede;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent;letter-spacing:.01em}
+  .btn:hover{background:var(--olive-fonce)}
+  .btn:disabled{background:#b9b4a6;cursor:not-allowed}
+  .btn.secondary{background:var(--carte);color:var(--olive-fonce);border:1.5px solid var(--olive)}
+  .btn.ghost{background:transparent;color:var(--sourd);border:none;font-weight:500}
+  .consent{background:var(--bronze-pale);border:1px solid var(--or);padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
+  .alerte{background:var(--rouge-pale);border:1px solid #d9a59c;padding:14px;border-radius:10px;margin:12px 0;font-size:14px;color:var(--rouge)}
+  .info{background:var(--olive-pale);border:1px solid var(--olive-trait);padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14px}
   .step{display:none}
   .step.active{display:block}
   .tabs{display:flex;gap:6px;margin:12px 0}
-  .tabs button{flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;font-weight:600;color:#6b7280;cursor:pointer}
-  .tabs button.on{border-color:#0e7490;color:#0e7490;background:#cffafe}
+  .tabs button{flex:1;padding:10px 4px;border-radius:10px;border:1.5px solid var(--ligne);background:var(--carte);font-weight:600;color:var(--sourd);cursor:pointer;font-family:inherit}
+  .tabs button.on{border-color:var(--bronze);color:var(--olive-fonce);background:var(--bronze-pale)}
   .kpi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
-  .kpi div{background:#f8fafc;border-radius:10px;padding:10px;text-align:center}
-  .kpi b{display:block;font-size:20px;color:#1e3a8a}
-  .kpi span{font-size:12px;color:#6b7280}
-  .nuit{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px}
-  .nuit .eff{font-weight:600}
+  .kpi div{background:var(--champ);border:1px solid var(--ligne);border-radius:10px;padding:10px;text-align:center}
+  .kpi b{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums;font-size:26px;font-weight:600;color:var(--olive-fonce)}
+  .kpi span{font-size:12px;color:var(--sourd)}
+  .nuit{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--ligne);font-size:14px}
+  .nuit .eff{font-weight:600;color:var(--olive-fonce)}
   .faces{display:flex;gap:6px}
   .faces .s{font-size:22px;padding:6px 0}
-  .qr-container{text-align:center;padding:24px;background:#fff !important;border-radius:12px;color:#000;isolation:isolate;filter:none !important}
+  .qr-container{text-align:center;padding:24px;background:#fff !important;border-radius:12px;color:#000;isolation:isolate;filter:none !important;border:1px solid var(--ligne)}
   .qr-container img{display:block;margin:0 auto;max-width:100%;image-rendering:pixelated}
-  textarea{width:100%;font-size:12px;font-family:monospace;padding:8px;border:1px solid #e2e8f0;border-radius:8px}
+  textarea{width:100%;font-size:14px;font-family:inherit;padding:10px;border:1.5px solid var(--ligne);border-radius:10px;background:var(--champ);color:var(--encre)}
+  textarea:focus{border-color:var(--bronze);outline:none}
   .courbe{width:100%;height:auto}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--bronze-pale);padding:1px 5px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -78,13 +90,14 @@
     <p>Ce programme dure <strong>six semaines</strong>. Il demande chaque matin une minute pour noter votre nuit, et chaque semaine dix minutes de lecture et un exercice.</p>
     <p>Aujourd'hui, vous allez répondre à un <strong>bilan d'entrée</strong> d'une quinzaine de minutes. Il se termine par un QR code à montrer à votre médecin, qui validera la suite.</p>
     <div class="consent">
-      <strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.
+      <strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code — ou, si votre médecin vous a remis un code de partage, par son serveur sécurisé, sans votre nom. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.
       <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer"><input type="checkbox" id="consent" style="width:18px;height:18px;margin-top:3px"> J'ai compris.</label>
     </div>
     <button class="btn" id="btn-commencer" disabled>Commencer le bilan →</button>
   </div>
   <div class="card" id="home-reprise" style="display:none">
     <p id="home-reprise-txt"></p>
+    <p class="small" id="home-partage" style="display:none"></p>
     <button class="btn" id="btn-agenda">Mon agenda du sommeil →</button>
     <button class="btn secondary" id="btn-revoir-bilan">Revoir mon bilan et son QR code</button>
     <button class="btn ghost" id="btn-effacer">Effacer mes données de ce téléphone</button>
@@ -244,6 +257,23 @@
       <div class="qr-container" id="qr-suivi-wrap" style="display:none"><img id="qr-suivi-img" alt="QR code de suivi" width="320" height="320"></div>
       <div id="qr-suivi-fallback" style="display:none"><textarea id="qr-suivi-data" rows="4" readonly></textarea></div>
     </div>
+    <div class="card" id="carte-partage">
+      <h3>Partage avec mon médecin</h3>
+      <div id="partage-actif" style="display:none">
+        <p class="small" id="partage-etat"></p>
+        <p class="small">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
+        <button class="btn secondary" id="btn-sync">Envoyer maintenant</button>
+        <button class="btn ghost" id="btn-partage-stop">Arrêter le partage</button>
+      </div>
+      <div id="partage-inactif">
+        <p class="small">Si votre médecin vous a remis un <strong>code de partage</strong> (QR code ou carte), scannez-le ou saisissez-le ici : votre agenda lui parviendra sans que vous ayez à montrer le QR de suivi.</p>
+        <input type="text" id="partage-code" placeholder="Code (ex. K7M3-9QXW)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
+        <input type="text" id="partage-cle" placeholder="Clé (12 caractères)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
+        <input type="url" id="partage-serveur" placeholder="Adresse du serveur (https://…)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:14px;margin-bottom:6px;display:none">
+        <button class="btn secondary" id="btn-partage-ok">Activer le partage</button>
+        <p class="small" id="partage-retour"></p>
+      </div>
+    </div>
     <div class="card">
       <h3>Refaire le questionnaire d'insomnie (ISI)</h3>
       <p class="small">À la fin du programme, ou quand votre médecin le demande.</p>
@@ -354,8 +384,8 @@ const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PP
 
 // ---------------------------------------------------------------- État
 let state = null
-const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'' })
-function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} }
+const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null })
+function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} planifierSync() }
 function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
 
 // ---------------------------------------------------------------- Navigation
@@ -512,14 +542,16 @@ function afficherResultat(){
 }
 
 // ---------------------------------------------------------------- QR
-function payloadBilan(){
+function payloadBilan(){ return 'TCC-V1::' + JSON.stringify(objBilan()) }
+function objBilan(){
   const b = state.bilan, i = state.ident
-  return 'TCC-V1::' + JSON.stringify({ v:1, k:'b', dt:b.date, n:i.n, p:i.p, d:i.d, s:i.s, po:i.po, ta:i.ta,
+  return ({ v:1, k:'b', dt:b.date, n:i.n, p:i.p, d:i.d, s:i.s, po:i.po, ta:i.ta,
     isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, mt:state.motif, lv:state.lever })
 }
-function payloadSuivi(){
+function payloadSuivi(){ return 'TCC-V1::' + JSON.stringify(objSuivi()) }
+function objSuivi(){
   const i = state.ident, sem = semaines()
-  return 'TCC-V1::' + JSON.stringify({ v:1, k:'s', dt:aujourdhui(), n:i.n, p:i.p, d:i.d, mo:state.mode, pa:state.pause ? 1 : 0,
+  return ({ v:1, k:'s', dt:aujourdhui(), n:i.n, p:i.p, d:i.d, mo:state.mode, pa:state.pause ? 1 : 0,
     fen:state.fen ? { l:state.fen.l, d:state.fen.d } : null, nn:Object.keys(state.nuits).length,
     sem:sem.map(s => ({ i:s.i, n:s.n, ef:s.eff, ts:s.tst, tl:s.tib, la:s.lat, wa:s.waso, q:s.q, pp:s.ppc, fe:s.fen })),
     sig:state.sig.map(x => ({ s:x.s, t:x.t })), hb:state.hebdo.map(h => ({ s:h.s, a:h.acc })),
@@ -666,13 +698,13 @@ function rendreSemaine(){
   // Courbe : efficacité par nuit (points) et moyenne glissante sur 7 nuits (ligne), zone cible 85–90 %.
   const svg = $('courbe'); const W = 520, H = 220, L = 36, R = 10, T = 14, B = 28
   const x = i => L + (n.length > 1 ? i / (n.length - 1) : 0.5) * (W - L - R), y = v => T + (100 - v) / 60 * (H - T - B)
-  let s = `<rect x="${L}" y="${y(90)}" width="${W - L - R}" height="${y(85) - y(90)}" fill="#cffafe"/>`
-  ;[40, 60, 80, 100].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e5e7eb"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="#6b7280">${v} %</text>` })
+  let s = `<rect x="${L}" y="${y(90)}" width="${W - L - R}" height="${y(85) - y(90)}" fill="#e9ecde"/>`
+  ;[40, 60, 80, 100].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e3dccb"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="#6e6757">${v} %</text>` })
   if(n.length){
-    s += n.map((p, i) => `<circle cx="${x(i)}" cy="${y(Math.max(40, p.eff))}" r="3.5" fill="#94a3b8"/>`).join('')
+    s += n.map((p, i) => `<circle cx="${x(i)}" cy="${y(Math.max(40, p.eff))}" r="3.5" fill="#a39d8f"/>`).join('')
     const roul = n.map((_, i) => { const t = n.slice(Math.max(0, i - 6), i + 1); return t.reduce((a, b) => a + b.eff, 0) / t.length })
-    s += `<polyline fill="none" stroke="#0e7490" stroke-width="2.5" points="${roul.map((v, i) => `${x(i)},${y(Math.max(40, v))}`).join(' ')}"/>`
-    s += `<text x="${L}" y="${H - 8}" font-size="11" fill="#6b7280">${n[0].d.slice(8)}/${n[0].d.slice(5, 7)}</text><text x="${W - R}" y="${H - 8}" font-size="11" text-anchor="end" fill="#6b7280">${n[n.length - 1].d.slice(8)}/${n[n.length - 1].d.slice(5, 7)}</text>`
+    s += `<polyline fill="none" stroke="#5f6b4f" stroke-width="2.5" points="${roul.map((v, i) => `${x(i)},${y(Math.max(40, v))}`).join(' ')}"/>`
+    s += `<text x="${L}" y="${H - 8}" font-size="11" fill="#6e6757">${n[0].d.slice(8)}/${n[0].d.slice(5, 7)}</text><text x="${W - R}" y="${H - 8}" font-size="11" text-anchor="end" fill="#6e6757">${n[n.length - 1].d.slice(8)}/${n[n.length - 1].d.slice(5, 7)}</text>`
   }
   svg.innerHTML = s
   const prem = semaines()[0]
@@ -693,15 +725,94 @@ function ouvrirAgenda(){
 $('btn-qr-suivi').addEventListener('click', () => { $('qr-suivi-wrap').style.display = 'block'; rendreQR(payloadSuivi(), $('qr-suivi-img'), null, $('qr-suivi-fallback'), $('qr-suivi-data')) })
 
 // ---- Code du médecin : lettre du mode + heure de lever HHMM + durée en quarts d'heure (2 chiffres), ex. M070026 = modéré, lever 7 h, 6 h 30.
-$('btn-code').addEventListener('click', () => {
-  const m = /^([CMS])(\d{2})(\d{2})(\d{2})$/.exec(($('code-medecin').value || '').trim().toUpperCase())
-  if(!m){ $('code-retour').textContent = 'Code non reconnu.'; return }
+function appliquerCodeMedecin(code){
+  const m = /^([CMS])(\d{2})(\d{2})(\d{2})$/.exec((code || '').trim().toUpperCase())
+  if(!m) return null
   state.mode = m[1].toLowerCase(); state.pause = null
   const l = `${m[2]}:${m[3]}`, d = +m[4] * 15
   state.lever = l; if(state.mode !== 's' && d >= 240) state.fen = { l, d, depuis:aujourdhui(), medecin:true }
   state.hebdo.push({ s:semaineCourante(), code:1, fen:state.fen ? state.fen.d : null, acc:true })
-  sauver(); $('code-retour').textContent = `Appliqué : mode ${MODE_LIB[state.mode]}${state.fen ? ', ' + hm(state.fen.d) + ' au lit, lever à ' + l : ''}.`; rendreFenetre(); rendreSaisie()
+  sauver(); rendreFenetre(); rendreSaisie()
+  return `mode ${MODE_LIB[state.mode]}${state.fen ? ', ' + hm(state.fen.d) + ' au lit, lever à ' + l : ''}`
+}
+$('btn-code').addEventListener('click', () => {
+  const r = appliquerCodeMedecin($('code-medecin').value)
+  $('code-retour').textContent = r ? `Appliqué : ${r}.` : 'Code non reconnu.'
 })
+
+// ---- Partage avec le médecin, par le serveur Hypnote (optionnel)
+// Ce qui part : l'état du programme SANS le bloc d'identité, et les mêmes
+// charges utiles que les QR codes, sans nom, prénom ni date de naissance.
+// Le serveur refait ce tri de son côté. Seul le médecin relie le code au patient.
+function serveurPartage(){
+  const s = state.partage && state.partage.serveur
+  if(s) return s.replace(/\/$/, '')
+  return location.pathname.startsWith('/patient/') ? location.origin : null
+}
+function anonymiserEtat(){
+  const e = Object.assign({}, state); delete e.ident; delete e.partage; return e
+}
+function sansIdentite(o){ if(!o) return null; const c = Object.assign({}, o); delete c.n; delete c.p; delete c.d; return c }
+let syncTimer = null, syncEnCours = false
+function planifierSync(){ if(!state || !state.partage) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => synchroniser(), 1500) }
+async function synchroniser(manuel){
+  if(!state || !state.partage || syncEnCours) return
+  const base = serveurPartage(); if(!base) return
+  syncEnCours = true
+  try {
+    const corps = { cle:state.partage.cle, etat:anonymiserEtat(),
+      bilan:state.bilan && state.mode ? sansIdentite(objBilan()) : null,
+      suivi:state.bilan && state.mode ? sansIdentite(objSuivi()) : null }
+    const r = await fetch(`${base}/api/tcc/patient/${encodeURIComponent(state.partage.code)}`, {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(corps) })
+    const j = await r.json().catch(() => ({}))
+    if(r.status === 403){ state.partage.erreur = 'Code ou clé refusés par le serveur : le partage est suspendu.'; rendrePartage(); return }
+    if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
+    state.partage.derniere = new Date().toISOString(); state.partage.erreur = null
+    if(j.decision && j.decision_le && j.decision_le !== state.partage.decisionVue){
+      state.partage.decisionVue = j.decision_le
+      const res = appliquerCodeMedecin(j.decision)
+      if(res){ state.partage.message = `Décision de votre médecin reçue : ${res}.`; alert(state.partage.message) }
+    }
+    try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {}
+  } catch(e){
+    state.partage.erreur = 'Envoi impossible pour le moment (' + e.message + '). Nouvel essai à la prochaine ouverture.'
+  } finally { syncEnCours = false; rendrePartage() }
+}
+function rendrePartage(){
+  const actif = !!(state && state.partage)
+  $('partage-actif').style.display = actif ? 'block' : 'none'
+  $('partage-inactif').style.display = actif ? 'none' : 'block'
+  $('partage-serveur').style.display = location.pathname.startsWith('/patient/') ? 'none' : 'block'
+  if(actif){
+    const p = state.partage
+    const d = p.derniere ? new Date(p.derniere) : null
+    $('partage-etat').innerHTML = `<strong>Code : ${p.code}</strong><br>` +
+      (p.erreur ? `<span style="color:#8a3b2e">${p.erreur}</span>` : d ? `Dernier envoi : ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}.` : 'Pas encore envoyé.') +
+      (p.message ? `<br>${p.message}` : '')
+  }
+  const hp = $('home-partage')
+  if(hp){ hp.style.display = actif ? 'block' : 'none'; if(actif) hp.textContent = 'Partagé avec votre médecin (code ' + state.partage.code + ')' + (state.partage.erreur ? ' — envoi en attente' : '') + '.' }
+}
+function activerPartage(code, cle, serveur){
+  code = (code || '').toUpperCase().replace(/[^A-Z2-9]/g, ''); cle = (cle || '').toUpperCase().replace(/[^A-Z2-9]/g, '')
+  if(code.length !== 8 || cle.length !== 12) return 'Code (8 caractères) ou clé (12 caractères) incomplets.'
+  if(!state) state = vide()
+  state.partage = { code:code.slice(0, 4) + '-' + code.slice(4), cle, serveur:serveur || null, derniere:null, decisionVue:null }
+  if(!serveurPartage()){ state.partage = null; return 'Adresse du serveur manquante : scannez le QR code remis par votre médecin.' }
+  try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {}
+  rendrePartage(); synchroniser(true)
+  return null
+}
+$('btn-partage-ok').addEventListener('click', () => {
+  const err = activerPartage($('partage-code').value, $('partage-cle').value, $('partage-serveur').value.trim())
+  $('partage-retour').textContent = err || ''
+})
+$('btn-partage-stop').addEventListener('click', () => {
+  if(!confirm('Arrêter d\'envoyer votre programme à votre médecin ? Ce qui a déjà été envoyé reste chez lui jusqu\'à ce qu\'il le supprime.')) return
+  state.partage = null; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} rendrePartage()
+})
+$('btn-sync').addEventListener('click', () => synchroniser(true))
 
 // ---- ISI de fin
 $('btn-isi-fin').addEventListener('click', () => {
@@ -934,6 +1045,19 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
   } else if(state && state.bilan){
     rendreBilan(); $('consent').checked = true; $('btn-commencer').disabled = false
   } else state = vide()
+
+  // Lien remis par le médecin : ?p=CODE.CLE (et &s=serveur si la page n'est pas servie par Hypnote)
+  try {
+    const q = new URLSearchParams(location.search)
+    if(q.get('p')){
+      const [code, cle] = q.get('p').split('.')
+      const err = activerPartage(code, cle, q.get('s') || '')
+      if(err) alert(err)
+      history.replaceState(null, '', location.pathname)
+    }
+  } catch(e) {}
+  rendrePartage()
+  if(state && state.partage){ synchroniser(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
 })()
 </script>
 </body>

@@ -915,6 +915,11 @@
 <div class="step" id="step-qr">
   <h1>✅ Questionnaire terminé</h1>
   <p>Présentez ce QR code à votre médecin. Il le scannera depuis son ordinateur pour récupérer vos réponses.</p>
+  <div class="card" id="resume-insomnie" style="display:none;margin-bottom:14px">
+    <h3 style="margin:0 0 6px">Votre bilan d'insomnie</h3>
+    <div id="resume-insomnie-txt" style="font-size:15px;line-height:1.5"></div>
+    <p class="small" style="margin-top:8px;color:#475569">Ce résumé vous est donné à titre d'information ; votre médecin l'interprète avec vous et décide, s'il y a lieu, du programme d'insomnie en ligne (TCC-I) et de son mode.</p>
+  </div>
 
   <div class="qr-container">
     <img id="qrcode-img" alt="QR code des réponses" width="384" height="384" style="display:none">
@@ -1424,6 +1429,35 @@ function rendreBilanTcc(){
   const lv = document.getElementById('tcc-lever'); lv.value = state.lever || '07:00'; lv.addEventListener('change', e => { state.lever = e.target.value || '07:00'; sauvegarderReponses() })
 }
 const bilanTccComplet = () => ['dbas','psas','meq','phq'].every(k => state[k].every(v => v != null)) && state.sec != null
+// Résumé affiché au patient sur l'écran final, quand il a répondu « oui » à
+// l'insomnie : il sait avec quoi il repart, avant même la consultation.
+function rendreResumeInsomnie(){
+  const carte = document.getElementById('resume-insomnie'); if(!carte) return
+  if(state.insomnie !== 'oui'){ carte.style.display = 'none'; return }
+  const l = []
+  const isiRep = (state.isi || []).filter(v => v != null)
+  if(isiRep.length){
+    const t = isiRep.reduce((a, b) => a + b, 0)
+    const niveau = t <= 7 ? 'pas d\'insomnie significative' : t <= 14 ? 'insomnie légère' : t <= 21 ? 'insomnie modérée' : 'insomnie sévère'
+    l.push(`<strong>Sévérité (ISI) : ${t} / 28</strong> — ${niveau}.`)
+  }
+  if(bilanTccComplet()){
+    const fortes = state.dbas.filter(v => v >= 7).length
+    const mental = state.psas.slice(8).reduce((a, b) => a + b, 0), physique = state.psas.slice(0, 8).reduce((a, b) => a + b, 0)
+    const meq = state.meq.reduce((a, b) => a + b, 0)
+    l.push(`<strong>Croyances sur le sommeil :</strong> ${fortes} idée${fortes > 1 ? 's' : ''} fortement ancrée${fortes > 1 ? 's' : ''} sur 16 — ce sont elles que le programme travaille.`)
+    l.push(`<strong>Au coucher :</strong> agitation mentale ${mental} / 40, agitation physique ${physique} / 40.`)
+    l.push(`<strong>Rythme :</strong> plutôt ${meq <= 11 ? 'du soir' : meq >= 18 ? 'du matin' : 'intermédiaire'}.`)
+    const m = modeTcc()
+    const lib = { s:'sans restriction du temps au lit', m:'modéré (jamais moins de 6 h au lit)', c:'complet' }[m.mode]
+    l.push(`<strong>Si un programme vous est proposé :</strong> mode ${lib} (${m.motif}).`)
+    if(state.sec === 1) l.push('<strong style="color:#b91c1c">Vous avez signalé des idées noires : parlez-en à votre médecin aujourd\'hui.</strong>')
+  } else {
+    l.push('Le bilan détaillé (croyances, agitation au coucher, rythme) n\'est pas complet : votre médecin pourra le reprendre avec vous.')
+  }
+  document.getElementById('resume-insomnie-txt').innerHTML = l.map(x => `<p style="margin:4px 0">${x}</p>`).join('')
+  carte.style.display = 'block'
+}
 // Mode de sécurité : mêmes règles que calculerMode() dans tcc.html.
 function modeTcc(){
   const s = state.situ, epw = state.epworth.reduce((a, b) => a + (b || 0), 0), a = state.age
@@ -2154,6 +2188,7 @@ function generateQR(){
   }
 
   deposerBilanTcc()
+  rendreResumeInsomnie()
   const json = JSON.stringify(payload)
   const data = 'SLEEP-V3::' + json
 
