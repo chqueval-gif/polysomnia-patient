@@ -266,7 +266,7 @@
         <button class="btn ghost" id="btn-partage-stop">Arrêter le partage</button>
       </div>
       <div id="partage-inactif">
-        <p class="small">Si votre médecin vous a remis un <strong>code de partage</strong> (QR code ou carte), scannez-le ou saisissez-le ici : votre agenda lui parviendra sans que vous ayez à montrer le QR de suivi.</p>
+        <p class="small">Si votre médecin vous a remis un <strong>code de partage</strong> (QR code ou carte), scannez-le ou saisissez-le ici : votre agenda lui parviendra sans que vous ayez à montrer le QR de suivi. Le même code, ouvert sur votre ordinateur, y retrouve votre programme : téléphone et ordinateur restent synchronisés.</p>
         <input type="text" id="partage-code" placeholder="Code (ex. K7M3-9QXW)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
         <input type="text" id="partage-cle" placeholder="Clé (12 caractères)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
         <input type="url" id="partage-serveur" placeholder="Adresse du serveur (https://…)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:14px;margin-bottom:6px;display:none">
@@ -769,6 +769,7 @@ async function synchroniser(manuel){
     if(r.status === 403){ state.partage.erreur = 'Code ou clé refusés par le serveur : le partage est suspendu.'; rendrePartage(); return }
     if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
     state.partage.derniere = new Date().toISOString(); state.partage.erreur = null
+    adopterEtatServeur(j.etat)
     if(j.decision && j.decision_le && j.decision_le !== state.partage.decisionVue){
       state.partage.decisionVue = j.decision_le
       const res = appliquerCodeMedecin(j.decision)
@@ -778,6 +779,25 @@ async function synchroniser(manuel){
   } catch(e){
     state.partage.erreur = 'Envoi impossible pour le moment (' + e.message + '). Nouvel essai à la prochaine ouverture.'
   } finally { syncEnCours = false; rendrePartage() }
+}
+// L'état renvoyé par le serveur est la réunion de tous les appareils du
+// patient : on le reprend tel quel, en gardant ce qui n'appartient qu'à cet
+// appareil (identité, réglages du partage).
+const CLES_SERVEUR = ['situ','bilan','mode','motif','fen','nuits','hebdo','sig','pause','isiFin','lever','seances','cartes','plan','habitudeChoisie','depuisConsultation']
+function adopterEtatServeur(etat){
+  if(!etat || typeof etat !== 'object') return
+  const avant = JSON.stringify(CLES_SERVEUR.map(k => state[k]))
+  CLES_SERVEUR.forEach(k => { if(etat[k] !== undefined) state[k] = etat[k] })
+  if(JSON.stringify(CLES_SERVEUR.map(k => state[k])) === avant) return
+  try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {}
+  const actif = document.querySelector('.step.active')
+  if(actif && actif.id === 'step-agenda'){ try { verifierReports(); rendreSaisie(); rendreFenetre(); rendreSemaine(); rendreSeances(); rendreCartes() } catch(e) {} }
+  if(actif && actif.id === 'step-home' && state.bilan && state.mode){
+    $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
+    const n = Object.keys(state.nuits).length, lues = Object.values(state.seances || {}).filter(s => s.lue).length
+    $('home-reprise-txt').innerHTML = `Bonjour${state.ident.p ? ' ' + state.ident.p : ''}. Programme récupéré depuis le serveur de votre médecin : ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
+    try { rendreBilan() } catch(e) {}
+  }
 }
 function rendrePartage(){
   const actif = !!(state && state.partage)
