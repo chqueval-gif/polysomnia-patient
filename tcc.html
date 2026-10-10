@@ -85,10 +85,10 @@
 <!-- ================= ACCUEIL ================= -->
 <div class="step active" id="step-home">
   <h1>Mon programme sommeil</h1>
-  <p class="small">Thérapie cognitivo-comportementale de l'insomnie (TCC-I), proposée par votre médecin du sommeil.</p>
+  <p class="small">Programme d'information et d'accompagnement du sommeil, fondé sur les principes de la thérapie cognitivo-comportementale de l'insomnie, suivi par votre médecin du sommeil.</p>
   <div class="card" id="home-nouveau">
     <p>Ce programme dure <strong>six semaines</strong>. Il demande chaque matin une minute pour noter votre nuit, et chaque semaine dix minutes de lecture et un exercice.</p>
-    <p>Aujourd'hui, vous allez répondre à un <strong>bilan d'entrée</strong> d'une quinzaine de minutes. Il se termine par un QR code à montrer à votre médecin, qui validera la suite.</p>
+    <p>Aujourd'hui, vous allez répondre à un <strong>bilan d'entrée</strong> d'une quinzaine de minutes. Il se termine par un QR code à montrer à votre médecin, qui décidera de la suite. Ce programme ne remplace pas une consultation et ne constitue pas un traitement.</p>
     <div class="consent">
       <strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code — ou, si votre médecin vous a remis un code de partage, par son serveur sécurisé, sans votre nom. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.
       <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer"><input type="checkbox" id="consent" style="width:18px;height:18px;margin-top:3px"> J'ai compris.</label>
@@ -201,7 +201,39 @@
     <div class="qr-container"><img id="qr-img" alt="QR code du bilan" width="320" height="320" style="display:none"><div id="qr-loading" class="small">⏳ Génération…</div></div>
     <div id="qr-fallback" style="display:none"><p class="small">Le QR code n'a pas pu être dessiné. Recopiez ce texte :</p><textarea id="qr-fallback-data" rows="4" readonly></textarea></div>
   </div>
+  <div class="card" id="carte-pdf" style="display:none">
+    <h3>Votre bilan en PDF</h3>
+    <div id="pdf-a-payer">
+      <p class="small">Recevez votre <strong>bilan sommeil commenté</strong> (scores expliqués, ce que votre médecin prendra en compte) et le <strong>guide « Comprendre son sommeil »</strong>, en PDF, pour <strong id="pdf-prix">10 €</strong> (paiement unique, sécurisé par Stripe).</p>
+      <button class="btn secondary" id="btn-pdf-payer">Obtenir mes deux PDF</button>
+    </div>
+    <div id="pdf-ok" style="display:none">
+      <p class="small">Vos documents sont prêts. Ils restent téléchargeables depuis cette page.</p>
+      <a class="btn secondary" id="lien-pdf-bilan" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Mon bilan sommeil (PDF)</a>
+      <a class="btn secondary" id="lien-pdf-guide" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Comprendre son sommeil (PDF)</a>
+    </div>
+    <p class="small" id="pdf-retour"></p>
+  </div>
   <button class="btn" id="btn-vers-agenda">Commencer mon agenda du sommeil →</button>
+  <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
+<!-- ================= OFFRES ================= -->
+<div class="step" id="step-offres">
+  <h2>Choisir ma formule</h2>
+  <p class="small">L'agenda, les séances et les cartes font partie d'un programme payant. Deux formules, sans engagement, résiliables à tout moment.</p>
+  <div class="card">
+    <h3>En autonomie — <span id="prix-autonomie">15 €</span> / mois</h3>
+    <p class="small">Agenda du sommeil chaque matin, six séances hebdomadaires, cartes de croyances alimentées par vos chiffres, partage avec votre médecin et application de ses décisions.</p>
+    <button class="btn" id="btn-offre-autonomie">Choisir l'autonomie</button>
+  </div>
+  <div class="card">
+    <h3>Coaché — <span id="prix-coache">40 €</span> / mois</h3>
+    <p class="small">Tout le programme, plus des <strong>échanges écrits avec un coach</strong> — psychologue ou infirmier(e) formé(e) au sommeil — qui lit votre agenda et répond à vos questions sous 48 h ouvrées.</p>
+    <button class="btn" id="btn-offre-coache">Choisir le coaching</button>
+  </div>
+  <p class="small" id="offres-retour"></p>
+  <p class="small">Vous avez un code remis par votre médecin ? Activez-le d'abord dans l'onglet « Médecin » de votre agenda : certains programmes sont pris en charge par le cabinet.</p>
   <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
 </div>
 
@@ -262,8 +294,13 @@
       <div id="partage-actif" style="display:none">
         <p class="small" id="partage-etat"></p>
         <p class="small">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
+        <p class="small" id="partage-cle-ligne" style="display:none">Votre médecin peut rattacher ce programme à son compte avec votre code et votre clé : <strong id="partage-cle-affichee"></strong></p>
         <button class="btn secondary" id="btn-sync">Envoyer maintenant</button>
         <button class="btn ghost" id="btn-partage-stop">Arrêter le partage</button>
+      </div>
+      <div id="abonnement-bloc" style="display:none;margin-top:10px">
+        <p class="small" id="abonnement-etat"></p>
+        <button class="btn ghost" id="btn-abonnement">Gérer mon abonnement</button>
       </div>
       <div id="partage-inactif">
         <p class="small">Si votre médecin vous a remis un <strong>code de partage</strong> (QR code ou carte), scannez-le ou saisissez-le ici : votre agenda lui parviendra sans que vous ayez à montrer le QR de suivi. Le même code, ouvert sur votre ordinateur, y retrouve votre programme : téléphone et ordinateur restent synchronisés.</p>
@@ -525,7 +562,7 @@ function chronotype(){ const t = somme(state.bilan.meq); return t <= 11 ? 'du so
 $('btn-terminer-bilan').addEventListener('click', () => {
   state.lever = $('lever-cible').value || '07:00'
   const r = calculerMode(); state.mode = r.mode; state.motif = r.motif; state.bilan.date = aujourdhui()
-  sauver(); afficherResultat(); show('step-resultat')
+  sauver(); afficherResultat(); show('step-resultat'); rendrePdf(); rafraichirDroits()
 })
 function afficherResultat(){
   const b = state.bilan, isi = somme(b.isi), epw = somme(b.epw), dbasMoy = somme(b.dbas) / 16
@@ -719,6 +756,7 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
   if(b.dataset.tab === 'croyances') rendreCartes()
 }))
 function ouvrirAgenda(){
+  if(!suiviOuvert()){ show('step-offres'); rafraichirDroits(); return }
   $('agenda-pause').innerHTML = state.pause ? `<div class="alerte">${state.pause}</div>` : ''
   verifierReports(); rendreSaisie(); rendreFenetre(); rendreSemaine(); rendreSeances(); rendreCartes(); show('step-agenda')
 }
@@ -754,6 +792,70 @@ function anonymiserEtat(){
 }
 function sansIdentite(o){ if(!o) return null; const c = Object.assign({}, o); delete c.n; delete c.p; delete c.d; return c }
 let syncTimer = null, syncEnCours = false
+let droits = null   // ce que le serveur ouvre pour ce programme (bilan, abonnement, offert)
+async function apiPatient(chemin, options){
+  const base = serveurPartage(); if(!base || !state.partage) throw new Error('Pas de serveur')
+  const r = await fetch(`${base}/api/tcc/patient/${encodeURIComponent(state.partage.code)}${chemin}`, options)
+  const j = await r.json().catch(() => ({}))
+  if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
+  return j
+}
+// Inscription libre : la page servie par Hypnote ouvre un programme (code +
+// clé, aucune identité) dès le début, pour que le partage et les offres
+// existent sans code du médecin.
+async function inscrireSiBesoin(){
+  if(state.partage || !location.pathname.startsWith('/patient/')) return
+  try {
+    const r = await fetch(`${location.origin}/api/tcc/patient/inscription`, { method:'POST' })
+    const j = await r.json().catch(() => ({}))
+    if(r.ok && j.ok){ state.partage = { code:j.code, cle:j.cle, serveur:null, derniere:null, decisionVue:null, libre:true }; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} }
+  } catch(e) {}
+}
+function adopterDroits(d){ if(d){ droits = d; rendrePdf(); rendreAbonnement() } }
+function rendrePdf(){
+  const carte = $('carte-pdf'); if(!carte) return
+  const base = serveurPartage()
+  if(!base || !state.partage){ carte.style.display = 'none'; return }
+  carte.style.display = 'block'
+  const ok = droits && droits.bilan
+  $('pdf-a-payer').style.display = ok ? 'none' : 'block'; $('pdf-ok').style.display = ok ? 'block' : 'none'
+  if(ok){
+    const q = `?cle=${encodeURIComponent(state.partage.cle)}`
+    $('lien-pdf-bilan').href = `${base}/api/tcc/patient/${encodeURIComponent(state.partage.code)}/pdf/bilan${q}`
+    $('lien-pdf-guide').href = `${base}/api/tcc/patient/${encodeURIComponent(state.partage.code)}/pdf/guide${q}`
+  }
+}
+function rendreAbonnement(){
+  const bloc = $('abonnement-bloc'); if(!bloc) return
+  if(!droits || (!droits.abonnement && !droits.actif)){ bloc.style.display = 'none'; return }
+  bloc.style.display = 'block'
+  $('abonnement-etat').textContent = droits.offert ? 'Programme pris en charge par votre médecin.' :
+    droits.actif ? `Formule ${droits.offre === 'coache' ? 'coachée' : 'autonomie'} active${droits.expire_le ? ' jusqu\'au ' + droits.expire_le.split('-').reverse().join('/') : ''}.` : 'Abonnement terminé.'
+  $('btn-abonnement').style.display = droits.abonnement ? 'block' : 'none'
+}
+async function payer(offre, retour){
+  retour.textContent = 'Ouverture du paiement…'
+  try {
+    const j = await apiPatient('/checkout', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, offre }) })
+    location.href = j.url
+  } catch(e){ retour.textContent = e.message }
+}
+$('btn-pdf-payer').addEventListener('click', () => payer('bilan', $('pdf-retour')))
+$('btn-offre-autonomie').addEventListener('click', () => payer('autonomie', $('offres-retour')))
+$('btn-offre-coache').addEventListener('click', () => payer('coache', $('offres-retour')))
+$('btn-abonnement').addEventListener('click', async () => {
+  try { const j = await apiPatient('/portail', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle }) }); location.href = j.url }
+  catch(e){ $('abonnement-etat').textContent = e.message }
+})
+async function rafraichirDroits(){
+  if(!state.partage || !serveurPartage()) return
+  try { const j = await apiPatient(`/offres?cle=${encodeURIComponent(state.partage.cle)}`); adopterDroits(j.droits)
+    if(j.offres){ j.offres.forEach(o => { const el = $('prix-' + o.id) || (o.id === 'bilan' ? $('pdf-prix') : null); if(el) el.textContent = (o.prix / 100).toLocaleString('fr-FR') + ' €' }) }
+  } catch(e) {}
+}
+// Le suivi (agenda, séances, cartes) n'est ouvert que si le programme est
+// réglé ou offert — uniquement quand la page est servie par Hypnote.
+function suiviOuvert(){ return !serveurPartage() || !state.partage || (droits && droits.actif) }
 function planifierSync(){ if(!state || !state.partage) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => synchroniser(), 1500) }
 async function synchroniser(manuel){
   if(!state || !state.partage || syncEnCours) return
@@ -769,7 +871,7 @@ async function synchroniser(manuel){
     if(r.status === 403){ state.partage.erreur = 'Code ou clé refusés par le serveur : le partage est suspendu.'; rendrePartage(); return }
     if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
     state.partage.derniere = new Date().toISOString(); state.partage.erreur = null
-    adopterEtatServeur(j.etat)
+    adopterEtatServeur(j.etat); adopterDroits(j.droits)
     if(j.decision && j.decision_le && j.decision_le !== state.partage.decisionVue){
       state.partage.decisionVue = j.decision_le
       const res = appliquerCodeMedecin(j.decision)
@@ -807,6 +909,7 @@ function rendrePartage(){
   if(actif){
     const p = state.partage
     const d = p.derniere ? new Date(p.derniere) : null
+    $('partage-cle-ligne').style.display = p.libre ? 'block' : 'none'; $('partage-cle-affichee').textContent = `${p.code} · ${p.cle}`
     $('partage-etat').innerHTML = `<strong>Code : ${p.code}</strong><br>` +
       (p.erreur ? `<span style="color:#8a3b2e">${p.erreur}</span>` : d ? `Dernier envoi : ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}.` : 'Pas encore envoyé.') +
       (p.message ? `<br>${p.message}` : '')
@@ -1042,7 +1145,7 @@ function verifierReports(){
 
 // ---------------------------------------------------------------- Accueil
 $('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
-$('btn-commencer').addEventListener('click', () => { state = vide(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(2).fill(null), sec:null, hab:[] }; sauver(); rendreBilan(); show('step-id') })
+$('btn-commencer').addEventListener('click', async () => { state = vide(); await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(2).fill(null), sec:null, hab:[] }; sauver(); rendreBilan(); show('step-id') })
 $('btn-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-vers-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-revoir-bilan').addEventListener('click', () => { afficherResultat(); show('step-resultat') })
@@ -1077,7 +1180,11 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
     }
   } catch(e) {}
   rendrePartage()
-  if(state && state.partage){ synchroniser(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
+  try {
+    const q = new URLSearchParams(location.search)
+    if(q.get('paiement') === 'ok'){ alert('Merci, votre paiement est enregistré. Si l\'accès n\'apparaît pas tout de suite, patientez quelques secondes et rouvrez la page.'); history.replaceState(null, '', location.pathname) }
+  } catch(e) {}
+  if(state && state.partage){ synchroniser(); rafraichirDroits(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
 })()
 </script>
 </body>
