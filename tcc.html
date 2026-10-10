@@ -5,27 +5,24 @@
 <title>Mon programme sommeil — TCC-I</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light only">
-<meta name="theme-color" content="#5f6b4f">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#f5f5f7">
 <style>
   :root{
-    --ivoire:#f4efe4; --carte:#fffdf8; --encre:#2a2823; --texte:#3b3832; --sourd:#6e6757;
-    --olive:#5f6b4f; --olive-fonce:#4a5540; --olive-pale:#e9ecde; --olive-trait:#b8c0a6;
-    --bronze:#9d7f54; --bronze-pale:#f1e8d6; --or:#c9a96a;
-    --ligne:#e3dccb; --champ:#faf7ef; --rouge:#8a3b2e; --rouge-pale:#f6e9e5;
+    --ivoire:#f5f5f7; --carte:#ffffff; --encre:#1d1d1f; --texte:#1d1d1f; --sourd:#6e6e73;
+    --olive:#0071e3; --olive-fonce:#0060bf; --olive-pale:#e8f1fd; --olive-trait:#b9d4f5;
+    --bronze:#6e6e73; --bronze-pale:#f0f0f2; --or:#d2d2d7;
+    --ligne:#d2d2d7; --champ:#fafafa; --rouge:#b3261e; --rouge-pale:#fdecea;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--ivoire);color:var(--texte);
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif;background:var(--ivoire);color:var(--texte);-webkit-font-smoothing:antialiased;
     padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);max-width:560px;margin:0 auto;line-height:1.55;font-size:16px}
-  h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:.01em;margin:26px 0 8px;color:var(--encre)}
-  h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:25px;font-weight:600;margin:24px 0 10px;color:var(--olive-fonce);border-bottom:1px solid var(--bronze);padding-bottom:6px}
-  h3{font-size:15px;margin:18px 0 4px;color:var(--encre);letter-spacing:.01em}
+  h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:26px 0 8px;color:var(--encre)}
+  h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:24px 0 10px;color:var(--encre)}
+  h3{font-size:15px;font-weight:600;margin:18px 0 4px;color:var(--encre);letter-spacing:-.01em}
   p{margin:8px 0}
   .small{font-size:13px;color:var(--sourd)}
-  .card{background:var(--carte);padding:18px;border-radius:14px;border:1px solid var(--ligne);box-shadow:0 4px 18px rgba(42,40,35,.06);margin-bottom:16px}
+  .card{background:var(--carte);padding:18px;border-radius:18px;border:1px solid #e5e5ea;box-shadow:0 1px 2px rgba(0,0,0,.03),0 8px 24px rgba(0,0,0,.04);margin-bottom:16px}
   .progress{position:sticky;top:0;background:var(--carte);z-index:10;padding:8px 0;border-bottom:1px solid var(--ligne);margin:0 -16px 12px;text-align:center;font-size:13px;color:var(--sourd)}
   .progress-bar{height:3px;background:var(--ligne);border-radius:2px;margin-top:6px;overflow:hidden}
   .progress-fill{height:100%;background:var(--bronze);transition:width .3s}
@@ -49,22 +46,23 @@
   .ddn input.j,.ddn input.m{flex:0 0 66px}
   .ddn input.a{flex:0 0 92px}
   .ddn-sep{color:var(--sourd);font-size:18px;font-weight:600}
-  .btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;background:var(--olive);color:#f4eede;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent;letter-spacing:.01em}
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;background:var(--olive);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent;letter-spacing:-.01em}
   .btn:hover{background:var(--olive-fonce)}
-  .btn:disabled{background:#b9b4a6;cursor:not-allowed}
+  .btn:disabled{background:#c7c7cc;cursor:not-allowed}
   .btn.secondary{background:var(--carte);color:var(--olive-fonce);border:1.5px solid var(--olive)}
   .btn.ghost{background:transparent;color:var(--sourd);border:none;font-weight:500}
   .consent{background:var(--bronze-pale);border:1px solid var(--or);padding:14px;border-radius:10px;margin-bottom:16px;font-size:14px}
-  .alerte{background:var(--rouge-pale);border:1px solid #d9a59c;padding:14px;border-radius:10px;margin:12px 0;font-size:14px;color:var(--rouge)}
+  .alerte{background:var(--rouge-pale);border:1px solid #f5c2bd;padding:14px;border-radius:10px;margin:12px 0;font-size:14px;color:var(--rouge)}
   .info{background:var(--olive-pale);border:1px solid var(--olive-trait);padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14px}
   .step{display:none}
   .step.active{display:block}
   .tabs{display:flex;gap:6px;margin:12px 0}
-  .tabs button{flex:1;padding:10px 4px;border-radius:10px;border:1.5px solid var(--ligne);background:var(--carte);font-weight:600;color:var(--sourd);cursor:pointer;font-family:inherit}
-  .tabs button.on{border-color:var(--bronze);color:var(--olive-fonce);background:var(--bronze-pale)}
+  .tabs{background:#e9e9eb;border-radius:12px;padding:3px;gap:2px}
+  .tabs button{flex:1;padding:9px 4px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--sourd);cursor:pointer;font-family:inherit;font-size:13px}
+  .tabs button.on{color:var(--encre);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .kpi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
   .kpi div{background:var(--champ);border:1px solid var(--ligne);border-radius:10px;padding:10px;text-align:center}
-  .kpi b{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums;font-size:26px;font-weight:600;color:var(--olive-fonce)}
+  .kpi b{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--encre)}
   .kpi span{font-size:12px;color:var(--sourd)}
   .nuit{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--ligne);font-size:14px}
   .nuit .eff{font-weight:600;color:var(--olive-fonce)}
@@ -324,9 +322,9 @@
       </div>
       <div id="partage-inactif">
         <p class="small">Si votre médecin vous a remis un <strong>code de partage</strong> (QR code ou carte), scannez-le ou saisissez-le ici : votre agenda lui parviendra sans que vous ayez à montrer le QR de suivi. Le même code, ouvert sur votre ordinateur, y retrouve votre programme : téléphone et ordinateur restent synchronisés.</p>
-        <input type="text" id="partage-code" placeholder="Code (ex. K7M3-9QXW)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
-        <input type="text" id="partage-cle" placeholder="Clé (12 caractères)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:16px;margin-bottom:6px">
-        <input type="url" id="partage-serveur" placeholder="Adresse du serveur (https://…)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #e3dccb;border-radius:8px;font-size:14px;margin-bottom:6px;display:none">
+        <input type="text" id="partage-code" placeholder="Code (ex. K7M3-9QXW)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #d2d2d7;border-radius:8px;font-size:16px;margin-bottom:6px">
+        <input type="text" id="partage-cle" placeholder="Clé (12 caractères)" autocomplete="off" autocapitalize="characters" style="width:100%;padding:10px;border:1px solid #d2d2d7;border-radius:8px;font-size:16px;margin-bottom:6px">
+        <input type="url" id="partage-serveur" placeholder="Adresse du serveur (https://…)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #d2d2d7;border-radius:8px;font-size:14px;margin-bottom:6px;display:none">
         <button class="btn secondary" id="btn-partage-ok">Activer le partage</button>
         <p class="small" id="partage-retour"></p>
       </div>
@@ -755,13 +753,13 @@ function rendreSemaine(){
   // Courbe : efficacité par nuit (points) et moyenne glissante sur 7 nuits (ligne), zone cible 85–90 %.
   const svg = $('courbe'); const W = 520, H = 220, L = 36, R = 10, T = 14, B = 28
   const x = i => L + (n.length > 1 ? i / (n.length - 1) : 0.5) * (W - L - R), y = v => T + (100 - v) / 60 * (H - T - B)
-  let s = `<rect x="${L}" y="${y(90)}" width="${W - L - R}" height="${y(85) - y(90)}" fill="#e9ecde"/>`
-  ;[40, 60, 80, 100].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e3dccb"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="#6e6757">${v} %</text>` })
+  let s = `<rect x="${L}" y="${y(90)}" width="${W - L - R}" height="${y(85) - y(90)}" fill="#e8f1fd"/>`
+  ;[40, 60, 80, 100].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#d2d2d7"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="#6e6e73">${v} %</text>` })
   if(n.length){
-    s += n.map((p, i) => `<circle cx="${x(i)}" cy="${y(Math.max(40, p.eff))}" r="3.5" fill="#a39d8f"/>`).join('')
+    s += n.map((p, i) => `<circle cx="${x(i)}" cy="${y(Math.max(40, p.eff))}" r="3.5" fill="#aeaeb2"/>`).join('')
     const roul = n.map((_, i) => { const t = n.slice(Math.max(0, i - 6), i + 1); return t.reduce((a, b) => a + b.eff, 0) / t.length })
-    s += `<polyline fill="none" stroke="#5f6b4f" stroke-width="2.5" points="${roul.map((v, i) => `${x(i)},${y(Math.max(40, v))}`).join(' ')}"/>`
-    s += `<text x="${L}" y="${H - 8}" font-size="11" fill="#6e6757">${n[0].d.slice(8)}/${n[0].d.slice(5, 7)}</text><text x="${W - R}" y="${H - 8}" font-size="11" text-anchor="end" fill="#6e6757">${n[n.length - 1].d.slice(8)}/${n[n.length - 1].d.slice(5, 7)}</text>`
+    s += `<polyline fill="none" stroke="#0071e3" stroke-width="2.5" points="${roul.map((v, i) => `${x(i)},${y(Math.max(40, v))}`).join(' ')}"/>`
+    s += `<text x="${L}" y="${H - 8}" font-size="11" fill="#6e6e73">${n[0].d.slice(8)}/${n[0].d.slice(5, 7)}</text><text x="${W - R}" y="${H - 8}" font-size="11" text-anchor="end" fill="#6e6e73">${n[n.length - 1].d.slice(8)}/${n[n.length - 1].d.slice(5, 7)}</text>`
   }
   svg.innerHTML = s
   const prem = semaines()[0]
@@ -957,7 +955,7 @@ function rendrePartage(){
     const d = p.derniere ? new Date(p.derniere) : null
     $('partage-cle-ligne').style.display = p.libre ? 'block' : 'none'; $('partage-cle-affichee').textContent = `${p.code} · ${p.cle}`
     $('partage-etat').innerHTML = `<strong>Code : ${p.code}</strong><br>` +
-      (p.erreur ? `<span style="color:#8a3b2e">${p.erreur}</span>` : d ? `Dernier envoi : ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}.` : 'Pas encore envoyé.') +
+      (p.erreur ? `<span style="color:#b3261e">${p.erreur}</span>` : d ? `Dernier envoi : ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}.` : 'Pas encore envoyé.') +
       (p.message ? `<br>${p.message}` : '')
   }
   const hp = $('home-partage')
