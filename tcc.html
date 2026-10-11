@@ -205,6 +205,20 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     <p class="small">Il contient vos réponses et le mode proposé. Votre médecin le valide ou le modifie, puis votre agenda peut commencer.</p>
     <div class="qr-container"><img id="qr-img" alt="QR code du bilan" width="320" height="320" style="display:none"><div id="qr-loading" class="small">⏳ Génération…</div></div>
     <div id="qr-fallback" style="display:none"><p class="small">Le QR code n'a pas pu être dessiné. Recopiez ce texte :</p><textarea id="qr-fallback-data" rows="4" readonly></textarea></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn secondary" id="btn-qr-enregistrer" style="flex:1;margin-top:8px">Enregistrer le QR code</button>
+      <button class="btn secondary" id="btn-qr-partager" style="flex:1;margin-top:8px;display:none">Envoyer le QR code</button>
+    </div>
+    <p class="small" id="qr-retour"></p>
+  </div>
+  <div class="card" id="carte-code-partage" style="display:none">
+    <h3>Votre code de partage</h3>
+    <p class="small">À donner à votre médecin ou à votre psychologue du sommeil : il rattache votre programme à son compte et reçoit votre agenda <strong>sans votre nom</strong>. Notez‑le ou copiez‑le.</p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <code id="code-partage-affiche" style="flex:1;font-size:18px;letter-spacing:.06em;padding:12px 14px;background:#EBEDF1;border-radius:12px;word-break:break-all"></code>
+      <button class="btn secondary" id="btn-code-copier" style="width:auto;margin-top:0;padding:12px 18px">Copier</button>
+    </div>
+    <p class="small" id="code-partage-retour"></p>
   </div>
   <div class="card" id="carte-pdf" style="display:none">
     <h3>Votre bilan en PDF</h3>
@@ -694,7 +708,7 @@ function rendreQR(data, img, loading, fallback, fallbackData){
     if(err){ QRCode.toCanvas(c, data, Object.assign({}, opts, { errorCorrectionLevel:'L' }), err2 => { if(err2){ montrerFallback(); return } fini() }); return }
     fini()
   })
-  function fini(){ img.src = c.toDataURL('image/png'); img.style.display = 'block'; if(loading) loading.style.display = 'none'; if(fallback) fallback.style.display = 'none' }
+  function fini(){ img.src = c.toDataURL('image/png'); img.style.display = 'block'; if(loading) loading.style.display = 'none'; if(fallback) fallback.style.display = 'none'; rendreCodePartageBilan() }
   function montrerFallback(){ img.style.display = 'none'; if(loading) loading.style.display = 'none'; if(fallback){ fallback.style.display = 'block'; fallbackData.value = data } }
 }
 
@@ -1054,6 +1068,40 @@ $('btn-partage-stop').addEventListener('click', () => {
 })
 $('btn-sync').addEventListener('click', () => synchroniser(true))
 
+// ---- Ecran du bilan : enregistrer / envoyer le QR, code de partage
+function rendreCodePartageBilan(){
+  const carte = $('carte-code-partage'); if(!carte) return
+  const p = state && state.partage
+  if(p && p.code && p.cle){ carte.style.display = 'block'; $('code-partage-affiche').textContent = `${p.code} · ${p.cle}` }
+  else carte.style.display = 'none'
+  const img = $('qr-img'); $('btn-qr-enregistrer').disabled = !(img && img.src && img.src.startsWith('data:'))
+  $('btn-qr-partager').style.display = (navigator.share && navigator.canShare) ? 'block' : 'none'
+}
+function fichierQr(){
+  const img = $('qr-img'); if(!img || !img.src.startsWith('data:')) return null
+  const b = atob(img.src.split(',')[1]), u = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i)
+  const nom = `bilan-sommeil${state && state.partage ? '-' + state.partage.code : ''}.png`
+  return new File([u], nom, { type:'image/png' })
+}
+$('btn-qr-enregistrer').addEventListener('click', () => {
+  const img = $('qr-img'); if(!img || !img.src.startsWith('data:')){ $('qr-retour').textContent = 'QR code pas encore prêt.'; return }
+  const a = document.createElement('a'); a.href = img.src; a.download = `bilan-sommeil${state && state.partage ? '-' + state.partage.code : ''}.png`
+  document.body.appendChild(a); a.click(); a.remove()
+  $('qr-retour').textContent = 'QR code enregistré dans vos images ou téléchargements. Vous pourrez le montrer ou l\'envoyer à votre médecin.'
+})
+$('btn-qr-partager').addEventListener('click', async () => {
+  const f = fichierQr(); if(!f) return
+  try {
+    if(navigator.canShare({ files:[f] })) await navigator.share({ files:[f], title:'Mon bilan sommeil', text:'QR code de mon bilan sommeil' + (state && state.partage ? ` — code de partage ${state.partage.code} · ${state.partage.cle}` : '') })
+    else await navigator.share({ title:'Mon bilan sommeil', text: state && state.partage ? `Code de partage : ${state.partage.code} · ${state.partage.cle}` : 'Mon bilan sommeil' })
+    $('qr-retour').textContent = 'Envoyé.'
+  } catch(e){ if(e && e.name !== 'AbortError') $('qr-retour').textContent = 'Envoi impossible : ' + e.message }
+})
+$('btn-code-copier').addEventListener('click', async () => {
+  const t = $('code-partage-affiche').textContent
+  try { await navigator.clipboard.writeText(t); $('code-partage-retour').textContent = 'Code copié.' }
+  catch(e){ const r = document.createRange(); r.selectNodeContents($('code-partage-affiche')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); $('code-partage-retour').textContent = 'Sélectionnez le code et copiez‑le.' }
+})
 // ---- Montre connectée et saisie manuelle des chiffres de la montre
 const M_CHAMPS = ['score','hc','hl','lat','nrev','waso','tst','prof','par','fc','vfc','spo2','ronfl']
 const escM = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]))
