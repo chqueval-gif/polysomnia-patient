@@ -614,7 +614,8 @@ const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PP
 // ---------------------------------------------------------------- État
 let state = null
 const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null, montre:{ lien:null, nuits:{} } })
-function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} planifierSync() }
+let modifsLocales = 0   // augmente a chaque sauvegarde : sert a ne pas ecraser une saisie en cours
+function sauver(){ modifsLocales++; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} planifierSync() }
 function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
 
 // ---------------------------------------------------------------- Navigation
@@ -628,6 +629,20 @@ function show(id){
 }
 // Une page incomplete : on montre QUELLE question manque (encadree en rouge,
 // defilement jusqu'a elle) au lieu d'un message general introuvable.
+// Ce que le patient voit coche fait foi : on le recopie dans ses reponses
+// (questions visibles seulement) avant de verifier la page.
+function reprendreDuDom(st){
+  if(!state || !state.bilan) return
+  let change = false
+  st.querySelectorAll('.opt.on[data-cle], .s.on[data-cle]').forEach(el => {
+    if(el.offsetParent === null) return
+    const c = el.dataset.cle, v = Number(el.dataset.val)
+    if(el.dataset.i === undefined){ if(state.bilan[c] !== v){ state.bilan[c] = v; change = true } return }
+    const a = state.bilan[c], i = Number(el.dataset.i)
+    if(Array.isArray(a) && a[i] !== v){ a[i] = v; change = true }
+  })
+  if(change){ sauver(); try { majTotaux() } catch(e) {} }
+}
 function signalerManques(st){
   const manques = [...st.querySelectorAll('.question')].filter(q => q.offsetParent !== null && q.querySelector('.opt,.s') && !q.querySelector('.opt.on,.s.on'))
   manques.forEach(q => q.classList.add('manque'))
@@ -639,6 +654,7 @@ function signalerManques(st){
 document.addEventListener('click', e => { const q = e.target.closest && e.target.closest('.question.manque'); if(q && e.target.closest('.opt,.s')) q.classList.remove('manque') })
 document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => {
   const cour = document.querySelector('.step.active').id
+  if(ETAPES.includes(cour)) reprendreDuDom(document.getElementById(cour))
   if(ETAPES.includes(cour) && !etapeComplete(cour)){ signalerManques(document.getElementById(cour)); return }
   sauver(); show(b.dataset.next)
 }))
@@ -654,6 +670,7 @@ function rendreOptions(cont, items, cle, getLabel){
     liste.forEach((o, j) => {
       const lab = Array.isArray(o) ? o[0] : o, val = Array.isArray(o) ? o[1] : j
       const el = document.createElement('label'); el.className = 'opt'; el.textContent = lab
+      el.dataset.cle = cle; el.dataset.i = i; el.dataset.val = val
       if(state.bilan[cle][i] === val) el.classList.add('on')
       el.addEventListener('click', () => { state.bilan[cle][i] = val; opts.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver(); majTotaux() })
       opts.appendChild(el)
@@ -669,6 +686,7 @@ function rendreEchelle(cont, items, cle, min, max, legende){
     const sc = q.querySelector('.scale')
     for(let v = min; v <= max; v++){
       const el = document.createElement('div'); el.className = 's'; el.textContent = v
+      el.dataset.cle = cle; el.dataset.i = i; el.dataset.val = v
       if(state.bilan[cle][i] === v) el.classList.add('on')
       el.addEventListener('click', () => { state.bilan[cle][i] = v; sc.querySelectorAll('.s').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() })
       sc.appendChild(el)
@@ -676,12 +694,14 @@ function rendreEchelle(cont, items, cle, min, max, legende){
     cont.appendChild(q)
   })
 }
-function rendreChips(cont, items, tableau){
+// `lire` rend le tableau COURANT au moment du clic : une synchronisation peut
+// remplacer state.bilan ou state.situ, et l'ancien tableau ne compte plus.
+function rendreChips(cont, items, lire){
   cont.innerHTML = ''
   items.forEach((txt, i) => {
     const el = document.createElement('label'); el.className = 'chip'; el.textContent = txt
-    if(tableau.includes(i)) el.classList.add('on')
-    el.addEventListener('click', () => { const k = tableau.indexOf(i); if(k >= 0) tableau.splice(k, 1); else tableau.push(i); el.classList.toggle('on'); sauver() })
+    if(lire().includes(i)) el.classList.add('on')
+    el.addEventListener('click', () => { const tableau = lire(), k = tableau.indexOf(i); if(k >= 0) tableau.splice(k, 1); else tableau.push(i); el.classList.toggle('on', k < 0); sauver() })
     cont.appendChild(el)
   })
 }
@@ -713,7 +733,8 @@ function rendreOuiNon(cont, items, cle){
   items.forEach((txt, i) => {
     const q = document.createElement('div'); q.className = 'question'
     q.innerHTML = `<div class="q">${txt}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
-    q.querySelectorAll('.opt').forEach(el => { if(state.bilan[cle][i] === Number(el.dataset.v)) el.classList.add('on')
+    q.querySelectorAll('.opt').forEach(el => { el.dataset.cle = cle; el.dataset.i = i; el.dataset.val = el.dataset.v
+      if(state.bilan[cle][i] === Number(el.dataset.v)) el.classList.add('on')
       el.addEventListener('click', () => { state.bilan[cle][i] = Number(el.dataset.v); q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() }) })
     cont.appendChild(q)
   })
@@ -724,10 +745,14 @@ function rendreSante(){
   const t = $('trau-q'); t.innerHTML = ''
   const q = document.createElement('div'); q.className = 'question'
   q.innerHTML = `<div class="q">${TRAU_Q}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
-  q.querySelectorAll('.opt').forEach(el => { if(b.trau === Number(el.dataset.v)) el.classList.add('on')
-    el.addEventListener('click', () => { b.trau = Number(el.dataset.v); q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on')
-      if(b.trau === 0) b.ptsd = Array(5).fill(null)
-      $('ptsd-bloc').style.display = b.trau === 1 ? 'block' : 'none'; sauver() }) })
+  q.querySelectorAll('.opt').forEach(el => { el.dataset.cle = 'trau'; el.dataset.val = el.dataset.v
+    if(b.trau === Number(el.dataset.v)) el.classList.add('on')
+    // Toujours state.bilan au moment du clic, jamais `b` : une synchronisation
+    // remplace state.bilan, et ecrire dans l'ancien objet perdait la reponse
+    // (blocage de l'etape 8).
+    el.addEventListener('click', () => { const bb = state.bilan; bb.trau = Number(el.dataset.v); q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on')
+      if(bb.trau === 0) bb.ptsd = Array(5).fill(null)
+      $('ptsd-bloc').style.display = bb.trau === 1 ? 'block' : 'none'; sauver() }) })
   t.appendChild(q)
   $('ptsd-bloc').style.display = b.trau === 1 ? 'block' : 'none'
   rendreOuiNon($('ptsd-q'), PTSD_ITEMS, 'ptsd')
@@ -743,8 +768,8 @@ function rendreBilan(){
   rendreOptions($('meq-q'), MEQ_ITEMS, 'meq')
   rendreEchelle($('epw-q'), EPW_ITEMS, 'epw', 0, 3, ['jamais', 'forte'])
   rendreOptions($('phq-q'), PHQ_ITEMS, 'phq')
-  rendreChips($('chips-hab'), HAB, state.bilan.hab)
-  rendreChips($('chips-situ'), SITU, state.situ)
+  rendreChips($('chips-hab'), HAB, () => { if(!Array.isArray(state.bilan.hab)) state.bilan.hab = []; return state.bilan.hab })
+  rendreChips($('chips-situ'), SITU, () => { if(!Array.isArray(state.situ)) state.situ = []; return state.situ })
   majTotaux()
 }
 
@@ -1159,6 +1184,7 @@ async function synchroniser(manuel){
   if(!state || !state.partage || syncEnCours) return
   const base = serveurPartage(); if(!base) return
   syncEnCours = true
+  const versionEnvoyee = modifsLocales
   try {
     const corps = { cle:state.partage.cle, etat:anonymiserEtat(),
       bilan:state.bilan && state.mode ? sansIdentite(objBilan()) : null,
@@ -1169,7 +1195,10 @@ async function synchroniser(manuel){
     if(r.status === 403){ state.partage.erreur = 'Code ou clé refusés par le serveur : le partage est suspendu.'; rendrePartage(); return }
     if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
     state.partage.derniere = new Date().toISOString(); state.partage.erreur = null
-    adopterEtatServeur(j.etat); adopterDroits(j.droits)
+    // Le patient a continue a repondre pendant l'aller-retour : son ecran est
+    // plus recent que la reponse du serveur. On garde l'ecran et on renvoie.
+    if(modifsLocales === versionEnvoyee) adopterEtatServeur(j.etat); else planifierSync()
+    adopterDroits(j.droits)
     if(j.messages_non_lus != null) majBadgeMessages(j.messages_non_lus)
     if(j.decision && j.decision_le && j.decision_le !== state.partage.decisionVue){
       state.partage.decisionVue = j.decision_le
