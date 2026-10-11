@@ -251,7 +251,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ================= AGENDA ================= -->
 <div class="step" id="step-agenda">
   <h2>Mon agenda du sommeil</h2>
-  <div class="tabs" style="font-size:13px"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Semaine</button><button data-tab="seances">Séances</button><button data-tab="croyances">Croyances</button><button data-tab="messages" id="tab-btn-messages">Messages</button><button data-tab="suivi">Médecin</button></div>
+  <div class="tabs" style="font-size:13px"><button class="on" data-tab="jour">Ce matin</button><button data-tab="semaine">Semaine</button><button data-tab="seances">Séances</button><button data-tab="croyances">Croyances</button><button data-tab="messages" id="tab-btn-messages">Messages</button><button data-tab="montre">Montre</button><button data-tab="suivi">Médecin</button></div>
 
   <div id="tab-jour">
     <div id="agenda-pause"></div>
@@ -305,6 +305,63 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <p class="small" id="messages-retour"></p>
     </div>
   </div>
+
+  <div id="tab-montre" style="display:none">
+    <div class="card" id="montre-lien-card">
+      <h3>Ma montre connectée</h3>
+      <div id="montre-lien-etat"></div>
+      <div id="montre-lien-choix" style="display:none">
+        <p class="small">Reliez votre montre : chaque matin, vos heures de coucher et de lever, vos réveils et votre temps de sommeil arrivent dans votre agenda, à confirmer d'un geste. Vous pouvez retirer l'accès à tout moment.</p>
+        <select id="montre-fournisseur" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;margin-bottom:6px"></select>
+        <button class="btn secondary" id="btn-montre-lier">Connecter ma montre</button>
+      </div>
+      <div id="montre-lien-actif" style="display:none">
+        <button class="btn secondary" id="btn-montre-sync">Mettre à jour maintenant</button>
+        <button class="btn ghost" id="btn-montre-delier">Déconnecter la montre</button>
+      </div>
+      <p class="small" id="montre-lien-retour"></p>
+    </div>
+    <div class="card">
+      <h3>Saisir les chiffres de ma montre</h3>
+      <p class="small">Recopiez ce qu'affiche l'application de votre montre (ou de votre bague, votre bracelet) pour une nuit. Seuls les chiffres que vous avez comptent : laissez vide ce que la montre ne donne pas.</p>
+      <div class="row">
+        <div><label class="small">Matin du</label><input type="date" id="m-date"></div>
+        <div><label class="small">Score de sommeil (0–100)</label><input type="number" id="m-score" min="0" max="100" inputmode="numeric" placeholder="ex : 78"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Coucher</label><input type="time" id="m-hc"></div>
+        <div><label class="small">Lever</label><input type="time" id="m-hl"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Endormissement (min)</label><input type="number" id="m-lat" min="0" max="600" inputmode="numeric"></div>
+        <div><label class="small">Nombre de réveils</label><input type="number" id="m-nrev" min="0" max="50" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Éveillé dans la nuit (min)</label><input type="number" id="m-waso" min="0" max="600" inputmode="numeric"></div>
+        <div><label class="small">Sommeil total (h:mm)</label><input type="time" id="m-tst"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Sommeil profond (min)</label><input type="number" id="m-prof" min="0" max="600" inputmode="numeric"></div>
+        <div><label class="small">Sommeil paradoxal (min)</label><input type="number" id="m-par" min="0" max="600" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Fréquence cardiaque (bpm)</label><input type="number" id="m-fc" min="25" max="200" inputmode="numeric"></div>
+        <div><label class="small">VFC (ms)</label><input type="number" id="m-vfc" min="1" max="300" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label class="small">Saturation moyenne (%)</label><input type="number" id="m-spo2" min="50" max="100" inputmode="numeric"></div>
+        <div><label class="small">Ronflement (min)</label><input type="number" id="m-ronfl" min="0" max="600" inputmode="numeric"></div>
+      </div>
+      <button class="btn" id="btn-montre-ok">Enregistrer cette nuit</button>
+      <p class="small" id="montre-saisie-retour"></p>
+    </div>
+    <div class="card">
+      <h3>Mes nuits selon la montre</h3>
+      <p class="small">Montre et agenda ne disent pas toujours la même chose : c'est normal, et cet écart intéresse votre médecin.</p>
+      <div id="montre-liste"></div>
+    </div>
+  </div>
+
   <div id="tab-suivi" style="display:none">
     <div class="card">
       <h3>QR code de suivi</h3>
@@ -449,7 +506,7 @@ const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PP
 
 // ---------------------------------------------------------------- État
 let state = null
-const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null })
+const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null, montre:{ lien:null, nuits:{} } })
 function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} planifierSync() }
 function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
 
@@ -655,8 +712,10 @@ function rendreSaisie(){
   const deja = state.nuits[date]
   $('saisie-titre').textContent = deja ? 'La nuit dernière (déjà enregistrée, vous pouvez corriger)' : 'La nuit dernière'
   saisie = deja ? { lat:deja.lat, nrev:deja.nrev, waso:deja.waso, q:deja.q, extras:[...(deja.ex || [])] } : { lat:null, nrev:null, waso:null, q:null, extras:[] }
-  $('n-hc').value = deja ? deja.hc : (state.fen ? hhmm(minutes(state.fen.l) - state.fen.d) : '')
-  $('n-hl').value = deja ? deja.hl : (state.fen ? state.fen.l : state.lever)
+  const mn = !deja ? montreNuit(date) : null
+  if(mn && (mn.hc || mn.hl)){ saisie = { lat:plusProche(LAT, mn.lat), nrev:mn.nrev != null ? Math.min(5, mn.nrev) : null, waso:mn.nrev === 0 ? 0 : plusProche(WASO, mn.waso), q:null, extras:[] } }
+  $('n-hc').value = deja ? deja.hc : (mn && mn.hc ? mn.hc : (state.fen ? hhmm(minutes(state.fen.l) - state.fen.d) : ''))
+  $('n-hl').value = deja ? deja.hl : (mn && mn.hl ? mn.hl : (state.fen ? state.fen.l : state.lever))
   const echelle = (cont, items, cle) => { cont.innerHTML = ''; items.forEach(([lab, val]) => { const el = document.createElement('div'); el.className = 's'; el.textContent = lab
     if(saisie[cle] === val) el.classList.add('on'); el.addEventListener('click', () => { saisie[cle] = val; cont.querySelectorAll('.s').forEach(x => x.classList.remove('on')); el.classList.add('on')
       if(cle === 'nrev') $('n-waso-wrap').style.display = val === 0 ? 'none' : 'block'; if(cle === 'nrev' && val === 0) saisie.waso = 0 }); cont.appendChild(el) }) }
@@ -667,7 +726,7 @@ function rendreSaisie(){
   EXTRAS.forEach((t, i) => { if(i === 3 && !state.situ.includes(7)) return
     const el = document.createElement('label'); el.className = 'chip'; el.textContent = t; if(saisie.extras.includes(i)) el.classList.add('on')
     el.addEventListener('click', () => { const k = saisie.extras.indexOf(i); if(k >= 0) saisie.extras.splice(k, 1); else saisie.extras.push(i); el.classList.toggle('on') }); ex.appendChild(el) })
-  $('saisie-retour').textContent = ''
+  $('saisie-retour').textContent = mn && (mn.hc || mn.hl) ? 'Pré-rempli d\'après votre montre : vérifiez, corrigez si besoin, puis enregistrez.' : ''
 }
 $('btn-nuit-ok').addEventListener('click', () => {
   const n = { hc:$('n-hc').value, hl:$('n-hl').value, lat:saisie.lat, nrev:saisie.nrev, waso:saisie.nrev === 0 ? 0 : saisie.waso, q:saisie.q, ex:saisie.extras }
@@ -779,9 +838,10 @@ function rendreSemaine(){
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b))
-  ;['jour','semaine','seances','croyances','messages','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
+  ;['jour','semaine','seances','croyances','messages','montre','suivi'].forEach(t => $('tab-' + t).style.display = b.dataset.tab === t ? 'block' : 'none')
   if(b.dataset.tab === 'seances') rendreSeances()
   if(b.dataset.tab === 'messages') chargerMessages()
+  if(b.dataset.tab === 'montre') rendreMontre()
   if(b.dataset.tab === 'croyances') rendreCartes()
 }))
 function ouvrirAgenda(){
@@ -939,7 +999,7 @@ async function synchroniser(manuel){
 // L'état renvoyé par le serveur est la réunion de tous les appareils du
 // patient : on le reprend tel quel, en gardant ce qui n'appartient qu'à cet
 // appareil (identité, réglages du partage).
-const CLES_SERVEUR = ['situ','bilan','mode','motif','fen','nuits','hebdo','sig','pause','isiFin','lever','seances','cartes','plan','habitudeChoisie','depuisConsultation']
+const CLES_SERVEUR = ['situ','bilan','mode','motif','fen','nuits','hebdo','sig','pause','isiFin','lever','seances','cartes','plan','habitudeChoisie','depuisConsultation','montre']
 function adopterEtatServeur(etat){
   if(!etat || typeof etat !== 'object') return
   const avant = JSON.stringify(CLES_SERVEUR.map(k => state[k]))
@@ -990,6 +1050,77 @@ $('btn-partage-stop').addEventListener('click', () => {
   state.partage = null; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} rendrePartage()
 })
 $('btn-sync').addEventListener('click', () => synchroniser(true))
+
+// ---- Montre connectée et saisie manuelle des chiffres de la montre
+const M_CHAMPS = ['score','hc','hl','lat','nrev','waso','tst','prof','par','fc','vfc','spo2','ronfl']
+const escM = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]))
+function montreEtat(){ if(!state.montre || typeof state.montre !== 'object') state.montre = { lien:null, nuits:{} }; state.montre.nuits = state.montre.nuits || {}; return state.montre }
+function montreNuit(date){ const m = state && state.montre; return m && m.nuits ? m.nuits[date] : null }
+function effMontre(n){ if(!n) return null; const hc = minutes(n.hc), hl = minutes(n.hl); if(hc == null || hl == null) return null; const tib = ((hl - hc) + 1440) % 1440 || 1440; const tst = n.tst != null ? n.tst : Math.max(0, tib - (n.lat || 0) - (n.waso || 0)); return { tib, tst, eff:Math.round(tst / tib * 100) } }
+function plusProche(echelle, v){ if(v == null) return null; return echelle.reduce((a, b) => Math.abs(b[1] - v) < Math.abs(a[1] - v) ? b : a)[1] }
+async function rendreMontre(){
+  const m = montreEtat()
+  $('m-date').value = $('m-date').value || aujourdhui()
+  const e = $('montre-lien-etat'), choix = $('montre-lien-choix'), actif = $('montre-lien-actif')
+  if(!SERVI || !state.partage){
+    e.innerHTML = '<p class="small">La liaison avec une montre passe par le serveur de votre médecin : activez d\'abord le partage (onglet Médecin). La saisie manuelle ci-dessous fonctionne sans.</p>'
+    choix.style.display = 'none'; actif.style.display = 'none'
+  } else if(m.lien && m.lien.ok){
+    const d = m.lien.derniere_sync ? new Date(m.lien.derniere_sync) : null
+    e.innerHTML = `<p class="small"><strong>${escM(m.lien.fournisseur === 'withings' ? 'Withings' : m.lien.fournisseur)} connectée</strong>${d ? ' · dernière mise à jour ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) : ''}. Vos nuits se mettent à jour à chaque ouverture du programme.</p>`
+    choix.style.display = 'none'; actif.style.display = 'block'
+  } else {
+    e.innerHTML = ''; choix.style.display = 'block'; actif.style.display = 'none'
+    try {
+      const j = await apiPatient('/montre')
+      const sel = $('montre-fournisseur'); sel.innerHTML = ''
+      j.fournisseurs.forEach(f => { const o = document.createElement('option'); o.value = f.id; o.disabled = !f.disponible; o.textContent = f.libelle + (f.disponible ? '' : (f.bientot ? ' — bientôt' : ' — pas encore activée')); sel.appendChild(o) })
+      const dispo = j.fournisseurs.find(f => f.disponible); if(dispo) sel.value = dispo.id
+      $('btn-montre-lier').disabled = !dispo
+      if(!dispo) e.innerHTML = '<p class="small">Aucune montre n\'est encore activée sur ce serveur. En attendant, saisissez vos chiffres ci-dessous.</p>'
+    } catch(err){ e.innerHTML = '<p class="small">Liste des montres indisponible pour le moment.</p>' }
+  }
+  rendreMontreListe()
+}
+function rendreMontreListe(){
+  const m = montreEtat(), dates = Object.keys(m.nuits).sort().reverse().slice(0, 14)
+  const cont = $('montre-liste')
+  if(!dates.length){ cont.innerHTML = '<p class="small">Aucune nuit pour l\'instant.</p>'; return }
+  const lignes = dates.map(d => { const n = m.nuits[d], c = effMontre(n), a = state.nuits[d], ca = a ? calculNuit(a) : null
+    const ecart = c && ca ? c.eff - ca.eff : null
+    return `<tr><td>${new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' })}</td><td>${n.score != null ? n.score : '–'}</td><td>${n.hc || '–'} → ${n.hl || '–'}</td><td>${n.tst != null ? hm(n.tst) : (c ? hm(c.tst) : '–')}</td><td>${n.nrev != null ? n.nrev : '–'}</td><td>${n.vfc != null ? n.vfc : '–'}</td><td>${c ? c.eff + ' %' : '–'}${ecart != null ? ` <span class="small" style="color:${Math.abs(ecart) >= 15 ? '#b3261e' : '#4E586E'}">(agenda ${ca.eff} %)</span>` : ''}</td><td class="small">${n.src === 'manuel' ? 'saisie' : escM(n.src || '')}</td></tr>` }).join('')
+  cont.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="text-align:left;color:#4E586E"><th>Matin</th><th>Score</th><th>Coucher → lever</th><th>Sommeil</th><th>Réveils</th><th>VFC</th><th>Efficacité</th><th></th></tr></thead><tbody>${lignes}</tbody></table></div>`
+  cont.querySelectorAll('td').forEach(td => { td.style.padding = '6px 4px'; td.style.borderTop = '1px solid #E6E3DC' })
+}
+$('m-date').addEventListener('change', () => { const n = montreNuit($('m-date').value) || {}
+  M_CHAMPS.forEach(k => { const el = $('m-' + k); if(!el) return; el.value = k === 'tst' ? (n.tst != null ? hhmm(n.tst) : '') : (n[k] != null ? n[k] : '') }) })
+$('btn-montre-ok').addEventListener('click', () => {
+  const date = $('m-date').value; if(!date){ $('montre-saisie-retour').textContent = 'Indiquez la date.'; return }
+  const num = id => { const v = $(id).value; return v === '' ? null : Number(v) }
+  const n = { src:'manuel', maj:new Date().toISOString(), score:num('m-score'), hc:$('m-hc').value || null, hl:$('m-hl').value || null, lat:num('m-lat'), nrev:num('m-nrev'), waso:num('m-waso'),
+    tst:$('m-tst').value ? minutes($('m-tst').value) : null, prof:num('m-prof'), par:num('m-par'), fc:num('m-fc'), vfc:num('m-vfc'), spo2:num('m-spo2'), ronfl:num('m-ronfl') }
+  if(Object.keys(n).every(k => k === 'src' || k === 'maj' || n[k] == null)){ $('montre-saisie-retour').textContent = 'Saisissez au moins un chiffre.'; return }
+  Object.keys(n).forEach(k => { if(n[k] == null) delete n[k] })
+  const m = montreEtat(); m.nuits[date] = Object.assign({}, m.nuits[date] && m.nuits[date].src !== 'manuel' ? m.nuits[date] : {}, n); sauver()
+  const c = effMontre(m.nuits[date])
+  $('montre-saisie-retour').textContent = 'Enregistré.' + (c ? ` Efficacité selon la montre : ${c.eff} %.` : '') + (state.nuits[date] ? '' : ' Votre agenda de ce matin sera pré-rempli avec ces chiffres.')
+  rendreMontreListe()
+})
+$('btn-montre-lier').addEventListener('click', async () => {
+  const f = $('montre-fournisseur').value; $('montre-lien-retour').textContent = 'Ouverture de la page d\'autorisation…'
+  try { const j = await apiPatient('/montre/lier', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, fournisseur:f }) }); location.href = j.url }
+  catch(e){ $('montre-lien-retour').textContent = 'Liaison impossible : ' + e.message }
+})
+$('btn-montre-sync').addEventListener('click', async () => {
+  $('montre-lien-retour').textContent = 'Mise à jour…'
+  try { const j = await apiPatient('/montre/sync', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle }) }); adopterEtatServeur(j.etat); $('montre-lien-retour').textContent = `${j.n} nuit${j.n > 1 ? 's' : ''} reçue${j.n > 1 ? 's' : ''}.`; rendreMontre() }
+  catch(e){ $('montre-lien-retour').textContent = 'Mise à jour impossible : ' + e.message }
+})
+$('btn-montre-delier').addEventListener('click', async () => {
+  if(!confirm('Retirer l\'accès à votre montre ? Les nuits déjà reçues restent dans votre programme.')) return
+  try { await apiPatient('/montre/delier', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle }) }); montreEtat().lien = null; sauver(); $('montre-lien-retour').textContent = 'Montre déconnectée.'; rendreMontre() }
+  catch(e){ $('montre-lien-retour').textContent = 'Déconnexion impossible : ' + e.message }
+})
 
 // ---- ISI de fin
 $('btn-isi-fin').addEventListener('click', () => {
@@ -1234,6 +1365,14 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
     }
   } catch(e) {}
   rendrePartage()
+  try {
+    const q0 = new URLSearchParams(location.search)
+    if(q0.get('montre')){
+      const ok = q0.get('montre') === 'ok'; history.replaceState(null, '', location.pathname)
+      alert(ok ? 'Montre connectée. Vos dernières nuits arrivent dans l\'onglet Montre et pré-remplissent votre agenda.' : 'La liaison avec la montre n\'a pas abouti. Réessayez depuis l\'onglet Montre.')
+      if(ok && state && state.bilan && state.mode){ ouvrirAgenda(); synchroniser(true).then(() => { document.querySelector('[data-tab="montre"]').click() }) }
+    }
+  } catch(e) {}
   try {
     const q = new URLSearchParams(location.search)
     if(q.get('paiement') === 'ok'){
