@@ -383,6 +383,17 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   </div>
 
   <div id="tab-suivi" style="display:none">
+    <div class="card" id="carte-equipe" style="display:none">
+      <h3>Mon médecin ou psychologue</h3>
+      <div id="equipe-etat"></div>
+      <div id="equipe-choix" style="display:none">
+        <p class="small">Choisissez un professionnel de l'équipe Mon Parcours Sommeil et demandez‑lui de vous suivre. Il reçoit votre <strong>code de programme</strong> et le pseudonyme que vous indiquez, jamais votre nom ; il accepte depuis son espace et suit alors votre agenda.</p>
+        <input type="text" id="equipe-pseudo" placeholder="Pseudonyme (facultatif)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;margin-bottom:6px">
+        <textarea id="equipe-message" rows="2" placeholder="Un mot pour lui ou elle (facultatif)" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:8px"></textarea>
+        <div id="equipe-liste"></div>
+      </div>
+      <p class="small" id="equipe-retour"></p>
+    </div>
     <div class="card">
       <h3>QR code de suivi</h3>
       <p class="small">Il résume vos semaines (efficacité, temps de sommeil, fenêtre, signaux) sans le détail de chaque nuit. Montrez-le à la consultation ou envoyez-en une photo au secrétariat.</p>
@@ -396,6 +407,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
         <p class="small" id="partage-etat"></p>
         <p class="small">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
         <p class="small" id="partage-cle-ligne" style="display:none">Votre médecin peut rattacher ce programme à son compte avec votre code et votre clé : <strong id="partage-cle-affichee"></strong></p>
+        <button class="btn secondary" id="btn-code-envoyer">Envoyer mon code à mon médecin ou psychologue</button>
         <button class="btn secondary" id="btn-sync">Envoyer maintenant</button>
         <button class="btn ghost" id="btn-partage-stop">Arrêter le partage</button>
       </div>
@@ -862,6 +874,7 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
   if(b.dataset.tab === 'seances') rendreSeances()
   if(b.dataset.tab === 'messages') chargerMessages()
   if(b.dataset.tab === 'montre') rendreMontre()
+  if(b.dataset.tab === 'suivi') rendreEquipe()
   if(b.dataset.tab === 'croyances') rendreCartes()
 }))
 function ouvrirAgenda(){
@@ -1106,6 +1119,62 @@ $('btn-code-copier').addEventListener('click', async () => {
   const t = $('code-partage-affiche').textContent
   try { await navigator.clipboard.writeText(t); $('code-partage-retour').textContent = 'Code copié.' }
   catch(e){ const r = document.createRange(); r.selectNodeContents($('code-partage-affiche')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); $('code-partage-retour').textContent = 'Sélectionnez le code et copiez‑le.' }
+})
+// ---- Equipe : suivi par un medecin ou un psychologue de l'annuaire
+const escE = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]))
+function carteProHtml(p, complet){
+  const photo = p.photo_url ? `<img src="${serveurPartage()}${escE(p.photo_url)}" alt="" style="width:64px;height:64px;border-radius:999px;object-fit:cover;flex:none">` : `<div style="width:64px;height:64px;border-radius:999px;background:#182136;flex:none;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 96 96" width="34" height="34" aria-hidden="true"><path d="M48 12a24 24 0 0 0 36 36 36 36 0 1 1-36-36Z" fill="#FAF9F6"/><circle cx="70" cy="20" r="4.5" fill="#C9955C"/></svg></div>`
+  const coord = complet ? [p.adresse, p.telephone ? `<a href="tel:${escE(p.telephone.replace(/\s/g, ''))}">${escE(p.telephone)}</a>` : '', p.email_pro ? `<a href="mailto:${escE(p.email_pro)}">${escE(p.email_pro)}</a>` : ''].filter(Boolean) : []
+  return `<div style="display:flex;gap:12px;align-items:flex-start"><div>${photo}</div><div style="min-width:0"><strong>${escE(p.nom)}</strong><br><span class="small">${escE(p.profession_libelle)}${p.ville ? ' · ' + escE(p.ville) : ''}</span>${p.presentation ? `<p class="small" style="margin:6px 0 0">${escE(p.presentation)}</p>` : ''}${coord.length ? `<p class="small" style="margin:6px 0 0">${coord.map(x => x.startsWith('<') ? x : escE(x)).join('<br>')}</p>` : ''}</div></div>`
+}
+async function rendreEquipe(){
+  const carte = $('carte-equipe'); if(!carte) return
+  if(!SERVI || !state || !state.partage){ carte.style.display = 'none'; return }
+  carte.style.display = 'block'
+  const etat = $('equipe-etat'), choix = $('equipe-choix')
+  let s
+  try { s = await apiPatient(`/demande?cle=${encodeURIComponent(state.partage.cle)}`) } catch(e){ etat.innerHTML = '<p class="small">Équipe indisponible pour le moment.</p>'; choix.style.display = 'none'; return }
+  const d = s.demande
+  if(d && d.statut === 'acceptee'){
+    etat.innerHTML = `<p class="small" style="margin-top:0"><strong>Vous êtes suivi(e) par :</strong></p>${carteProHtml(d.pro, true)}`; choix.style.display = 'none'; return
+  }
+  if(s.rattache){ etat.innerHTML = '<p class="small">Votre programme est suivi par votre médecin : il reçoit votre agenda et vous envoie ses décisions ici.</p>'; choix.style.display = 'none'; return }
+  if(d && d.statut === 'attente'){
+    etat.innerHTML = `<p class="small" style="margin-top:0"><strong>Demande envoyée le ${new Date(d.cree_le).toLocaleDateString('fr-FR')}</strong>, en attente de réponse :</p>${carteProHtml(d.pro, false)}<button class="btn ghost" id="btn-equipe-annuler">Annuler ma demande</button>`
+    choix.style.display = 'none'
+    $('btn-equipe-annuler').onclick = async () => { try { await apiPatient('/demande', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, annuler:true }) }); rendreEquipe() } catch(e){ $('equipe-retour').textContent = e.message } }
+    return
+  }
+  if(!s.coache){
+    etat.innerHTML = '<p class="small">Être suivi par un médecin ou un psychologue de l\'équipe, avec des échanges écrits, fait partie de la <strong>formule coachée</strong>. En autonomie, vous pouvez envoyer votre code à votre propre médecin (ci‑dessous).</p><button class="btn secondary" id="btn-equipe-offres">Voir la formule coachée</button>'
+    choix.style.display = 'none'
+    $('btn-equipe-offres').onclick = () => { show('step-offres'); rafraichirDroits() }
+    return
+  }
+  etat.innerHTML = d && d.statut === 'refusee' ? `<p class="small">${escE(d.pro.nom)} n'a pas pu donner suite. Vous pouvez choisir un autre professionnel.</p>` : ''
+  choix.style.display = 'block'
+  if(!$('equipe-pseudo').value && state.ident && state.ident.p) $('equipe-pseudo').value = state.ident.p
+  try {
+    const r = await fetch(`${serveurPartage()}/api/equipe`); const j = await r.json()
+    const liste = $('equipe-liste')
+    liste.innerHTML = j.equipe && j.equipe.length ? j.equipe.map(p => `<div style="border-top:1px solid #E6E3DC;padding:12px 0">${carteProHtml(p, false)}<button class="btn secondary" data-pro="${escE(p.id)}" style="margin-top:8px">Demander à être suivi(e)</button></div>`).join('')
+      : '<p class="small">Aucun professionnel ne reçoit de demandes pour l\'instant. Vous pouvez aussi envoyer votre code à votre médecin (ci‑dessous).</p>'
+    liste.querySelectorAll('[data-pro]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true
+      try { await apiPatient('/demande', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, pro_id:b.dataset.pro, pseudo:$('equipe-pseudo').value, message:$('equipe-message').value }) }); $('equipe-retour').textContent = 'Demande envoyée.'; rendreEquipe() }
+      catch(e){ $('equipe-retour').textContent = e.message; b.disabled = false }
+    }))
+  } catch(e){ $('equipe-liste').innerHTML = '<p class="small">Annuaire indisponible.</p>' }
+}
+function texteCode(){
+  const p = state.partage, base = serveurPartage() || 'https://monparcourssommeil.fr'
+  return `Bonjour, voici le code de mon programme Mon Parcours Sommeil : ${p.code} · clé ${p.cle}. Vous pouvez le rattacher à votre espace professionnel : ${base}/pro (Parcours sommeil → Rattacher un programme).`
+}
+$('btn-code-envoyer').addEventListener('click', async () => {
+  if(!state.partage) return
+  const t = texteCode()
+  if(navigator.share){ try { await navigator.share({ title:'Mon programme sommeil', text:t }); return } catch(e){ if(e && e.name === 'AbortError') return } }
+  location.href = 'mailto:?subject=' + encodeURIComponent('Mon programme sommeil') + '&body=' + encodeURIComponent(t)
 })
 // ---- Montre connectée et saisie manuelle des chiffres de la montre
 const M_CHAMPS = ['score','hc','hl','lat','nrev','waso','tst','prof','par','fc','vfc','spo2','ronfl']
