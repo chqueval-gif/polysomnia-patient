@@ -1582,7 +1582,7 @@ function verifierReports(){
 
 // ---------------------------------------------------------------- Accueil
 $('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
-$('btn-commencer').addEventListener('click', async () => { state = vide(); await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(9).fill(null), sec:null, hab:[], gad:Array(2).fill(null), trau:null, ptsd:Array(5).fill(null), asrs:Array(6).fill(null), cfx:Array(3).fill(null) }; sauver(); rendreBilan(); show('step-id') })
+$('btn-commencer').addEventListener('click', async () => { const partageRecu = state && state.partage; state = vide(); if(partageRecu) state.partage = partageRecu; await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(9).fill(null), sec:null, hab:[], gad:Array(2).fill(null), trau:null, ptsd:Array(5).fill(null), asrs:Array(6).fill(null), cfx:Array(3).fill(null) }; sauver(); rendreBilan(); show('step-id') })
 $('btn-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-vers-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-revoir-bilan').addEventListener('click', () => { afficherResultat(); show('step-resultat') })
