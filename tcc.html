@@ -214,7 +214,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   </div>
   <div class="card" id="carte-code-partage" style="display:none">
     <h3>Votre code de partage</h3>
-    <p class="small">À donner à votre médecin ou à votre psychologue du sommeil : il rattache votre programme à son compte et reçoit votre agenda <strong>sans votre nom</strong>. Notez‑le ou copiez‑le.</p>
+    <p class="small">À donner à votre psychologue : il rattache votre programme à son compte et reçoit votre agenda <strong>sans votre nom</strong>. Notez‑le ou copiez‑le.</p>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <code id="code-partage-affiche" style="flex:1;font-size:18px;letter-spacing:.06em;padding:12px 14px;background:#EBEDF1;border-radius:12px;word-break:break-all"></code>
       <button class="btn secondary" id="btn-code-copier" style="width:auto;margin-top:0;padding:12px 18px">Copier</button>
@@ -256,7 +256,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   </div>
   <div class="card">
     <h3>Coaché — <span id="prix-coache">40 €</span> / mois</h3>
-    <p class="small">Tout le programme, plus des <strong>échanges écrits avec un coach</strong> — psychologue ou infirmier(e) formé(e) au sommeil — qui lit votre agenda et répond à vos questions sous 48 h ouvrées.</p>
+    <p class="small">Tout le programme, plus des <strong>échanges écrits avec un coach</strong> — psychologue formé(e) à la TCC‑I — qui lit votre agenda et répond à vos questions sous 48 h ouvrées.</p>
     <button class="btn" id="btn-offre-coache">Choisir le coaching</button>
   </div>
   <p class="small" id="offres-retour"></p>
@@ -384,10 +384,10 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 
   <div id="tab-suivi" style="display:none">
     <div class="card" id="carte-equipe" style="display:none">
-      <h3>Mon médecin ou psychologue</h3>
+      <h3>Mon psychologue</h3>
       <div id="equipe-etat"></div>
       <div id="equipe-choix" style="display:none">
-        <p class="small">Choisissez un professionnel de l'équipe Mon Parcours Sommeil et demandez‑lui de vous suivre. Il reçoit votre <strong>code de programme</strong> et le pseudonyme que vous indiquez, jamais votre nom ; il accepte depuis son espace et suit alors votre agenda.</p>
+        <p class="small">Choisissez un psychologue de l'équipe Mon Parcours Sommeil, formé à la TCC‑I, et demandez‑lui de vous accompagner. Il reçoit votre <strong>code de programme</strong> et le pseudonyme que vous indiquez, jamais votre nom ; il accepte depuis son espace et suit alors votre agenda.</p>
         <input type="text" id="equipe-pseudo" placeholder="Pseudonyme (facultatif)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;margin-bottom:6px">
         <textarea id="equipe-message" rows="2" placeholder="Un mot pour lui ou elle (facultatif)" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:8px"></textarea>
         <div id="equipe-liste"></div>
@@ -407,7 +407,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
         <p class="small" id="partage-etat"></p>
         <p class="small">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
         <p class="small" id="partage-cle-ligne" style="display:none">Votre médecin peut rattacher ce programme à son compte avec votre code et votre clé : <strong id="partage-cle-affichee"></strong></p>
-        <button class="btn secondary" id="btn-code-envoyer">Envoyer mon code à mon médecin ou psychologue</button>
+        <button class="btn secondary" id="btn-code-envoyer">Envoyer mon code à mon psychologue</button>
         <button class="btn secondary" id="btn-sync">Envoyer maintenant</button>
         <button class="btn ghost" id="btn-partage-stop">Arrêter le partage</button>
       </div>
@@ -1136,7 +1136,7 @@ async function rendreEquipe(){
   try { s = await apiPatient(`/demande?cle=${encodeURIComponent(state.partage.cle)}`) } catch(e){ etat.innerHTML = '<p class="small">Équipe indisponible pour le moment.</p>'; choix.style.display = 'none'; return }
   const d = s.demande
   if(d && d.statut === 'acceptee'){
-    etat.innerHTML = `<p class="small" style="margin-top:0"><strong>Vous êtes suivi(e) par :</strong></p>${carteProHtml(d.pro, true)}`; choix.style.display = 'none'; return
+    etat.innerHTML = `<p class="small" style="margin-top:0"><strong>Vous êtes accompagné(e) par :</strong></p>${carteProHtml(d.pro, true)}`; choix.style.display = 'none'; return
   }
   if(s.rattache){ etat.innerHTML = '<p class="small">Votre programme est suivi par votre médecin : il reçoit votre agenda et vous envoie ses décisions ici.</p>'; choix.style.display = 'none'; return }
   if(d && d.statut === 'attente'){
@@ -1146,19 +1146,19 @@ async function rendreEquipe(){
     return
   }
   if(!s.coache){
-    etat.innerHTML = '<p class="small">Être suivi par un médecin ou un psychologue de l\'équipe, avec des échanges écrits, fait partie de la <strong>formule coachée</strong>. En autonomie, vous pouvez envoyer votre code à votre propre médecin (ci‑dessous).</p><button class="btn secondary" id="btn-equipe-offres">Voir la formule coachée</button>'
+    etat.innerHTML = '<p class="small">Être accompagné par un psychologue de l\'équipe, avec des échanges écrits, fait partie de la <strong>formule coachée</strong>.</p><button class="btn secondary" id="btn-equipe-offres">Voir la formule coachée</button>'
     choix.style.display = 'none'
     $('btn-equipe-offres').onclick = () => { show('step-offres'); rafraichirDroits() }
     return
   }
-  etat.innerHTML = d && d.statut === 'refusee' ? `<p class="small">${escE(d.pro.nom)} n'a pas pu donner suite. Vous pouvez choisir un autre professionnel.</p>` : ''
+  etat.innerHTML = d && d.statut === 'refusee' ? `<p class="small">${escE(d.pro.nom)} n'a pas pu donner suite. Vous pouvez choisir un autre psychologue.</p>` : ''
   choix.style.display = 'block'
   if(!$('equipe-pseudo').value && state.ident && state.ident.p) $('equipe-pseudo').value = state.ident.p
   try {
     const r = await fetch(`${serveurPartage()}/api/equipe`); const j = await r.json()
     const liste = $('equipe-liste')
     liste.innerHTML = j.equipe && j.equipe.length ? j.equipe.map(p => `<div style="border-top:1px solid #E6E3DC;padding:12px 0">${carteProHtml(p, false)}<button class="btn secondary" data-pro="${escE(p.id)}" style="margin-top:8px">Demander à être suivi(e)</button></div>`).join('')
-      : '<p class="small">Aucun professionnel ne reçoit de demandes pour l\'instant. Vous pouvez aussi envoyer votre code à votre médecin (ci‑dessous).</p>'
+      : '<p class="small">Aucun psychologue ne reçoit de demandes pour l\'instant. Revenez dans quelques jours.</p>'
     liste.querySelectorAll('[data-pro]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true
       try { await apiPatient('/demande', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, pro_id:b.dataset.pro, pseudo:$('equipe-pseudo').value, message:$('equipe-message').value }) }); $('equipe-retour').textContent = 'Demande envoyée.'; rendreEquipe() }
