@@ -232,6 +232,13 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <p class="small">Vos documents sont prêts. Ils restent téléchargeables depuis cette page.</p>
       <a class="btn secondary" id="lien-pdf-bilan" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Mon bilan sommeil (PDF)</a>
       <a class="btn secondary" id="lien-pdf-guide" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Comprendre son sommeil (PDF)</a>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #E6E3DC">
+        <p class="small" style="margin-top:0"><strong>Recevoir les deux PDF par e‑mail</strong></p>
+        <input type="email" id="pdf-email" placeholder="votre@adresse.fr" autocomplete="email" inputmode="email" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px">
+        <button class="btn" id="btn-pdf-email">Recevoir mes 2 PDF par e‑mail</button>
+        <p class="small" style="color:#7E5526;margin-bottom:0"><strong>Votre adresse ne sert qu'à cet envoi et n'est pas conservée : 0 publicité, 0 autre e‑mail, 0 revente de vos données.</strong></p>
+        <p class="small" id="pdf-email-retour"></p>
+      </div>
     </div>
     <p class="small" id="pdf-retour"></p>
   </div>
@@ -1086,6 +1093,16 @@ $('btn-partage-stop').addEventListener('click', () => {
 })
 $('btn-sync').addEventListener('click', () => synchroniser(true))
 
+// ---- Envoi des deux PDF par e-mail (adresse non conservee)
+$('btn-pdf-email').addEventListener('click', async () => {
+  const email = $('pdf-email').value.trim(), retour = $('pdf-email-retour')
+  if(!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)){ retour.textContent = 'Adresse e‑mail invalide.'; return }
+  $('btn-pdf-email').disabled = true; retour.textContent = 'Envoi en cours…'
+  try { await apiPatient('/pdf/envoyer', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, email }) })
+    retour.textContent = 'Envoyé. Pensez à regarder dans les indésirables si vous ne le voyez pas.'; $('pdf-email').value = '' }
+  catch(e){ retour.textContent = e.message }
+  finally { $('btn-pdf-email').disabled = false }
+})
 // ---- Ecran du bilan : enregistrer / envoyer le QR, code de partage
 function rendreCodePartageBilan(){
   const carte = $('carte-code-partage'); if(!carte) return
