@@ -252,7 +252,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   <div class="card" id="carte-pdf" style="display:none">
     <h3>Votre bilan en PDF</h3>
     <div id="pdf-a-payer">
-      <div class="info encart-test" id="encart-test-pdf" style="display:none"><strong>Gratuit pour l'instant :</strong> paiement simulé, carte <strong>4242 4242 4242 4242</strong>, date à venir, code 123.</div>
+      <div class="info encart-test" id="encart-test-pdf" style="display:none"><strong>Gratuit pour l'instant</strong>, jusqu'au <span class="code-lancement-fin"></span> : saisissez le code <strong class="code-lancement"></strong> et vos deux PDF s'ouvrent, sans carte bancaire.<div style="display:flex;gap:8px;margin-top:8px"><input id="code-acces-pdf" placeholder="Code d'accès" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;text-transform:uppercase"><button class="btn" data-code-acces="-pdf" style="width:auto;margin-top:0;padding:12px 18px">Activer</button></div><p class="small" id="code-acces-retour-pdf" style="margin-bottom:0"></p></div>
       <p class="small">Recevez votre <strong>bilan sommeil commenté</strong> (scores expliqués, ce que votre médecin prendra en compte) et le <strong>guide « Comprendre son sommeil »</strong>, en PDF, pour <strong id="pdf-prix">10 €</strong> (paiement unique, sécurisé par Stripe).</p>
       <button class="btn secondary" id="btn-pdf-payer">Obtenir mes deux PDF</button>
     </div>
@@ -277,7 +277,11 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ================= OFFRES ================= -->
 <div class="step" id="step-offres">
   <h2>Choisir ma formule</h2>
-  <div class="info encart-test" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit pour l'instant.</strong> Le paiement est simulé, rien ne vous sera débité. Sur l'écran de paiement, saisissez la carte <strong>4242 4242 4242 4242</strong>, une date d'expiration à venir, le code 123 et un nom quelconque.</div>
+  <div class="info encart-test" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit jusqu'au <span class="code-lancement-fin"></span>.</strong> Saisissez le code <strong class="code-lancement"></strong> ci-dessous : tout le programme s'ouvre, échanges avec un psychologue compris, sans carte bancaire.</div>
+  <div class="card">
+    <h3>J'ai un code d'accès</h3>
+    <p class="small" style="margin-top:0">Remis par votre médecin, votre psychologue ou affiché ci-dessus.</p><div style="display:flex;gap:8px;margin-top:8px"><input id="code-acces" placeholder="Code d'accès" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;text-transform:uppercase"><button class="btn" data-code-acces="" style="width:auto;margin-top:0;padding:12px 18px">Activer</button></div><p class="small" id="code-acces-retour" style="margin-bottom:0"></p>
+  </div>
   <p class="small">Le programme se compose de trois choses, qui font partie d'une formule payante :</p>
   <div class="card" style="font-size:14px">
     <p><strong>L'agenda du sommeil</strong> : chaque matin, une minute pour noter votre nuit (coucher, endormissement, réveils, lever, qualité). C'est lui qui produit vos chiffres : efficacité du sommeil, durée réelle, tendance de la semaine.</p>
@@ -1085,11 +1089,27 @@ $('btn-abonnement').addEventListener('click', async () => {
   try { const j = await apiPatient('/portail', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle }) }); location.href = j.url }
   catch(e){ $('abonnement-etat').textContent = e.message }
 })
-function afficherEncartsTest(on){ document.querySelectorAll('.encart-test').forEach(el => { el.style.display = on ? 'block' : 'none' }) }
+function afficherEncartsTest(code){
+  const fin = code && code.fin ? code.fin.split('-').reverse().join('/') : ''
+  document.querySelectorAll('.code-lancement').forEach(el => { el.textContent = code ? code.code : '' })
+  document.querySelectorAll('.code-lancement-fin').forEach(el => { el.textContent = fin })
+  document.querySelectorAll('.encart-test').forEach(el => { el.style.display = code ? 'block' : 'none' })
+}
+document.querySelectorAll('[data-code-acces]').forEach(b => b.addEventListener('click', async () => {
+  const suffixe = b.dataset.codeAcces, champ = $('code-acces' + suffixe), retour = $('code-acces-retour' + suffixe)
+  if(!champ.value.trim()) return
+  if(!state || !state.partage){ retour.textContent = 'Commencez d\'abord votre bilan : le code s\'active ensuite.'; return }
+  try {
+    const j = await apiPatient('/code-acces', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, code:champ.value }) })
+    adopterDroits(j.droits); champ.value = ''
+    retour.textContent = `✓ Code activé : votre programme est ouvert jusqu'au ${j.fin.split('-').reverse().join('/')}.`
+    if(!suffixe) setTimeout(ouvrirAgenda, 900)
+  } catch(e){ retour.textContent = e.message }
+}))
 async function rafraichirDroits(){
   if(!state.partage || !serveurPartage()) return
   try { const j = await apiPatient(`/offres?cle=${encodeURIComponent(state.partage.cle)}`); adopterDroits(j.droits)
-    afficherEncartsTest(!!j.mode_test)
+    afficherEncartsTest(j.code_lancement)
     if(j.offres){ j.offres.forEach(o => { const el = $('prix-' + o.id) || (o.id === 'bilan' ? $('pdf-prix') : null); if(el) el.textContent = (o.prix / 100).toLocaleString('fr-FR') + ' €' }) }
   } catch(e) {}
 }
