@@ -112,6 +112,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ================= IDENTITÉ ================= -->
 <div class="step" id="step-id">
   <h2>1. Vous</h2>
+  <div class="info encart-test" style="display:none"><strong>Phase de test, sans hébergement HDS pour l'instant :</strong> indiquez un <strong>pseudonyme</strong> plutôt que votre vrai nom. Vos réponses restent sur ce téléphone ; votre médecin vous reconnaîtra par le code de partage que vous lui donnerez.</div>
   <div class="card">
     <div class="row">
       <div><label class="small">Nom</label><input type="text" id="nom" autocomplete="off"></div>
@@ -223,7 +224,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   <div class="card" id="carte-pdf" style="display:none">
     <h3>Votre bilan en PDF</h3>
     <div id="pdf-a-payer">
-      <div class="info" id="encart-test-pdf" style="display:none"><strong>Gratuit pour l'instant :</strong> paiement simulé, carte <strong>4242 4242 4242 4242</strong>, date à venir, code 123.</div>
+      <div class="info encart-test" id="encart-test-pdf" style="display:none"><strong>Gratuit pour l'instant :</strong> paiement simulé, carte <strong>4242 4242 4242 4242</strong>, date à venir, code 123.</div>
       <p class="small">Recevez votre <strong>bilan sommeil commenté</strong> (scores expliqués, ce que votre médecin prendra en compte) et le <strong>guide « Comprendre son sommeil »</strong>, en PDF, pour <strong id="pdf-prix">10 €</strong> (paiement unique, sécurisé par Stripe).</p>
       <button class="btn secondary" id="btn-pdf-payer">Obtenir mes deux PDF</button>
     </div>
@@ -241,7 +242,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ================= OFFRES ================= -->
 <div class="step" id="step-offres">
   <h2>Choisir ma formule</h2>
-  <div class="info" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit pour l'instant.</strong> Le paiement est simulé, rien ne vous sera débité. Sur l'écran de paiement, saisissez la carte <strong>4242 4242 4242 4242</strong>, une date d'expiration à venir, le code 123 et un nom quelconque.</div>
+  <div class="info encart-test" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit pour l'instant.</strong> Le paiement est simulé, rien ne vous sera débité. Sur l'écran de paiement, saisissez la carte <strong>4242 4242 4242 4242</strong>, une date d'expiration à venir, le code 123 et un nom quelconque.</div>
   <p class="small">Le programme se compose de trois choses, qui font partie d'une formule payante :</p>
   <div class="card" style="font-size:14px">
     <p><strong>L'agenda du sommeil</strong> : chaque matin, une minute pour noter votre nuit (coucher, endormissement, réveils, lever, qualité). C'est lui qui produit vos chiffres : efficacité du sommeil, durée réelle, tendance de la semaine.</p>
@@ -916,7 +917,7 @@ async function inscrireSiBesoin(){
   try {
     const r = await fetch(`${location.origin}/api/tcc/patient/inscription`, { method:'POST' })
     const j = await r.json().catch(() => ({}))
-    if(r.ok && j.ok){ state.partage = { code:j.code, cle:j.cle, serveur:null, derniere:null, decisionVue:null, libre:true }; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} }
+    if(r.ok && j.ok){ state.partage = { code:j.code, cle:j.cle, serveur:null, derniere:null, decisionVue:null, libre:true }; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} afficherEncartsTest(!!j.mode_test) }
   } catch(e) {}
 }
 function adopterDroits(d){ if(d){ droits = d; rendrePdf(); rendreAbonnement() } }
@@ -955,10 +956,11 @@ $('btn-abonnement').addEventListener('click', async () => {
   try { const j = await apiPatient('/portail', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle }) }); location.href = j.url }
   catch(e){ $('abonnement-etat').textContent = e.message }
 })
+function afficherEncartsTest(on){ document.querySelectorAll('.encart-test').forEach(el => { el.style.display = on ? 'block' : 'none' }) }
 async function rafraichirDroits(){
   if(!state.partage || !serveurPartage()) return
   try { const j = await apiPatient(`/offres?cle=${encodeURIComponent(state.partage.cle)}`); adopterDroits(j.droits)
-    ;['encart-test', 'encart-test-pdf'].forEach(id => { const el = $(id); if(el) el.style.display = j.mode_test ? 'block' : 'none' })
+    afficherEncartsTest(!!j.mode_test)
     if(j.offres){ j.offres.forEach(o => { const el = $('prix-' + o.id) || (o.id === 'bilan' ? $('pdf-prix') : null); if(el) el.textContent = (o.prix / 100).toLocaleString('fr-FR') + ' €' }) }
   } catch(e) {}
 }
