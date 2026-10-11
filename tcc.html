@@ -102,12 +102,14 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer"><input type="checkbox" id="consent" style="width:18px;height:18px;margin-top:3px"> J'ai compris.</label>
     </div>
     <button class="btn" id="btn-commencer" disabled>Commencer le bilan →</button>
+    <button class="btn ghost" id="btn-vers-connexion" style="display:none">J'ai déjà un compte : me connecter</button>
   </div>
   <div class="card" id="home-reprise" style="display:none">
     <p id="home-reprise-txt"></p>
     <p class="small" id="home-partage" style="display:none"></p>
     <button class="btn" id="btn-agenda">Mon agenda du sommeil →</button>
     <button class="btn secondary" id="btn-revoir-bilan">Revoir mon bilan et son QR code</button>
+    <div id="home-compte" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #E6E3DC"></div>
     <button class="btn ghost" id="btn-effacer">Effacer mes données de ce téléphone</button>
   </div>
 </div>
@@ -228,6 +230,30 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 </div>
 
 <!-- ================= RÉSULTAT ================= -->
+<div class="step" id="step-connexion">
+  <h2>Retrouver mon programme</h2>
+  <div class="card">
+    <p class="small" style="margin-top:0">Connectez-vous avec l'e-mail et le mot de passe de votre compte : votre bilan, votre agenda et vos séances reviennent sur cet appareil.</p>
+    <input type="email" id="cx-email" placeholder="votre@adresse.fr" autocomplete="email" inputmode="email" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <input type="password" id="cx-mdp" placeholder="Mot de passe" autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <button class="btn" id="btn-cx-ok">Me connecter</button>
+    <button class="btn ghost" id="btn-cx-oubli">Mot de passe oublié</button>
+    <p class="small" id="cx-retour"></p>
+  </div>
+  <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
+<div class="step" id="step-reinit">
+  <h2>Nouveau mot de passe</h2>
+  <div class="card">
+    <input type="password" id="ri-mdp" placeholder="Nouveau mot de passe (10 caractères au moins)" autocomplete="new-password" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <input type="password" id="ri-mdp2" placeholder="Le même, une seconde fois" autocomplete="new-password" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <button class="btn" id="btn-ri-ok">Enregistrer et retrouver mon programme</button>
+    <p class="small" id="ri-retour"></p>
+  </div>
+  <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
+</div>
+
 <div class="step" id="step-resultat">
   <h2>Votre bilan</h2>
   <div id="resultat-alerte"></div>
@@ -273,6 +299,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
     <p class="small" id="pdf-retour"></p>
   </div>
+  <div class="card" id="carte-compte" style="display:none"></div>
   <button class="btn" id="btn-vers-agenda">Commencer mon agenda du sommeil →</button>
   <button class="btn ghost" data-next="step-home">Retour à l'accueil</button>
 </div>
@@ -816,6 +843,10 @@ function calculerMode(){
   if(s.includes(1)) mod.push('conduite quotidienne')
   if(Array.isArray(b.cfx) && b.cfx[2] === 1) mod.push('produit pris pour dormir')
   if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
+  // Pas d'insomnie cliniquement significative : aucune restriction du temps
+  // au lit, quel que soit le reste. Le dire honnetement vaut mieux qu'un programme inutile.
+  const isi = somme(b.isi)
+  if(isi <= 7) return { mode:'s', motif:`pas d'insomnie cliniquement significative (ISI ${isi}/28) : pas de restriction du temps au lit` + (sans.length ? ', ' + sans.join(', ') : ''), sansInsomnie:true }
   if(sans.length) return { mode:'s', motif:sans.join(', ') }
   if(mod.length) return { mode:'m', motif:mod.join(', ') }
   return { mode:'c', motif:'aucun signal de sécurité' }
@@ -826,7 +857,7 @@ function chronotype(){ const t = somme(state.bilan.meq); return t <= 11 ? 'du so
 
 $('btn-terminer-bilan').addEventListener('click', () => {
   state.lever = $('lever-cible').value || '07:00'
-  const r = calculerMode(); state.mode = r.mode; state.motif = r.motif; state.bilan.date = aujourdhui()
+  const r = calculerMode(); state.mode = r.mode; state.motif = r.motif; state.sansInsomnie = !!r.sansInsomnie; state.bilan.date = aujourdhui()
   sauver(); afficherResultat(); show('step-resultat'); rendrePdf(); rafraichirDroits()
 })
 function autresFacteurs(){
@@ -838,6 +869,7 @@ function autresFacteurs(){
   return out
 }
 function afficherResultat(){
+  setTimeout(rendreCompte, 0)
   const b = state.bilan, isi = somme(b.isi), epw = somme(b.epw), dbasMoy = somme(b.dbas) / 16
   const fortes = b.dbas.map((v, i) => v >= 7 ? DBAS_COURT[i] : null).filter(Boolean)
   const psasC = somme(b.psas.slice(8)), psasS = somme(b.psas.slice(0, 8))
@@ -849,8 +881,11 @@ function afficherResultat(){
     <p><strong>Rythme :</strong> plutôt ${chronotype()}. <strong>Somnolence :</strong> Epworth ${epw} / 24.</p>
     ${b.phq.length === 9 ? `<p><strong>Moral (PHQ-9) :</strong> ${somme(b.phq)} / 27, ${['minimal', 'léger', 'modéré', 'modérément sévère', 'sévère'][Math.min(4, Math.floor(somme(b.phq) / 5))]}.</p>` : ''}
     ${(() => { const a = autresFacteurs(); return a.length ? `<p><strong>À évoquer avec votre médecin :</strong> ${a.join(', ')}.</p>` : '' })()}
-    <div class="info"><strong>Mode proposé : ${MODE_LIB[state.mode]}</strong><br><span class="small">${state.motif}.</span><br><span class="small">${state.mode === 's' ? 'Le programme travaillera le contrôle du lit, les croyances et la détente, sans réduire votre temps au lit.' : state.mode === 'm' ? 'Votre temps au lit ne descendra jamais sous 6 heures.' : 'Votre temps au lit pourra être resserré jusqu\'à 5 h 30 si votre agenda le justifie.'} Votre médecin confirme ce choix.</span></div>`
+    ${isi <= 7 ? `<div class="info"><strong>Votre bilan ne montre pas d'insomnie.</strong><br><span class="small">Avec un score de ${isi} sur 28, vos nuits restent dans les limites habituelles. Un programme contre l'insomnie, et surtout la réduction du temps passé au lit, ne vous apporterait rien et pourrait vous fatiguer inutilement : nous ne vous le proposons pas.</span><br><span class="small">Gardez des horaires de lever réguliers. Si vos nuits vous gênent malgré tout, parlez-en à votre médecin : une fatigue ou un sommeil peu réparateur ont d'autres causes possibles (apnées du sommeil, rythme décalé, moral), qui se recherchent autrement.</span></div>` : `
+    <div class="info"><strong>Mode proposé : ${MODE_LIB[state.mode]}</strong><br><span class="small">${state.motif}.</span><br><span class="small">${state.mode === 's' ? 'Le programme travaillera le contrôle du lit, les croyances et la détente, sans réduire votre temps au lit.' : state.mode === 'm' ? 'Votre temps au lit ne descendra jamais sous 6 heures.' : 'Votre temps au lit pourra être resserré jusqu\'à 5 h 30 si votre agenda le justifie.'} Votre médecin confirme ce choix.</span></div>`}`
   rendreQR(payloadBilan(), $('qr-img'), $('qr-loading'), $('qr-fallback'), $('qr-fallback-data'))
+  $('btn-vers-agenda').textContent = isi <= 7 ? 'Suivre quand même mon sommeil (agenda, sans restriction)' : 'Commencer mon agenda du sommeil →'
+  $('btn-vers-agenda').className = isi <= 7 ? 'btn secondary' : 'btn'
 }
 
 // ---------------------------------------------------------------- QR
@@ -1647,7 +1682,90 @@ function verifierReports(){
 $('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
 $('btn-commencer').addEventListener('click', async () => { const partageRecu = state && state.partage; state = vide(); if(partageRecu) state.partage = partageRecu; await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(9).fill(null), sec:null, hab:[], gad:Array(2).fill(null), trau:null, ptsd:Array(5).fill(null), asrs:Array(6).fill(null), cfx:Array(3).fill(null) }; sauver(); rendreBilan(); show('step-id') })
 $('btn-agenda').addEventListener('click', ouvrirAgenda)
-$('btn-vers-agenda').addEventListener('click', ouvrirAgenda)
+// ---- Compte patient : sans lui, l'agenda ne vit que dans ce navigateur.
+let compteExiste = null
+const baseComptes = () => SERVI ? location.origin : null
+async function etatCompte(){
+  if(!state || !state.partage || !serveurPartage()) return null
+  try { compteExiste = (await apiPatient(`/compte?cle=${encodeURIComponent(state.partage.cle)}`)).compte } catch(e){ compteExiste = null }
+  return compteExiste
+}
+function formulaireCompte(zone){
+  zone.innerHTML = `<h3 style="margin-top:0">Créez votre compte patient</h3>
+    <p class="small"><strong>Sans compte, votre agenda reste seulement dans ce navigateur.</strong> Un téléphone changé, un historique vidé ou une navigation privée, et il est perdu. Avec un e-mail et un mot de passe, vous le retrouvez sur n'importe quel appareil.</p>
+    <input type="email" data-c="email" placeholder="votre@adresse.fr" autocomplete="email" inputmode="email" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <input type="password" data-c="mdp" placeholder="Mot de passe (10 caractères au moins)" autocomplete="new-password" style="width:100%;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;margin-top:8px">
+    <button class="btn" data-c="ok">Créer mon compte</button>
+    <p class="small" style="color:#7E5526"><strong>Votre adresse n'est pas conservée en clair :</strong> le serveur n'en garde qu'une empreinte chiffrée, qui sert à vous reconnaître. Vous ne recevrez un e-mail que si vous demandez un nouveau mot de passe. 0 publicité, 0 revente.</p>
+    <p class="small" data-c="retour" style="margin-bottom:0"></p>`
+  const champ = c => zone.querySelector(`[data-c="${c}"]`)
+  champ('ok').addEventListener('click', async () => {
+    const retour = champ('retour')
+    try {
+      await apiPatient('/compte', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ cle:state.partage.cle, email:champ('email').value, mdp:champ('mdp').value }) })
+      compteExiste = true; rendreCompte()
+    } catch(e){ retour.textContent = e.message }
+  })
+}
+function rendreCompte(){
+  const carte = $('carte-compte'), home = $('home-compte')
+  if(!state || !state.partage || !serveurPartage()){ carte.style.display = home.style.display = 'none'; return }
+  etatCompte().then(existe => {
+    if(existe === null){ carte.style.display = home.style.display = 'none'; return }
+    if(existe){
+      carte.style.display = 'block'; home.style.display = 'none'
+      carte.innerHTML = `<h3 style="margin-top:0">Votre compte patient</h3><p class="small" style="margin-bottom:0">✓ Votre programme est protégé. Sur un autre appareil, ouvrez <strong>${location.host}/programme</strong> et choisissez « J'ai déjà un compte ».</p>`
+    } else {
+      if(!carte.querySelector('[data-c]')){ carte.style.display = 'block'; formulaireCompte(carte) }
+      if(!home.querySelector('[data-c]')){ home.style.display = 'block'; formulaireCompte(home) }
+    }
+  })
+}
+// L'adresse tapee pour recevoir les PDF pre-remplit le compte (rien n'est garde).
+$('btn-pdf-email').addEventListener('click', () => { const v = $('pdf-email').value.trim(), i = document.querySelector('#carte-compte [data-c="email"]'); if(v && i && !i.value) i.value = v }, true)
+async function ouvrirSession(code, cle){
+  if(state && state.bilan && state.partage && state.partage.code !== code && !confirm('Ce téléphone contient un autre bilan. Le remplacer par le programme de votre compte ?')) return false
+  state = vide()
+  const err = activerPartage(code, cle, ''); if(err){ alert(err); return false }
+  for(let i = 0; i < 40 && (syncEnCours || !state.partage.derniere); i++) await new Promise(r => setTimeout(r, 250))
+  try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {}
+  location.href = location.pathname
+  return true
+}
+async function apiComptes(chemin, corps){
+  const r = await fetch(`${baseComptes()}/api/tcc/compte-patient/${chemin}`, { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(corps) })
+  const j = await r.json().catch(() => ({}))
+  if(!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status))
+  return j
+}
+$('btn-vers-connexion').addEventListener('click', () => show('step-connexion'))
+$('btn-cx-ok').addEventListener('click', async () => {
+  const retour = $('cx-retour'); retour.textContent = 'Connexion…'
+  try { const j = await apiComptes('connexion', { email:$('cx-email').value, mdp:$('cx-mdp').value }); retour.textContent = 'Programme retrouvé, chargement…'; if(!(await ouvrirSession(j.code, j.cle))) retour.textContent = '' }
+  catch(e){ retour.textContent = e.message }
+})
+$('btn-cx-oubli').addEventListener('click', async () => {
+  const retour = $('cx-retour'), email = $('cx-email').value.trim()
+  if(!email){ retour.textContent = 'Saisissez d\'abord votre adresse e-mail.'; return }
+  try { await apiComptes('oubli', { email }); retour.textContent = 'Si un compte existe avec cette adresse, un lien vient de lui être envoyé (valable une heure). Pensez aux indésirables.' }
+  catch(e){ retour.textContent = e.message }
+})
+let jetonReinit = null
+$('btn-ri-ok').addEventListener('click', async () => {
+  const retour = $('ri-retour')
+  if($('ri-mdp').value !== $('ri-mdp2').value){ retour.textContent = 'Les deux mots de passe diffèrent.'; return }
+  try { const j = await apiComptes('reinitialiser', { jeton:jetonReinit, mdp:$('ri-mdp').value }); retour.textContent = 'Mot de passe enregistré, chargement…'; if(!(await ouvrirSession(j.code, j.cle))) retour.textContent = '' }
+  catch(e){ retour.textContent = e.message }
+})
+$('btn-vers-agenda').addEventListener('click', () => {
+  if(compteExiste === false && !state.sansCompte){
+    if(confirm("Sans compte, votre agenda reste seulement dans ce navigateur : vous le perdrez si vous changez de téléphone ou videz l'historique." + String.fromCharCode(10, 10) + "Créer votre compte maintenant ? (Annuler : continuer sans compte)")){
+      const c = $('carte-compte'); c.scrollIntoView({ behavior:'smooth', block:'center' }); const i = c.querySelector('[data-c="email"]'); if(i) setTimeout(() => i.focus(), 400); return
+    }
+    state.sansCompte = true; sauver()
+  }
+  ouvrirAgenda()
+})
 $('btn-revoir-bilan').addEventListener('click', () => { afficherResultat(); show('step-resultat') })
 $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définitivement votre bilan et votre agenda de ce téléphone ?')){ localStorage.removeItem(CLE); location.reload() } })
 
@@ -1657,12 +1775,12 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
     const n = Object.keys(state.nuits).length
     $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
     const lues = Object.values(state.seances || {}).filter(s => s.lue).length
-    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'}${state.depuisConsultation ? ' avec le questionnaire de consultation' : ''} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
+    $('home-reprise-txt').innerHTML = `Bonjour${state.ident && state.ident.p ? ' ' + state.ident.p : ''}. Bilan fait le ${state.bilan.date ? state.bilan.date.split('-').reverse().join('/') : '—'}${state.depuisConsultation ? ' avec le questionnaire de consultation' : ''} ; ${n} nuit${n > 1 ? 's' : ''} dans l'agenda ; ${lues} séance${lues > 1 ? 's' : ''} sur 6.`
     rendreBilan()
   } else if(state && state.bilan && state.depuisConsultation){
     // Bilan rempli dans le questionnaire de salle d'attente (patient.html, même site).
     $('home-nouveau').style.display = 'none'; $('home-reprise').style.display = 'block'
-    $('home-reprise-txt').innerHTML = `Bonjour ${state.ident.p || ''}. Votre bilan a été fait avec le questionnaire de consultation (${state.bilan.date.split('-').reverse().join('/')}). Votre médecin valide le mode, puis votre agenda commence.`
+    $('home-reprise-txt').innerHTML = `Bonjour${state.ident && state.ident.p ? ' ' + state.ident.p : ''}. Votre bilan a été fait avec le questionnaire de consultation (${state.bilan.date.split('-').reverse().join('/')}). Votre médecin valide le mode, puis votre agenda commence.`
     $('btn-revoir-bilan').textContent = 'Voir mon bilan et son QR code'
     rendreBilan()
   } else if(state && state.bilan){
@@ -1702,6 +1820,12 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
     if(q.get('paiement') === 'annule') history.replaceState(null, '', location.pathname)
   } catch(e) {}
   if(state && state.partage){ synchroniser(); rafraichirDroits(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
+  if(baseComptes()) $('btn-vers-connexion').style.display = 'block'
+  rendreCompte()
+  try {
+    const q = new URLSearchParams(location.search)
+    if(q.get('reinit')){ jetonReinit = q.get('reinit'); history.replaceState(null, '', location.pathname); show('step-reinit') }
+  } catch(e) {}
 })()
 </script>
 </body>

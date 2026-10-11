@@ -1457,7 +1457,7 @@ function rendreResumeInsomnie(){
     l.push(`<strong>Rythme :</strong> plutôt ${meq <= 11 ? 'du soir' : meq >= 18 ? 'du matin' : 'intermédiaire'}.`)
     const m = modeTcc()
     const lib = { s:'sans restriction du temps au lit', m:'modéré (jamais moins de 6 h au lit)', c:'complet' }[m.mode]
-    l.push(`<strong>Si un programme vous est proposé :</strong> mode ${lib} (${m.motif}).`)
+    l.push(m.sansInsomnie ? `<strong>Votre bilan ne montre pas d'insomnie :</strong> aucun programme ni réduction du temps au lit ne vous est proposé. Si vos nuits vous gênent malgré tout, parlez-en à votre médecin aujourd'hui.` : `<strong>Si un programme vous est proposé :</strong> mode ${lib} (${m.motif}).`)
     if(state.sec === 1) l.push('<strong style="color:#b3261e">Vous avez signalé des idées noires : parlez-en à votre médecin aujourd\'hui.</strong>')
   } else {
     l.push('Le bilan détaillé (croyances, agitation au coucher, rythme) n\'est pas complet : votre médecin pourra le reprendre avec vous.')
@@ -1482,6 +1482,8 @@ function modeTcc(){
   if(a != null && a >= 70) mod.push(`${a} ans`)
   if(s.includes(1)) mod.push('conduite quotidienne')
   if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
+  const isiRep = (state.isi || []).filter(v => v != null), isi = isiRep.reduce((x, y) => x + y, 0)
+  if(isiRep.length === 7 && isi <= 7) return { mode:'s', motif:`pas d'insomnie cliniquement significative (ISI ${isi}/28) : pas de restriction du temps au lit` + (sans.length ? ', ' + sans.join(', ') : ''), sansInsomnie:true }
   if(sans.length) return { mode:'s', motif:sans.join(', ') }
   if(mod.length) return { mode:'m', motif:mod.join(', ') }
   return { mode:'c', motif:'aucun signal de sécurité' }
