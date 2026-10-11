@@ -314,6 +314,9 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
         <p class="small">Reliez votre montre : chaque matin, vos heures de coucher et de lever, vos réveils et votre temps de sommeil arrivent dans votre agenda, à confirmer d'un geste. Vous pouvez retirer l'accès à tout moment.</p>
         <select id="montre-fournisseur" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;margin-bottom:6px"></select>
         <button class="btn secondary" id="btn-montre-lier">Connecter ma montre</button>
+        <details style="margin-top:10px"><summary class="small" style="cursor:pointer">Apple Watch, ou Garmin / Polar / Oura reliée à l'app Santé de l'iPhone</summary>
+          <p class="small">Apple ne donne pas d'accès en ligne à Santé : un <strong>raccourci iOS</strong> envoie chaque matin vos nuits au serveur, à votre code. Votre médecin vous remet la notice du raccourci ; l'adresse à y coller est : <code id="montre-apple-url" style="word-break:break-all"></code></p>
+        </details>
       </div>
       <div id="montre-lien-actif" style="display:none">
         <button class="btn secondary" id="btn-montre-sync">Mettre à jour maintenant</button>
@@ -1077,6 +1080,7 @@ async function rendreMontre(){
       j.fournisseurs.forEach(f => { const o = document.createElement('option'); o.value = f.id; o.disabled = !f.disponible; o.textContent = f.libelle + (f.disponible ? '' : (f.bientot ? ' — bientôt' : ' — pas encore activée')); sel.appendChild(o) })
       const dispo = j.fournisseurs.find(f => f.disponible); if(dispo) sel.value = dispo.id
       $('btn-montre-lier').disabled = !dispo
+      const u = $('montre-apple-url'); if(u) u.textContent = `${serveurPartage()}/api/tcc/patient/${state.partage.code}/montre/apple`
       if(!dispo) e.innerHTML = '<p class="small">Aucune montre n\'est encore activée sur ce serveur. En attendant, saisissez vos chiffres ci-dessous.</p>'
     } catch(err){ e.innerHTML = '<p class="small">Liste des montres indisponible pour le moment.</p>' }
   }
