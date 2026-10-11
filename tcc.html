@@ -30,6 +30,8 @@
   .progress-bar{height:3px;background:var(--ligne);border-radius:2px;margin-top:6px;overflow:hidden}
   .progress-fill{height:100%;background:var(--bronze);transition:width .3s}
   .question{margin-bottom:16px}
+  .question.manque{outline:2px solid #b3261e;outline-offset:6px;border-radius:10px;background:#fdecea}
+  .question.manque .q::after{content:' (réponse manquante)';color:#b3261e;font-weight:600}
   .question .q{font-weight:600;margin-bottom:8px;color:var(--encre)}
   .options{display:flex;flex-direction:column;gap:6px}
   .opt{display:block;padding:12px 14px;background:var(--champ);border:1.5px solid var(--ligne);border-radius:10px;cursor:pointer;font-size:15px;-webkit-tap-highlight-color:transparent}
@@ -46,8 +48,9 @@
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .ddn{display:flex;align-items:center;gap:6px}
   .ddn input{text-align:center;padding:12px 4px}
-  .ddn input.j,.ddn input.m{flex:0 0 66px}
-  .ddn input.a{flex:0 0 92px}
+  .ddn input{min-width:0}
+  .ddn input.j,.ddn input.m{flex:0 1 66px}
+  .ddn input.a{flex:0 1 92px}
   .ddn-sep{color:var(--sourd);font-size:18px;font-weight:600}
   .btn{display:block;width:100%;padding:14px;border:none;border-radius:999px;background:#182136;color:#FAF9F6;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-tap-highlight-color:transparent;letter-spacing:-.01em}
   .btn:hover{background:#0F1526}
@@ -118,11 +121,11 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <div><label class="small">Nom</label><input type="text" id="nom" autocomplete="off"></div>
       <div><label class="small">Prénom</label><input type="text" id="prenom" autocomplete="off"></div>
     </div>
-    <div class="row" style="margin-top:12px">
+    <div style="margin-top:12px">
       <div><label class="small">Date de naissance</label>
         <div class="ddn"><input type="number" class="j" id="ddn-j" placeholder="JJ" inputmode="numeric"><span class="ddn-sep">/</span><input type="number" class="m" id="ddn-m" placeholder="MM" inputmode="numeric"><span class="ddn-sep">/</span><input type="number" class="a" id="ddn-a" placeholder="AAAA" inputmode="numeric"></div>
       </div>
-      <div><label class="small">Vous êtes</label>
+      <div style="margin-top:12px"><label class="small">Vous êtes</label>
         <div class="chips" id="chips-sexe"><label class="chip" data-v="F">Une femme</label><label class="chip" data-v="M">Un homme</label></div>
       </div>
     </div>
@@ -623,9 +626,20 @@ function show(id){
   if(i >= 0){ $('progress-text').textContent = `Bilan d'entrée — étape ${i + 1} / ${ETAPES.length}`; $('progress-fill').style.width = `${(i + 1) / ETAPES.length * 100}%` }
   window.scrollTo(0, 0)
 }
+// Une page incomplete : on montre QUELLE question manque (encadree en rouge,
+// defilement jusqu'a elle) au lieu d'un message general introuvable.
+function signalerManques(st){
+  const manques = [...st.querySelectorAll('.question')].filter(q => q.offsetParent !== null && q.querySelector('.opt,.s') && !q.querySelector('.opt.on,.s.on'))
+  manques.forEach(q => q.classList.add('manque'))
+  if(manques.length){
+    alert(manques.length === 1 ? 'Il manque une réponse : elle est encadrée en rouge.' : `Il manque ${manques.length} réponses : elles sont encadrées en rouge.`)
+    manques[0].scrollIntoView({ behavior:'smooth', block:'center' })
+  } else alert("Une réponse n'a pas été enregistrée. Touchez de nouveau vos choix sur cette page, puis « Continuer ».")
+}
+document.addEventListener('click', e => { const q = e.target.closest && e.target.closest('.question.manque'); if(q && e.target.closest('.opt,.s')) q.classList.remove('manque') })
 document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => {
   const cour = document.querySelector('.step.active').id
-  if(ETAPES.includes(cour) && !etapeComplete(cour)){ alert('Merci de répondre à toutes les questions de cette page.'); return }
+  if(ETAPES.includes(cour) && !etapeComplete(cour)){ signalerManques(document.getElementById(cour)); return }
   sauver(); show(b.dataset.next)
 }))
 
