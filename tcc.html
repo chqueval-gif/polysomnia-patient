@@ -179,11 +179,39 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   <h2>7. Votre moral</h2>
   <p class="small">Au cours des deux dernières semaines…</p>
   <div class="card" id="phq-q"></div>
+  <button class="btn" data-next="step-sante">Continuer →</button>
+</div>
+
+<div class="step" id="step-sante">
+  <h2>8. D'autres facteurs du sommeil</h2>
+  <p class="small">Plusieurs situations fréquentes pèsent sur le sommeil et changent la façon de l'aborder : l'anxiété, un événement traumatisant, un trouble de l'attention, la douleur, les cauchemars. Ces questions de dépistage ne posent aucun diagnostic ; elles aident votre médecin à adapter la prise en charge.</p>
+  <div class="card">
+    <h3>Anxiété</h3>
+    <p class="small">Au cours des deux dernières semaines…</p>
+    <div id="gad-q"></div>
+  </div>
+  <div class="card">
+    <h3>Événement traumatisant</h3>
+    <div id="trau-q"></div>
+    <div id="ptsd-bloc" style="display:none">
+      <p class="small">Au cours du dernier mois, en lien avec cet événement :</p>
+      <div id="ptsd-q"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Attention et agitation</h3>
+    <p class="small">Au cours des six derniers mois, à quelle fréquence…</p>
+    <div id="asrs-q"></div>
+  </div>
+  <div class="card">
+    <h3>Autres facteurs</h3>
+    <div id="cfx-q"></div>
+  </div>
   <button class="btn" data-next="step-hab">Continuer →</button>
 </div>
 
 <div class="step" id="step-hab">
-  <h2>8. Vos habitudes</h2>
+  <h2>9. Vos habitudes</h2>
   <div class="card">
     <p class="small">Cochez ce qui vous arrive la plupart des jours.</p>
     <div class="chips" id="chips-hab"></div>
@@ -526,11 +554,44 @@ const EPW_ITEMS = [
   "Comme passager(ère) en voiture pendant 1 heure sans interruption","Allongé(e) l'après-midi pour vous reposer quand les circonstances le permettent",
   "Assis(e) en parlant avec quelqu'un","Assis(e) au calme après un repas sans alcool","Au volant, en voiture, immobilisé(e) dans un embouteillage pendant quelques minutes",
 ]
+// PHQ-9 (libre d'usage). La 9e question tient lieu de question de sécurité (idées noires).
 const PHQ_ITEMS = [
   { q:"Vous avez eu peu d'intérêt ou de plaisir à faire les choses", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
   { q:"Vous vous êtes senti(e) triste, déprimé(e) ou désespéré(e)", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez eu du mal à vous endormir ou à rester endormi(e), ou vous avez trop dormi", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous vous êtes senti(e) fatigué(e) ou vous avez manqué d'énergie", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez eu peu d'appétit ou vous avez trop mangé", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez eu une mauvaise opinion de vous-même, le sentiment d'être nul(le), ou d'avoir déçu votre famille ou vous-même", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez eu du mal à vous concentrer, par exemple pour lire le journal ou regarder la télévision", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez bougé ou parlé si lentement que les autres auraient pu le remarquer, ou au contraire vous avez été si agité(e) que vous aviez du mal à tenir en place", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous avez pensé qu'il vaudrait mieux mourir, ou à vous faire du mal d'une manière ou d'une autre", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
 ]
 const SEC_Q = "Vous avez pensé que vous seriez mieux mort(e), ou à vous faire du mal"
+// Dépistages complémentaires (ordre fixe, transmis tels quels dans le QR)
+const GAD_ITEMS = [
+  { q:"Vous vous êtes senti(e) nerveux(se), anxieux(se) ou à bout", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+  { q:"Vous n'avez pas été capable d'arrêter de vous inquiéter ou de contrôler vos inquiétudes", opts:["Jamais","Plusieurs jours","Plus de la moitié des jours","Presque tous les jours"] },
+]
+const TRAU_Q = "Avez-vous déjà vécu un événement très effrayant, horrible ou traumatisant (accident grave, agression, violences, catastrophe, combat, mort brutale d'un proche…) ?"
+const PTSD_ITEMS = [
+  "Avez-vous eu des cauchemars à propos de cet événement, ou y avez-vous pensé alors que vous ne le vouliez pas ?",
+  "Vous êtes-vous efforcé(e) de ne pas y penser, ou avez-vous évité les situations qui vous le rappelaient ?",
+  "Avez-vous été constamment sur vos gardes, vigilant(e), ou facilement sursauté(e) ?",
+  "Vous êtes-vous senti(e) détaché(e) des autres, de vos activités ou de votre environnement ?",
+  "Vous êtes-vous senti(e) coupable, ou incapable d'arrêter de vous reprocher ou de reprocher à d'autres cet événement ?",
+]
+const ASRS_OPTS = ["Jamais","Rarement","Parfois","Souvent","Très souvent"]
+const ASRS_ITEMS = [
+  "avez-vous du mal à finaliser les derniers détails d'un projet, une fois que les parties difficiles ont été faites ?",
+  "avez-vous du mal à mettre les choses en ordre quand une tâche demande de l'organisation ?",
+  "avez-vous des difficultés à vous rappeler vos rendez-vous ou vos obligations ?",
+  "évitez-vous ou retardez-vous le moment de commencer une tâche qui demande beaucoup de réflexion ?",
+  "remuez-vous ou tortillez-vous les mains ou les pieds quand vous devez rester assis(e) longtemps ?",
+  "vous sentez-vous excessivement actif(ve), poussé(e) à faire des choses, comme entraîné(e) par un moteur ?",
+]
+const CFX_ITEMS = ["Une douleur gêne votre sommeil la plupart des nuits", "Vous faites des cauchemars plus d'une fois par semaine",
+  "Vous prenez de l'alcool, du cannabis ou un autre produit pour dormir"]
+function asrsPositif(a){ return Array.isArray(a) && a.every(v => v != null) && a.filter((v, i) => i < 3 ? v >= 2 : v >= 3).length >= 4 }
 // Ordre fixe (indices transmis). Ne pas réordonner.
 const SITU = ["Conducteur / conductrice professionnel(le)","Je conduis plus d'une heure par jour","Métier à risque (machines, hauteur, garde)",
   "Trouble bipolaire connu","Épilepsie","Grossesse en cours","Travail posté ou horaires de nuit",
@@ -550,7 +611,7 @@ function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(state)) } catc
 function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
 
 // ---------------------------------------------------------------- Navigation
-const ETAPES = ['step-id','step-isi','step-dbas','step-psas','step-meq','step-epw','step-phq','step-hab']
+const ETAPES = ['step-id','step-isi','step-dbas','step-psas','step-meq','step-epw','step-phq','step-sante','step-hab']
 function show(id){
   document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', s.id === id))
   const i = ETAPES.indexOf(id)
@@ -609,6 +670,7 @@ function rendreChips(cont, items, tableau){
 const somme = a => a.reduce((s, v) => s + (v == null ? 0 : v), 0)
 function majTotaux(){
   const b = state.bilan
+  if(Array.isArray(b.phq) && b.phq.length === 9 && b.phq[8] != null) b.sec = b.phq[8] >= 1 ? 1 : 0
   $('isi-total').textContent = b.isi.every(v => v != null) ? `Score ISI : ${somme(b.isi)} / 28` : ''
   $('epw-total').textContent = b.epw.every(v => v != null) ? `Score : ${somme(b.epw)} / 24` : ''
 }
@@ -616,20 +678,53 @@ function etapeComplete(id){
   const b = state.bilan
   const plein = a => a.every(v => v != null)
   return { 'step-isi':plein(b.isi), 'step-dbas':plein(b.dbas), 'step-psas':plein(b.psas), 'step-meq':plein(b.meq),
-           'step-epw':plein(b.epw), 'step-phq':plein(b.phq) && b.sec != null, 'step-id':true, 'step-hab':true }[id] ?? true
+           'step-epw':plein(b.epw), 'step-phq':plein(b.phq), 'step-id':true, 'step-hab':true,
+           'step-sante':plein(b.gad) && b.trau != null && (b.trau === 0 || plein(b.ptsd)) && plein(b.asrs) && plein(b.cfx) }[id] ?? true
+}
+function completerBilan(b){
+  if(!b) return
+  if(Array.isArray(b.phq) && b.phq.length === 2 && !state.mode) b.phq = b.phq.concat(Array(7).fill(null))
+  if(!Array.isArray(b.gad)) b.gad = Array(2).fill(null)
+  if(b.trau === undefined) b.trau = null
+  if(!Array.isArray(b.ptsd)) b.ptsd = Array(5).fill(null)
+  if(!Array.isArray(b.asrs)) b.asrs = Array(6).fill(null)
+  if(!Array.isArray(b.cfx)) b.cfx = Array(3).fill(null)
+}
+function rendreOuiNon(cont, items, cle){
+  cont.innerHTML = ''
+  items.forEach((txt, i) => {
+    const q = document.createElement('div'); q.className = 'question'
+    q.innerHTML = `<div class="q">${txt}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
+    q.querySelectorAll('.opt').forEach(el => { if(state.bilan[cle][i] === Number(el.dataset.v)) el.classList.add('on')
+      el.addEventListener('click', () => { state.bilan[cle][i] = Number(el.dataset.v); q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() }) })
+    cont.appendChild(q)
+  })
+}
+function rendreSante(){
+  const b = state.bilan
+  rendreOptions($('gad-q'), GAD_ITEMS, 'gad')
+  const t = $('trau-q'); t.innerHTML = ''
+  const q = document.createElement('div'); q.className = 'question'
+  q.innerHTML = `<div class="q">${TRAU_Q}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
+  q.querySelectorAll('.opt').forEach(el => { if(b.trau === Number(el.dataset.v)) el.classList.add('on')
+    el.addEventListener('click', () => { b.trau = Number(el.dataset.v); q.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on')
+      if(b.trau === 0) b.ptsd = Array(5).fill(null)
+      $('ptsd-bloc').style.display = b.trau === 1 ? 'block' : 'none'; sauver() }) })
+  t.appendChild(q)
+  $('ptsd-bloc').style.display = b.trau === 1 ? 'block' : 'none'
+  rendreOuiNon($('ptsd-q'), PTSD_ITEMS, 'ptsd')
+  rendreOptions($('asrs-q'), ASRS_ITEMS.map(x => ({ q:'… ' + x, opts:ASRS_OPTS })), 'asrs')
+  rendreOuiNon($('cfx-q'), CFX_ITEMS, 'cfx')
 }
 function rendreBilan(){
+  completerBilan(state.bilan)
+  rendreSante()
   rendreOptions($('isi-q'), ISI_ITEMS, 'isi')
   rendreEchelle($('dbas-q'), DBAS_ITEMS, 'dbas', 0, 10, ['pas du tout d\'accord', 'tout à fait d\'accord'])
   rendreEchelle($('psas-q'), PSAS_ITEMS, 'psas', 1, 5, ['pas du tout', 'extrêmement'])
   rendreOptions($('meq-q'), MEQ_ITEMS, 'meq')
   rendreEchelle($('epw-q'), EPW_ITEMS, 'epw', 0, 3, ['jamais', 'forte'])
   rendreOptions($('phq-q'), PHQ_ITEMS, 'phq')
-  const sec = document.createElement('div'); sec.className = 'question'
-  sec.innerHTML = `<div class="q">3. ${SEC_Q}</div><div class="options"><label class="opt" data-v="0">Non</label><label class="opt" data-v="1">Oui</label></div>`
-  sec.querySelectorAll('.opt').forEach(el => { if(state.bilan.sec === Number(el.dataset.v)) el.classList.add('on')
-    el.addEventListener('click', () => { state.bilan.sec = Number(el.dataset.v); sec.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); el.classList.add('on'); sauver() }) })
-  $('phq-q').appendChild(sec)
   rendreChips($('chips-hab'), HAB, state.bilan.hab)
   rendreChips($('chips-situ'), SITU, state.situ)
   majTotaux()
@@ -670,10 +765,13 @@ function calculerMode(){
   if(s.includes(5)) sans.push('grossesse')
   if(s.includes(9)) sans.push('parasomnie')
   if(epw >= 16) sans.push(`somnolence marquée (Epworth ${epw})`)
+  if(b.trau === 1 && Array.isArray(b.ptsd) && somme(b.ptsd) >= 3) sans.push('symptômes de stress post-traumatique : à évaluer avant toute restriction du temps au lit')
   if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
   if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
+  if(Array.isArray(b.phq) && b.phq.length === 9 && somme(b.phq) >= 15) mod.push(`moral à évaluer (PHQ-9 ${somme(b.phq)})`)
   if(a != null && a >= 70) mod.push(`${a} ans`)
   if(s.includes(1)) mod.push('conduite quotidienne')
+  if(Array.isArray(b.cfx) && b.cfx[2] === 1) mod.push('produit pris pour dormir')
   if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
   if(sans.length) return { mode:'s', motif:sans.join(', ') }
   if(mod.length) return { mode:'m', motif:mod.join(', ') }
@@ -688,6 +786,14 @@ $('btn-terminer-bilan').addEventListener('click', () => {
   const r = calculerMode(); state.mode = r.mode; state.motif = r.motif; state.bilan.date = aujourdhui()
   sauver(); afficherResultat(); show('step-resultat'); rendrePdf(); rafraichirDroits()
 })
+function autresFacteurs(){
+  const b = state.bilan, out = []
+  if(Array.isArray(b.gad) && somme(b.gad) >= 3) out.push('anxiété')
+  if(b.trau === 1 && Array.isArray(b.ptsd) && somme(b.ptsd) >= 3) out.push('signes de stress post-traumatique')
+  if(asrsPositif(b.asrs)) out.push("signes d'un trouble de l'attention (TDAH)")
+  if(Array.isArray(b.cfx)){ if(b.cfx[0] === 1) out.push('douleur nocturne'); if(b.cfx[1] === 1) out.push('cauchemars fréquents'); if(b.cfx[2] === 1) out.push('produit pris pour dormir') }
+  return out
+}
 function afficherResultat(){
   const b = state.bilan, isi = somme(b.isi), epw = somme(b.epw), dbasMoy = somme(b.dbas) / 16
   const fortes = b.dbas.map((v, i) => v >= 7 ? DBAS_COURT[i] : null).filter(Boolean)
@@ -698,6 +804,8 @@ function afficherResultat(){
     <p><strong>Croyances sur le sommeil :</strong> ${fortes.length ? fortes.length + ' croyance' + (fortes.length > 1 ? 's' : '') + ' à travailler (' + fortes.join(', ') + ')' : 'aucune croyance forte repérée'}.</p>
     <p><strong>Au coucher :</strong> éveil mental ${psasC} / 40, éveil physique ${psasS} / 40.</p>
     <p><strong>Rythme :</strong> plutôt ${chronotype()}. <strong>Somnolence :</strong> Epworth ${epw} / 24.</p>
+    ${b.phq.length === 9 ? `<p><strong>Moral (PHQ-9) :</strong> ${somme(b.phq)} / 27, ${['minimal', 'léger', 'modéré', 'modérément sévère', 'sévère'][Math.min(4, Math.floor(somme(b.phq) / 5))]}.</p>` : ''}
+    ${(() => { const a = autresFacteurs(); return a.length ? `<p><strong>À évoquer avec votre médecin :</strong> ${a.join(', ')}.</p>` : '' })()}
     <div class="info"><strong>Mode proposé : ${MODE_LIB[state.mode]}</strong><br><span class="small">${state.motif}.</span><br><span class="small">${state.mode === 's' ? 'Le programme travaillera le contrôle du lit, les croyances et la détente, sans réduire votre temps au lit.' : state.mode === 'm' ? 'Votre temps au lit ne descendra jamais sous 6 heures.' : 'Votre temps au lit pourra être resserré jusqu\'à 5 h 30 si votre agenda le justifie.'} Votre médecin confirme ce choix.</span></div>`
   rendreQR(payloadBilan(), $('qr-img'), $('qr-loading'), $('qr-fallback'), $('qr-fallback-data'))
 }
@@ -707,7 +815,8 @@ function payloadBilan(){ return 'TCC-V1::' + JSON.stringify(objBilan()) }
 function objBilan(){
   const b = state.bilan, i = state.ident
   return ({ v:1, k:'b', dt:b.date, n:i.n, p:i.p, d:i.d, s:i.s, po:i.po, ta:i.ta,
-    isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, mt:state.motif, lv:state.lever })
+    isi:b.isi, db:b.dbas, ps:b.psas, mq:b.meq, ep:b.epw, ph:b.phq, sc:b.sec, hb:b.hab, st:state.situ, mo:state.mode, mt:state.motif, lv:state.lever,
+    ga:b.gad, tr:b.trau, pt:b.trau === 1 ? b.ptsd : null, as:b.asrs, cx:b.cfx })
 }
 function payloadSuivi(){ return 'TCC-V1::' + JSON.stringify(objSuivi()) }
 function objSuivi(){
@@ -1473,7 +1582,7 @@ function verifierReports(){
 
 // ---------------------------------------------------------------- Accueil
 $('consent').addEventListener('change', e => { $('btn-commencer').disabled = !e.target.checked })
-$('btn-commencer').addEventListener('click', async () => { state = vide(); await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(2).fill(null), sec:null, hab:[] }; sauver(); rendreBilan(); show('step-id') })
+$('btn-commencer').addEventListener('click', async () => { state = vide(); await inscrireSiBesoin(); state.bilan = { isi:Array(7).fill(null), dbas:Array(16).fill(null), psas:Array(16).fill(null), meq:Array(5).fill(null), epw:Array(8).fill(null), phq:Array(9).fill(null), sec:null, hab:[], gad:Array(2).fill(null), trau:null, ptsd:Array(5).fill(null), asrs:Array(6).fill(null), cfx:Array(3).fill(null) }; sauver(); rendreBilan(); show('step-id') })
 $('btn-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-vers-agenda').addEventListener('click', ouvrirAgenda)
 $('btn-revoir-bilan').addEventListener('click', () => { afficherResultat(); show('step-resultat') })
