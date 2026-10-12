@@ -848,6 +848,8 @@ function calculerMode(){
   const isi = somme(b.isi)
   if(isi <= 7) return { mode:'s', motif:`pas d'insomnie cliniquement significative (ISI ${isi}/28) : parcours léger sans restriction (croyances, pensées du soir, détente)` + (sans.length ? ', ' + sans.join(', ') : ''), sansInsomnie:true }
   if(sans.length) return { mode:'s', motif:sans.join(', ') }
+  // Insomnie legere : une restriction moindre (jamais sous 6 h) suffit.
+  if(isi <= 14) mod.unshift(`insomnie légère (ISI ${isi}/28) : restriction modérée`)
   if(mod.length) return { mode:'m', motif:mod.join(', ') }
   return { mode:'c', motif:'aucun signal de sécurité' }
 }

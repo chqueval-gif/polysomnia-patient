@@ -1485,6 +1485,7 @@ function modeTcc(){
   const isiRep = (state.isi || []).filter(v => v != null), isi = isiRep.reduce((x, y) => x + y, 0)
   if(isiRep.length === 7 && isi <= 7) return { mode:'s', motif:`pas d'insomnie cliniquement significative (ISI ${isi}/28) : pas de restriction du temps au lit` + (sans.length ? ', ' + sans.join(', ') : ''), sansInsomnie:true }
   if(sans.length) return { mode:'s', motif:sans.join(', ') }
+  if(isiRep.length === 7 && isi <= 14) mod.unshift(`insomnie légère (ISI ${isi}/28) : restriction modérée`)
   if(mod.length) return { mode:'m', motif:mod.join(', ') }
   return { mode:'c', motif:'aucun signal de sécurité' }
 }
