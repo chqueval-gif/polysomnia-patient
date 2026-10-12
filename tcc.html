@@ -307,7 +307,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ================= OFFRES ================= -->
 <div class="step" id="step-offres">
   <h2>Choisir ma formule</h2>
-  <div class="info encart-test" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit jusqu'au <span class="code-lancement-fin"></span>.</strong> Saisissez le code <strong class="code-lancement"></strong> ci-dessous : tout le programme s'ouvre, échanges avec un psychologue compris, sans carte bancaire.</div>
+  <div class="info encart-test" id="encart-test" style="display:none"><strong>Phase de lancement : gratuit jusqu'au <span class="code-lancement-fin"></span>.</strong> Saisissez le code <strong class="code-lancement"></strong> ci-dessous : tout le programme en autonomie s'ouvre, sans carte bancaire.</div>
   <div class="card">
     <h3>J'ai un code d'accès</h3>
     <p class="small" style="margin-top:0">Remis par votre médecin, votre psychologue ou affiché ci-dessus.</p><div style="display:flex;gap:8px;margin-top:8px"><input id="code-acces" placeholder="Code d'accès" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;padding:12px;border:1px solid #C8CDD9;border-radius:12px;font-size:16px;text-transform:uppercase"><button class="btn" data-code-acces="" style="width:auto;margin-top:0;padding:12px 18px">Activer</button></div><p class="small" id="code-acces-retour" style="margin-bottom:0"></p>
@@ -324,9 +324,9 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     <button class="btn" id="btn-offre-autonomie">Choisir l'autonomie</button>
   </div>
   <div class="card">
-    <h3>Coaché — <span id="prix-coache">40 €</span> / mois</h3>
+    <h3>Coaché — <span id="prix-coache">40 €</span> / mois <span style="display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:#F3EDE3;color:#7E5526;vertical-align:middle">bientôt disponible</span></h3>
     <p class="small">Tout le programme, plus des <strong>échanges écrits avec un coach</strong> — psychologue formé(e) à la TCC‑I — qui lit votre agenda et répond à vos questions sous 48 h ouvrées.</p>
-    <button class="btn" id="btn-offre-coache">Choisir le coaching</button>
+    <button class="btn secondary" id="btn-offre-coache" disabled>Bientôt disponible</button>
   </div>
   <p class="small" id="offres-retour"></p>
   <div class="info"><strong>Aucun engagement.</strong> Vous arrêtez quand vous voulez, en un clic, depuis « Mon abonnement » (onglet Médecin). Tout mois entamé est dû : votre accès reste ouvert jusqu'à la fin du mois déjà réglé, et rien n'est prélevé ensuite.</div>
@@ -1196,7 +1196,7 @@ async function chargerMessages(){
   try {
     const j = await apiPatient(`/messages?cle=${encodeURIComponent(state.partage.cle)}`)
     $('messages-ecrire').style.display = j.peut_ecrire ? 'block' : 'none'
-    $('messages-intro').textContent = j.peut_ecrire ? (j.coach ? 'Votre coach lit votre agenda et vous répond ici.' : 'Un coach va prendre votre programme en charge et se présentera ici.') : 'Les échanges écrits avec un coach font partie de la formule coachée (onglet Médecin → Mon abonnement).'
+    $('messages-intro').textContent = j.peut_ecrire ? (j.coach ? 'Votre coach lit votre agenda et vous répond ici.' : 'Un coach va prendre votre programme en charge et se présentera ici.') : 'Les échanges écrits avec un psychologue feront partie de la formule coachée, bientôt disponible.'
     fil.innerHTML = j.messages.length ? '' : '<p class="small">Pas encore de message.</p>'
     j.messages.forEach(m => { const d = document.createElement('div')
       d.style.cssText = 'max-width:85%;padding:8px 12px;border-radius:12px;font-size:14px;white-space:pre-wrap;' + (m.auteur === 'patient' ? 'align-self:flex-end;background:var(--olive-pale)' : 'align-self:flex-start;background:var(--bronze-pale)')
@@ -1372,9 +1372,8 @@ async function rendreEquipe(){
     return
   }
   if(!s.coache){
-    etat.innerHTML = '<p class="small">Être accompagné par un psychologue de l\'équipe, avec des échanges écrits, fait partie de la <strong>formule coachée</strong>.</p><button class="btn secondary" id="btn-equipe-offres">Voir la formule coachée</button>'
+    etat.innerHTML = '<p class="small">Être accompagné par un psychologue de l\'équipe, avec des échanges écrits, fera partie de la <strong>formule coachée</strong>, bientôt disponible.</p>'
     choix.style.display = 'none'
-    $('btn-equipe-offres').onclick = () => { show('step-offres'); rafraichirDroits() }
     return
   }
   etat.innerHTML = d && d.statut === 'refusee' ? `<p class="small">${escE(d.pro.nom)} n'a pas pu donner suite. Vous pouvez choisir un autre psychologue.</p>` : ''
