@@ -835,7 +835,7 @@ function calculerMode(){
   if(s.includes(5)) sans.push('grossesse')
   if(s.includes(9)) sans.push('parasomnie')
   if(epw >= 16) sans.push(`somnolence marquée (Epworth ${epw})`)
-  if(b.trau === 1 && Array.isArray(b.ptsd) && somme(b.ptsd) >= 3) sans.push('symptômes de stress post-traumatique : à évaluer avant toute restriction du temps au lit')
+  if(b.trau === 1 && Array.isArray(b.ptsd) && somme(b.ptsd) >= 3) mod.push('symptômes de stress post-traumatique (PC-PTSD-5) : restriction modérée, à évaluer en consultation')
   if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
   if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
   if(Array.isArray(b.phq) && b.phq.length === 9 && somme(b.phq) >= 10) mod.push(`moral à évaluer (PHQ-9 ${somme(b.phq)})`)
