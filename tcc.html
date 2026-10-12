@@ -63,8 +63,8 @@
   .step{display:none}
   .step.active{display:block}
   .tabs{display:flex;gap:6px;margin:12px 0}
-  .tabs{background:#e9e9eb;border-radius:12px;padding:3px;gap:2px}
-  .tabs button{flex:1;padding:9px 4px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--sourd);cursor:pointer;font-family:inherit;font-size:13px}
+  .tabs{background:#e9e9eb;border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+  .tabs button{flex:1 1 auto;padding:9px 4px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--sourd);cursor:pointer;font-family:inherit;font-size:13px}
   .tabs button.on{color:var(--encre);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .kpi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
   .kpi div{background:var(--champ);border:1px solid var(--ligne);border-radius:10px;padding:10px;text-align:center}
@@ -98,7 +98,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     <p>Ce programme dure <strong>six semaines</strong>. Il demande chaque matin une minute pour noter votre nuit, et chaque semaine dix minutes de lecture et un exercice.</p>
     <p>Aujourd'hui, vous allez répondre à un <strong>bilan d'entrée</strong> d'une quinzaine de minutes. Il se termine par un QR code à montrer à votre médecin, qui décidera de la suite. Ce programme ne remplace pas une consultation et ne constitue pas un traitement.</p>
     <div class="consent">
-      <strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code — ou, si votre médecin vous a remis un code de partage, par son serveur sécurisé, sans votre nom. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.
+      <span id="consent-txt"><strong>Vos réponses restent sur ce téléphone.</strong> Rien n'est envoyé sur internet. Elles ne sont transmises à votre médecin que lorsque vous lui montrez le QR code — ou, si votre médecin vous a remis un code de partage, par son serveur sécurisé, sans votre nom. Rouvrez ce lien sur le même téléphone pour retrouver votre programme.</span>
       <label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer"><input type="checkbox" id="consent" style="width:18px;height:18px;margin-top:3px"> J'ai compris.</label>
     </div>
     <button class="btn" id="btn-commencer" disabled>Commencer le bilan →</button>
@@ -838,8 +838,8 @@ function calculerMode(){
   if(b.trau === 1 && Array.isArray(b.ptsd) && somme(b.ptsd) >= 3) sans.push('symptômes de stress post-traumatique : à évaluer avant toute restriction du temps au lit')
   if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
   if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
-  if(Array.isArray(b.phq) && b.phq.length === 9 && somme(b.phq) >= 15) mod.push(`moral à évaluer (PHQ-9 ${somme(b.phq)})`)
-  if(a != null && a >= 70) mod.push(`${a} ans`)
+  if(Array.isArray(b.phq) && b.phq.length === 9 && somme(b.phq) >= 10) mod.push(`moral à évaluer (PHQ-9 ${somme(b.phq)})`)
+  if(a != null && a >= 65) mod.push(`${a} ans`)
   if(s.includes(1)) mod.push('conduite quotidienne')
   if(Array.isArray(b.cfx) && b.cfx[2] === 1) mod.push('produit pris pour dormir')
   if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
@@ -992,9 +992,12 @@ function proposerFenetre(){
   }
   const sig = state.sig.find(x => x.s === semaineCourante() && (x.t === 'volant' || x.t === 'somnolence'))
   let d = state.fen.d, raison
+  // Regles de reference : complet +15 min a 90 % et plus, -15 min sous 85 % ;
+  // modere (compression, sujet age ou fragile) +15 min a 85 % et plus, -15 min sous 80 %.
+  const haut = state.mode === 'm' ? 85 : 90, bas = state.mode === 'm' ? 80 : 85
   if(sig){ d += 30; raison = 'vous avez signalé une somnolence : la fenêtre est rallongée' }
-  else if(m.eff >= 90){ d += 15; raison = `efficacité ${m.eff} % : la fenêtre peut s'allonger de 15 min` }
-  else if(m.eff < 80){ d = Math.max(plancher, d - 15); raison = d === state.fen.d ? `efficacité ${m.eff} %, mais la fenêtre est déjà au plancher` : `efficacité ${m.eff} % : la fenêtre est resserrée de 15 min` }
+  else if(m.eff >= haut){ d += 15; raison = `efficacité ${m.eff} % : la fenêtre peut s'allonger de 15 min` }
+  else if(m.eff < bas){ d = Math.max(plancher, d - 15); raison = d === state.fen.d ? `efficacité ${m.eff} %, mais la fenêtre est déjà au plancher` : `efficacité ${m.eff} % : la fenêtre est resserrée de 15 min` }
   else raison = `efficacité ${m.eff} % : la fenêtre reste la même`
   return { d, l:state.fen.l, raison, change:d !== state.fen.d }
 }
@@ -1060,7 +1063,11 @@ function rendreSemaine(){
   }
   svg.innerHTML = s
   const prem = semaines()[0]
-  $('semaine-mot').textContent = m.n >= 5 && prem && n.length > 7 ? `Cette semaine, vous avez dormi ${hm(m.tst)} en moyenne, ${m.tst >= prem.tst ? hm(m.tst - prem.tst) + ' de plus' : hm(prem.tst - m.tst) + ' de moins'} qu'au départ.` : ''
+  const ecart = x => x < 60 ? `${x} min` : hm(x)
+  $('semaine-mot').textContent = m.n >= 5 && prem && n.length > 7
+    ? `Cette semaine, ${m.eff} % de votre temps au lit est du sommeil, contre ${prem.eff} % au départ. Vous dormez ${hm(m.tst)} en moyenne, ` +
+      (m.tst >= prem.tst ? `${ecart(m.tst - prem.tst)} de plus qu'au départ.` : `${ecart(prem.tst - m.tst)} de moins qu'au départ : c'est attendu tant que la fenêtre est resserrée, le temps de sommeil remonte quand elle s'allonge.`)
+    : ''
   $('liste-nuits').innerHTML = n.slice().reverse().slice(0, 14).map(p => `<div class="nuit"><span>${p.d.slice(8)}/${p.d.slice(5, 7)} · ${p.hc} → ${p.hl} ${FACES[(p.q || 3) - 1]}</span><span>${hm(p.tst)} · <span class="eff">${p.eff} %</span></span></div>`).join('') || '<p class="small">Aucune nuit pour l\'instant.</p>'
   rendreHebdo()
 }
@@ -1839,6 +1846,10 @@ $('btn-effacer').addEventListener('click', () => { if(confirm('Effacer définiti
   } catch(e) {}
   if(state && state.partage){ synchroniser(); rafraichirDroits(); setInterval(() => synchroniser(), 10 * 60 * 1000) }
   if(baseComptes()) $('btn-vers-connexion').style.display = 'block'
+  // Sur le site, le programme est enregistre sur le serveur sous un code : le dire.
+  if(SERVI) $('consent-txt').innerHTML = "<strong>Vos réponses sont enregistrées sur ce téléphone et sur notre serveur, hébergé en France, sous un code et sans votre nom.</strong> " +
+    "C'est ce qui permet de reprendre votre programme et de le partager avec votre médecin. Aucun professionnel ne le voit si vous ne lui donnez pas votre code ou votre QR code. " +
+    "Créez un compte à la fin du bilan pour le retrouver sur un autre appareil. Vous pouvez tout effacer à tout moment."
   rendreCompte()
   try {
     const q = new URLSearchParams(location.search)

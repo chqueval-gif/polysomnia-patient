@@ -1479,7 +1479,7 @@ function modeTcc(){
   if(epw >= 16) sans.push(`somnolence marquée (Epworth ${epw})`)
   if(s.includes(7) || s.includes(8)) mod.push('apnées du sommeil')
   if(epw >= 11 && epw < 16) mod.push(`somnolence (Epworth ${epw})`)
-  if(a != null && a >= 70) mod.push(`${a} ans`)
+  if(a != null && a >= 65) mod.push(`${a} ans`)
   if(s.includes(1)) mod.push('conduite quotidienne')
   if(s.includes(6)) mod.push('travail posté : fenêtre fixée par le médecin')
   const isiRep = (state.isi || []).filter(v => v != null), isi = isiRep.reduce((x, y) => x + y, 0)
