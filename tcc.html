@@ -342,6 +342,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   <div id="tab-jour">
     <div id="agenda-pause"></div>
     <div class="card" id="decision-card" style="display:none"></div>
+    <div class="card" id="retour-card" style="display:none"></div>
     <div class="card" id="saisie-card">
       <h3 id="saisie-titre">La nuit dernière</h3>
       <div class="row">
@@ -641,7 +642,7 @@ const EXTRAS = ["Sieste dans la journée","Alcool le soir","Somnifère pris","PP
 
 // ---------------------------------------------------------------- État
 let state = null
-const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null, montre:{ lien:null, nuits:{} } })
+const vide = () => ({ v:1, cree:Date.now(), ident:{}, situ:[], bilan:null, mode:null, motif:'', fen:null, nuits:{}, hebdo:[], sig:[], pause:null, isiFin:null, lever:'07:00', seances:{}, cartes:{}, plan:'', partage:null, montre:{ lien:null, nuits:{} }, retours:{} })
 let modifsLocales = 0   // augmente a chaque sauvegarde : sert a ne pas ecraser une saisie en cours
 function sauver(){ modifsLocales++; try { localStorage.setItem(CLE, JSON.stringify(state)) } catch(e) {} planifierSync() }
 function charger(){ try { const o = JSON.parse(localStorage.getItem(CLE) || 'null'); if(!(o && o.v === 1)) return null; o.seances = o.seances || {}; o.cartes = o.cartes || {}; o.plan = o.plan || ''; return o } catch(e){ return null } }
@@ -1027,8 +1028,57 @@ function rendreDecision(){
     ${dm.vue ? '' : '<button class="btn" id="btn-decision-vue">J\'ai compris</button>'}`
   $('btn-decision-vue')?.addEventListener('click', () => { state.decisionMedecin.vue = true; sauver(); rendreDecision() })
 }
+// ---- Avis du patient sur le suivi, demande au debut (7 nuits), au milieu
+// (3 semaines) et a la fin (ISI de fin rempli). Memes regles que le serveur,
+// qui prepare alors un courrier que le medecin relit avant de l'envoyer.
+const ETAPES_RETOUR = { debut:'le début du programme', milieu:'la mi-parcours', fin:'la fin du programme' }
+function etapeRetour(){
+  if(state.isiFin && (state.isiFin.isi || []).every(v => v != null)) return 'fin'
+  const n = nuitsTriees()
+  if(n.length && (Date.now() - new Date(n[0].d).getTime()) / 864e5 >= 21) return 'milieu'
+  if(n.length >= 7) return 'debut'
+  return null
+}
+let brouillonRetour = null
+function rendreRetour(){
+  const c = $('retour-card'); if(!c) return
+  const e = etapeRetour(); state.retours = state.retours || {}
+  // Sans partage, personne ne lirait l'avis : on ne le demande pas.
+  const rep = state.retourReporte
+  if(!e || state.retours[e] || !state.partage || !serveurPartage() || (rep && rep.e === e && rep.jusqu > aujourdhui())){ c.style.display = 'none'; c.dataset.e = ''; return }
+  // Deja affichee pour cette etape : on ne redessine pas (la synchro ne doit pas effacer une saisie en cours).
+  if(c.style.display === 'block' && c.dataset.e === e) return
+  c.dataset.e = e
+  if(!brouillonRetour || brouillonRetour.e !== e) brouillonRetour = { e, note:null, aide:'', difficile:'', com:'' }
+  const b = brouillonRetour
+  c.style.display = 'block'
+  c.innerHTML = `<h3 style="margin-top:0">Votre avis sur le suivi</h3>
+    <p class="small" style="margin-top:0">C'est ${ETAPES_RETOUR[e]}. Deux minutes pour dire à votre médecin comment vous vivez le programme : il lit chaque réponse et peut vous répondre dans l'onglet « Messages ».</p>
+    <div class="question"><div class="q">Dans l'ensemble, le suivi vous convient-il ?</div><div class="scale faces" id="r-note"></div></div>
+    <div class="question"><div class="q">Ce qui vous aide le plus</div><textarea id="r-aide" rows="2" maxlength="600"></textarea></div>
+    <div class="question"><div class="q">Ce qui est difficile pour vous</div><textarea id="r-difficile" rows="2" maxlength="600"></textarea></div>
+    <div class="question"><div class="q">Un mot pour votre médecin <span class="small">(facultatif)</span></div><textarea id="r-com" rows="2" maxlength="600"></textarea></div>
+    <button class="btn" id="btn-retour-ok">Envoyer mon avis</button>
+    <p class="small" style="text-align:center;margin:8px 0 0"><a href="#" id="btn-retour-plus-tard" style="color:inherit">Plus tard</a></p>
+    <p class="small" id="retour-msg"></p>`
+  const zn = $('r-note')
+  FACES.forEach((f, i) => { const el = document.createElement('div'); el.className = 's' + (b.note === i + 1 ? ' on' : ''); el.textContent = f; el.title = ['pas du tout', 'plutôt non', 'moyennement', 'plutôt oui', 'tout à fait'][i]
+    el.addEventListener('click', () => { b.note = i + 1; zn.querySelectorAll('.s').forEach(x => x.classList.remove('on')); el.classList.add('on') }); zn.appendChild(el) })
+  ;['aide', 'difficile', 'com'].forEach(k => { const t = $('r-' + k); t.value = b[k]; t.addEventListener('input', () => { b[k] = t.value }) })
+  $('btn-retour-ok').addEventListener('click', () => {
+    if(!b.note){ $('retour-msg').textContent = "Choisissez d'abord un visage, de 😣 à 😄."; return }
+    state.retours[e] = { note:b.note, aide:b.aide.trim(), difficile:b.difficile.trim(), com:b.com.trim(), dt:aujourdhui() }
+    brouillonRetour = null; sauver()
+    c.innerHTML = `<h3 style="margin-top:0">Merci pour votre avis</h3><p class="small" style="margin:0">Il est transmis à votre médecin, qui pourra vous répondre dans l'onglet « Messages ».</p>`
+  })
+  $('btn-retour-plus-tard').addEventListener('click', ev => { ev.preventDefault()
+    const d = new Date(); d.setDate(d.getDate() + 3)
+    state.retourReporte = { e, jusqu:`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+    sauver(); c.style.display = 'none' })
+}
 function rendreFenetre(){
   rendreDecision()
+  rendreRetour()
   const c = $('fenetre-card'), p = proposerFenetre()
   if(state.mode === 's'){ c.innerHTML = `<h3>Votre fenêtre de sommeil</h3><p class="small">Mode sans restriction : gardez votre heure de lever (${state.lever}) et sortez du lit si vous ne dormez pas après 20 minutes.</p>`; return }
   if(state.pause){ c.innerHTML = `<h3>Programme en pause</h3><p class="small">${state.pause}</p>`; return }
@@ -1287,7 +1337,7 @@ async function synchroniser(manuel){
 // L'état renvoyé par le serveur est la réunion de tous les appareils du
 // patient : on le reprend tel quel, en gardant ce qui n'appartient qu'à cet
 // appareil (identité, réglages du partage).
-const CLES_SERVEUR = ['situ','bilan','mode','motif','fen','nuits','hebdo','sig','pause','isiFin','lever','seances','cartes','plan','habitudeChoisie','depuisConsultation','montre']
+const CLES_SERVEUR = ['situ','bilan','mode','motif','fen','nuits','hebdo','sig','pause','isiFin','lever','seances','cartes','plan','habitudeChoisie','depuisConsultation','montre','retours']
 function adopterEtatServeur(etat){
   if(!etat || typeof etat !== 'object') return
   const avant = JSON.stringify(CLES_SERVEUR.map(k => state[k]))
