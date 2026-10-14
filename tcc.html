@@ -87,7 +87,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
   /* En ligne, le compte remplace les codes : ni QR, ni code de partage, ni code medecin. */
   body.en-ligne #carte-qr, body.en-ligne #carte-code-partage, body.en-ligne #carte-qr-suivi,
   body.en-ligne #partage-inactif, body.en-ligne #partage-cle-ligne, body.en-ligne #btn-code-envoyer,
-  body.en-ligne #btn-partage-stop, body.en-ligne #carte-code-medecin{display:none!important}
+  body.en-ligne #btn-partage-stop, body.en-ligne #carte-code-medecin, body.en-ligne #partage-explication{display:none!important}
 </style>
 </head>
 <body>
@@ -463,7 +463,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <h3>Mon psychologue</h3>
       <div id="equipe-etat"></div>
       <div id="equipe-choix" style="display:none">
-        <p class="small">Choisissez un psychologue de l'équipe Mon Parcours Sommeil, formé à la TCC‑I, et demandez‑lui de vous accompagner. Il reçoit votre <strong>code de programme</strong> et le pseudonyme que vous indiquez, jamais votre nom ; il accepte depuis son espace et suit alors votre agenda.</p>
+        <p class="small">Choisissez un psychologue de l'équipe Mon Parcours Sommeil, formé à la TCC‑I, et demandez‑lui de vous accompagner. Il reçoit votre programme et le pseudonyme que vous indiquez, <strong>jamais votre nom</strong> ; il accepte depuis son espace et suit alors votre agenda.</p>
         <input type="text" id="equipe-pseudo" placeholder="Pseudonyme (facultatif)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;margin-bottom:6px">
         <textarea id="equipe-message" rows="2" placeholder="Un mot pour lui ou elle (facultatif)" style="width:100%;padding:10px;border:1px solid #C8CDD9;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:8px"></textarea>
         <div id="equipe-liste"></div>
@@ -481,7 +481,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <h3>Partage avec mon médecin</h3>
       <div id="partage-actif" style="display:none">
         <p class="small" id="partage-etat"></p>
-        <p class="small">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
+        <p class="small" id="partage-explication">Votre programme est envoyé à votre médecin par son serveur sécurisé, <strong>sans votre nom ni votre date de naissance</strong> : seul le code ci-dessous l'identifie, et seul votre médecin sait à qui il correspond. Sa décision (mode, heure de lever, temps au lit) s'applique ici automatiquement.</p>
         <p class="small" id="partage-cle-ligne" style="display:none">Votre médecin peut rattacher ce programme à son compte avec votre code et votre clé : <strong id="partage-cle-affichee"></strong></p>
         <button class="btn secondary" id="btn-code-envoyer">Envoyer mon code à mon psychologue</button>
         <button class="btn secondary" id="btn-sync">Envoyer maintenant</button>
@@ -1379,12 +1379,12 @@ function rendrePartage(){
     const p = state.partage
     const d = p.derniere ? new Date(p.derniere) : null
     $('partage-cle-ligne').style.display = p.libre ? 'block' : 'none'; $('partage-cle-affichee').textContent = `${p.code} · ${p.cle}`
-    $('partage-etat').innerHTML = `<strong>Code : ${p.code}</strong><br>` +
+    $('partage-etat').innerHTML = (SERVI ? `<strong>Votre programme est enregistré sur votre compte</strong> et partagé avec votre médecin, sans votre nom.<br>` : `<strong>Code : ${p.code}</strong><br>`) +
       (p.erreur ? `<span style="color:#b3261e">${p.erreur}</span>` : d ? `Dernier envoi : ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}.` : 'Pas encore envoyé.') +
       (p.message ? `<br>${p.message}` : '')
   }
   const hp = $('home-partage')
-  if(hp){ hp.style.display = actif ? 'block' : 'none'; if(actif) hp.textContent = 'Partagé avec votre médecin (code ' + state.partage.code + ')' + (state.partage.erreur ? ' — envoi en attente' : '') + '.' }
+  if(hp){ hp.style.display = actif ? 'block' : 'none'; if(actif) hp.textContent = 'Partagé avec votre médecin' + (SERVI ? '' : ' (code ' + state.partage.code + ')') + (state.partage.erreur ? ' — envoi en attente' : '') + '.' }
 }
 function activerPartage(code, cle, serveur){
   code = (code || '').toUpperCase().replace(/[^A-Z2-9]/g, ''); cle = (cle || '').toUpperCase().replace(/[^A-Z2-9]/g, '')
