@@ -48,6 +48,8 @@
   }
   .chip:active{background:#E6E3DC}
   .chip.on{background:#F3EDE3;border-color:#5F3F1B;color:#5F3F1B;font-weight:600}
+  .echelle10{display:flex;flex-wrap:wrap;gap:6px}
+  .echelle10 .opt{flex:1 0 34px;text-align:center;padding-left:0;padding-right:0}
   .chip input{display:none}
 
   input[type=number],input[type=text]{
@@ -192,8 +194,8 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <!-- ============================ ÉTAPE 3a : QUESTIONNAIRE ADULTE / PPC ============================ -->
 <div class="step" id="step-form">
   <div class="progress">
-    <span data-progress-label>Section 1 / 11</span>
-    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:9.1%"></div></div>
+    <span data-progress-label>Section 1 / 12</span>
+    <div class="progress-bar"><div class="progress-fill" data-progress-fill style="width:8.3%"></div></div>
   </div>
 
   <!-- ===== SECTION 1 : MORPHOMÉTRIE & CONSTANTES ===== -->
@@ -256,15 +258,59 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <p class="small" style="margin-top:10px">Cochez aussi si votre activité correspond à l'une de ces catégories.</p>
       <div class="chips" id="chips-prof"></div>
     </div>
+    <div class="card">
+      <h3>Conduisez-vous un véhicule ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="vh"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.vh==1" style="display:none">
+    <div class="card">
+      <h3>Êtes-vous chauffeur professionnel ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="vp"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    </div>
     <div class="nav">
       <button class="btn" data-next="1">Suivant →</button>
     </div>
   </div>
 
   
-  <!-- ===== SECTION 2 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
+  <!-- ===== SECTION 2 : DÉPISTAGE ET MOTIF (questions reprises de Snozas) ===== -->
   <div class="section" data-section="1" style="display:none">
-    <h2>2. Antécédents et traitements</h2>
+    <h2>2. Votre consultation</h2>
+    <div class="card">
+      <h3>Ronflez-vous fort ?</h3><p class="small">Assez fort pour être entendu(e) à travers une porte fermée.</p>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="s"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Vous sentez-vous souvent fatigué(e), épuisé(e) ou somnolent(e) dans la journée ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="t"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Quelqu'un a-t-il déjà remarqué que vous arrêtiez de respirer, ou que vous étouffiez, pendant votre sommeil ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="o"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label><label class="opt" style="flex:1;text-align:center" data-v="2">Je dors seul(e)</label></div>
+    </div>
+    <div class="card">
+      <h3>Avez-vous de l'hypertension artérielle (tension trop élevée) ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="p"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Pourquoi consultez-vous ?</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="mo"><label class="chip" data-v="0">Je ne sais pas / on m'a demandé de prendre rendez-vous</label><label class="chip" data-v="1">Ronflements gênants</label><label class="chip" data-v="2">Suspicion d'apnées du sommeil</label><label class="chip" data-v="3">Somnolence ou endormissements dans la journée</label><label class="chip" data-v="4">Insomnie</label><label class="chip" data-v="5">Impatiences / jambes sans repos</label><label class="chip" data-v="6">Cauchemars fréquents / comportements inhabituels pendant le sommeil</label><label class="chip" data-v="7">Sommeil non récupérateur, même en vacances</label><label class="chip" data-v="8">Difficulté à supporter la PPC (machine pour les apnées)</label><label class="chip" data-v="9">Difficulté à supporter l'orthèse (gouttière pour les apnées)</label><label class="chip" data-v="10">Contrôle d'efficacité du traitement des apnées</label></div>
+    </div>
+    <div class="card">
+      <h3>Comment notez-vous la qualité de votre sommeil ?</h3>
+      <p class="small">De 0 (très mauvais) à 10 (excellent).</p>
+      <div class="options echelle10" data-q="qs"><label class="opt" data-v="0">0</label><label class="opt" data-v="1">1</label><label class="opt" data-v="2">2</label><label class="opt" data-v="3">3</label><label class="opt" data-v="4">4</label><label class="opt" data-v="5">5</label><label class="opt" data-v="6">6</label><label class="opt" data-v="7">7</label><label class="opt" data-v="8">8</label><label class="opt" data-v="9">9</label><label class="opt" data-v="10">10</label></div>
+    </div>
+    <div class="nav">
+      <button class="btn secondary" data-prev="0">← Retour</button>
+      <button class="btn" data-next="2">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 3 : ANTÉCÉDENTS MÉDICAUX, FAMILIAUX, TRAITEMENTS ===== -->
+  <div class="section" data-section="2" style="display:none">
+    <h2>3. Antécédents et traitements</h2>
 
     <div class="card">
       <h3>Antécédents médicaux personnels</h3>
@@ -285,21 +331,9 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <label class="small" style="display:block;margin-top:10px">Nom du médicament, si vous vous en souvenez</label>
       <input type="text" id="traitements-noms" placeholder="ex : Lévothyrox, Doliprane… (facultatif)">
     </div>
-
-    <div class="nav">
-      <button class="btn secondary" data-prev="0">← Retour</button>
-      <button class="btn" data-next="2">Suivant →</button>
-    </div>
-  </div>
-
-  <!-- ===== SECTION 3 : MODE DE VIE ===== -->
-  <div class="section" data-section="2" style="display:none">
-    <h2>3. Mode de vie</h2>
-
     <div class="card">
-      <h3>Hygiène de sommeil et mode de vie</h3>
-      <p class="small">Cochez ce qui s'applique à votre quotidien.</p>
-      <div class="chips" id="chips-hygiene"></div>
+      <h3>Avez-vous pris du poids ces derniers temps ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="pw"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
     </div>
 
     <div class="nav">
@@ -308,9 +342,75 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
   </div>
 
-  <!-- ===== SECTION 4 : HABITUDES DE SOMMEIL ===== -->
+  <!-- ===== SECTION 3 : MODE DE VIE ===== -->
   <div class="section" data-section="3" style="display:none">
-    <h2>4. Habitudes de sommeil</h2>
+    <h2>4. Mode de vie</h2>
+
+    <div class="card">
+      <h3>Hygiène de sommeil et mode de vie</h3>
+      <p class="small">Cochez ce qui s'applique à votre quotidien.</p>
+      <div class="chips" id="chips-hygiene"></div>
+    </div>
+    <div class="card">
+      <h3>Fumez-vous, ou avez-vous fumé ? (cigarette électronique avec nicotine comprise)</h3>
+      <div class="options" data-q="tb"><label class="opt" data-v="0">Jamais</label><label class="opt" data-v="1">Oui, je fume</label><label class="opt" data-v="2">J'ai arrêté</label></div>
+    </div>
+    <div data-si="q.tb==1||q.tb==2" style="display:none">
+    <div class="card">
+      <h3>Combien de cigarettes par jour (ou équivalent) ?</h3>
+      <input type="number" data-qn="tc" min="0" max="200" inputmode="numeric" placeholder="ex : 10">
+    </div>
+    </div>
+    <div data-si="q.tb==2" style="display:none">
+    <div class="card">
+      <h3>Depuis combien d'années avez-vous arrêté ?</h3>
+      <input type="number" data-qn="ta" min="0" max="80" inputmode="numeric" placeholder="ex : 5">
+    </div>
+    </div>
+    <div class="card">
+      <h3>Buvez-vous des boissons excitantes (café, cola, boissons énergisantes) ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="ex"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.ex==1" style="display:none">
+    <div class="card">
+      <h3>Combien par semaine ?</h3>
+      <input type="number" data-qn="en" min="0" max="200" inputmode="numeric" placeholder="ex : 14">
+    </div>
+    </div>
+    <div class="card">
+      <h3>Buvez-vous des boissons alcoolisées (bière, vin, apéritifs…) ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="al"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.al==1" style="display:none">
+    <div class="card">
+      <h3>Combien de verres par semaine ?</h3>
+      <input type="number" data-qn="av" min="0" max="200" inputmode="numeric" placeholder="ex : 7">
+    </div>
+    </div>
+    <div class="card">
+      <h3>Consommez-vous de la drogue ?</h3><p class="small">Vos réponses restent confidentielles, elles servent seulement à votre médecin.</p>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="dr"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.dr==1" style="display:none">
+    <div class="card">
+      <h3>Lesquelles ?</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="dg"><label class="chip" data-v="0">Cannabis</label><label class="chip" data-v="1">Ecstasy / MDMA</label><label class="chip" data-v="2">Cocaïne</label><label class="chip" data-v="3">Autre</label></div>
+    </div>
+    </div>
+    <div class="card">
+      <h3>Pratiquez-vous une activité sportive ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="sp"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="2">← Retour</button>
+      <button class="btn" data-next="4">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 4 : HABITUDES DE SOMMEIL ===== -->
+  <div class="section" data-section="4" style="display:none">
+    <h2>5. Votre sommeil de nuit</h2>
 
     <div class="card">
       <div class="row">
@@ -324,25 +424,43 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
         </div>
       </div>
     </div>
-
-    <div class="nav">
-      <button class="btn secondary" data-prev="2">← Retour</button>
-      <button class="btn" data-next="4">Suivant →</button>
-    </div>
-  </div>
-
-  <!-- ===== SECTION 5 : SYMPTÔMES NOCTURNES & DIURNES ===== -->
-  <div class="section" data-section="4" style="display:none">
-    <h2>5. Symptômes nocturnes et diurnes</h2>
-
     <div class="card">
-      <h3>Symptômes nocturnes (cochez ceux qui vous concernent)</h3>
-      <div class="chips" id="chips-symptn"></div>
+      <h3>La nuit, vous arrive-t-il de…</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="nr" data-excl="3"><label class="chip" data-v="0">Vous réveiller trop tôt (avant l'heure prévue)</label><label class="chip" data-v="1">Vous réveiller plusieurs fois</label><label class="chip" data-v="2">Rester éveillé(e) longtemps au milieu de la nuit</label><label class="chip" data-v="3">Non</label></div>
     </div>
-
+    <div data-si="q.nrDiff" style="display:none">
     <div class="card">
-      <h3>Symptômes diurnes (en journée)</h3>
-      <div class="chips" id="chips-symptd"></div>
+      <h3>Le soir, combien de temps mettez-vous à vous endormir ?</h3>
+      <div class="options" data-q="la"><label class="opt" data-v="0">Moins de 30 minutes</label><label class="opt" data-v="1">30 à 60 minutes</label><label class="opt" data-v="2">Plus de 60 minutes</label></div>
+    </div>
+    <div class="card">
+      <h3>Ces difficultés surviennent combien de nuits par semaine ?</h3>
+      <div class="options" data-q="nf"><label class="opt" data-v="0">Moins d'une nuit</label><label class="opt" data-v="1">1 à 2 nuits</label><label class="opt" data-v="2">3 nuits ou plus</label><label class="opt" data-v="3">Pas de difficulté</label></div>
+    </div>
+    </div>
+    <div data-si="q.nrDiff&&q.nf!=null&&q.nf!=3" style="display:none">
+    <div class="card">
+      <h3>Depuis combien de temps ?</h3>
+      <div class="options" data-q="nd"><label class="opt" data-v="0">Moins d'un mois</label><label class="opt" data-v="1">1 à 3 mois</label><label class="opt" data-v="2">Plus de 3 mois</label></div>
+    </div>
+    <div class="card">
+      <h3>Cela retentit-il sur votre journée (fatigue, concentration, irritabilité) ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="nj"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    </div>
+    <div class="card">
+      <h3>Avez-vous des horaires de travail particuliers (3x8, 2x8, travail de nuit…) ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="hp"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.hp==1" style="display:none">
+    <div class="card">
+      <h3>Précisez le rythme de vos rotations</h3>
+      <input type="text" data-qt="hr" maxlength="80" placeholder="ex : 3x8, une semaine de nuit sur trois">
+    </div>
+    </div>
+    <div class="card">
+      <h3>Le week-end ou en vacances, votre rythme de sommeil est-il différent ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="we"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
     </div>
 
     <div class="nav">
@@ -351,13 +469,64 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
   </div>
 
-  <!-- ===== SECTION 6 : RETENTISSEMENT ===== -->
+  <!-- ===== SECTION 5 : SYMPTÔMES NOCTURNES & DIURNES ===== -->
   <div class="section" data-section="5" style="display:none">
-    <h2>6. Retentissement sur la vie quotidienne</h2>
+    <h2>6. Ronflements, nuit et réveil</h2>
+    <div data-si="q.s!=1" style="display:none">
+    <div class="card">
+      <h3>Vous arrive-t-il de ronfler ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="rn"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label><label class="opt" style="flex:1;text-align:center" data-v="2">Je ne sais pas</label></div>
+    </div>
+    </div>
+    <div data-si="q.s==1||q.rn==1" style="display:none">
+    <div class="card">
+      <h3>À quelle fréquence ronflez-vous ?</h3>
+      <div class="options" data-q="rf"><label class="opt" data-v="0">Presque toutes les nuits (6 ou 7 par semaine)</label><label class="opt" data-v="1">Souvent (4 ou 5 nuits par semaine)</label><label class="opt" data-v="2">Parfois (2 ou 3 nuits par semaine)</label><label class="opt" data-v="3">Rarement (1 nuit par semaine ou moins)</label></div>
+    </div>
+    <div class="card">
+      <h3>Avez-vous déjà…</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="rc" data-excl="3"><label class="chip" data-v="0">Dormi dans une autre chambre à cause des ronflements</label><label class="chip" data-v="1">Été réveillé(e) en suffoquant</label><label class="chip" data-v="2">Eu des arrêts de respiration remarqués par quelqu'un</label><label class="chip" data-v="3">Non</label></div>
+    </div>
+    </div>
+    <div class="card">
+      <h3>La nuit ou au réveil, avez-vous…</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="nv" data-excl="3"><label class="chip" data-v="0">Beaucoup transpiré</label><label class="chip" data-v="1">Mal à la tête</label><label class="chip" data-v="2">Besoin d'uriner plus de 2 fois</label><label class="chip" data-v="3">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Bougez-vous beaucoup en dormant ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="mv"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div data-si="q.mv==1" style="display:none">
+    <div class="card">
+      <h3>Votre partenaire vous reproche-t-il de bouger les jambes ou de lui donner des « coups de pied » la nuit ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="ck"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    </div>
+    <div class="card">
+      <h3>Faites-vous régulièrement des cauchemars ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="cm"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Vous arrive-t-il d'être somnambule ou de parler en dormant ?</h3>
+      <div class="options" style="flex-direction:row;gap:8px" data-q="sb"><label class="opt" style="flex:1;text-align:center" data-v="1">Oui</label><label class="opt" style="flex:1;text-align:center" data-v="0">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Avez-vous déjà vécu…</h3><p class="small">Plusieurs réponses possibles.</p>
+      <div class="chips" data-qm="nx" data-excl="3"><label class="chip" data-v="0">Être paralysé(e) en vous endormant ou au réveil</label><label class="chip" data-v="1">Voir ou entendre des choses qui n'existent pas en vous endormant</label><label class="chip" data-v="2">Perdre soudainement de la force (chute, maladresse) lors d'une émotion</label><label class="chip" data-v="3">Non</label></div>
+    </div>
+    <div class="card">
+      <h3>Au réveil, vous sentez-vous le plus souvent…</h3>
+      <div class="options" data-q="rv"><label class="opt" data-v="0">En forme</label><label class="opt" data-v="1">Encore fatigué(e) et endormi(e)</label></div>
+    </div>
 
     <div class="card">
-      <p class="small">Comment vos troubles du sommeil affectent votre quotidien ?</p>
-      <div class="chips" id="chips-retent"></div>
+      <h3>Autres signes la nuit (cochez ceux qui vous concernent)</h3>
+      <div class="chips" id="chips-symptn"></div>
+    </div>
+
+    <div class="card">
+      <h3>Autres signes en journée</h3>
+      <div class="chips" id="chips-symptd"></div>
     </div>
 
     <div class="nav">
@@ -366,9 +535,24 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
   </div>
 
-  <!-- ===== SECTION 7 : EPWORTH ===== -->
+  <!-- ===== SECTION 6 : RETENTISSEMENT ===== -->
   <div class="section" data-section="6" style="display:none">
-    <h2>7. Échelle d'Epworth</h2>
+    <h2>7. Retentissement sur la vie quotidienne</h2>
+
+    <div class="card">
+      <p class="small">Comment vos troubles du sommeil affectent votre quotidien ?</p>
+      <div class="chips" id="chips-retent"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="5">← Retour</button>
+      <button class="btn" data-next="7">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 7 : EPWORTH ===== -->
+  <div class="section" data-section="7" style="display:none">
+    <h2>8. Échelle d'Epworth</h2>
     <p class="small">Évaluez votre <strong>somnolence dans la journée</strong>. Pour chaque situation, indiquez la probabilité que vous vous endormiez ou somnoliez (pas seulement vous sentir fatigué).</p>
     <div class="info-box">
       <strong>Échelle :</strong><br>
@@ -380,14 +564,14 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="epworth-total">Total : 0 / 24</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="5">← Retour</button>
-      <button class="btn" data-next="7">Suivant →</button>
+      <button class="btn secondary" data-prev="6">← Retour</button>
+      <button class="btn" data-next="8">Suivant →</button>
     </div>
   </div>
 
   <!-- ===== SECTION 8 : PICHOT ===== -->
-  <div class="section" data-section="7" style="display:none">
-    <h2>8. Échelle de Pichot (fatigue)</h2>
+  <div class="section" data-section="8" style="display:none">
+    <h2>9. Échelle de Pichot (fatigue)</h2>
     <p class="small">Pour chacune des phrases suivantes, dites <strong>à quel point elle correspond à votre état actuel</strong>.</p>
     <div class="info-box">
       <strong>Échelle :</strong><br>
@@ -399,34 +583,19 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="pichot-total">Total : 0 / 32</p>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="6">← Retour</button>
-      <button class="btn" data-next="8">Suivant →</button>
-    </div>
-  </div>
-
-  <!-- ===== SECTION 9 : HAD ===== -->
-  <div class="section" data-section="8" style="display:none">
-    <h2>9. Échelle HAD (anxiété et humeur)</h2>
-    <p class="small">Comment vous êtes-vous senti(e) <strong>au cours de la dernière semaine</strong> ? Choisissez la réponse qui décrit le mieux ce que vous avez ressenti.</p>
-
-    <div id="had-questions"></div>
-
-    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
-
-    <div class="nav">
       <button class="btn secondary" data-prev="7">← Retour</button>
       <button class="btn" data-next="9">Suivant →</button>
     </div>
   </div>
 
-  <!-- ===== SECTION 10 : ISI ===== -->
+  <!-- ===== SECTION 10 : BECK (humeur) — remplace l'HAD dans le parcours adulte ===== -->
   <div class="section" data-section="9" style="display:none">
-    <h2>10. Index de sévérité de l'insomnie (ISI)</h2>
-    <p class="small">Évaluez vos <strong>problèmes de sommeil au cours des 2 dernières semaines</strong>.</p>
+    <h2>10. Votre humeur (questionnaire de Beck)</h2>
+    <p class="small">Pour chaque groupe, choisissez la phrase qui décrit le mieux comment vous vous êtes senti(e) <strong>ces deux dernières semaines</strong>.</p>
 
-    <div id="isi-questions"></div>
+    <div id="beck-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="isi-total">Total : 0 / 28</p>
+    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="beck-total">Total : 0 / 39</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="8">← Retour</button>
@@ -434,9 +603,24 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
   </div>
 
-  <!-- ===== SECTION 11 : SPIELMAN (insomnie, optionnel) ===== -->
+  <!-- ===== SECTION 10 : ISI ===== -->
   <div class="section" data-section="10" style="display:none">
-    <h2>11. Insomnie</h2>
+    <h2>11. Index de sévérité de l'insomnie (ISI)</h2>
+    <p class="small">Évaluez vos <strong>problèmes de sommeil au cours des 2 dernières semaines</strong>.</p>
+
+    <div id="isi-questions"></div>
+
+    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="isi-total">Total : 0 / 28</p>
+
+    <div class="nav">
+      <button class="btn secondary" data-prev="9">← Retour</button>
+      <button class="btn" data-next="11">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 11 : SPIELMAN (insomnie, optionnel) ===== -->
+  <div class="section" data-section="11" style="display:none">
+    <h2>12. Insomnie</h2>
 
     <div class="card">
       <h3>Souffrez-vous d'insomnie ?</h3>
@@ -501,7 +685,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
 
     <div class="nav">
-      <button class="btn secondary" data-prev="9">← Retour</button>
+      <button class="btn secondary" data-prev="10">← Retour</button>
       <button class="btn" id="btn-finish">Terminer et générer le QR code →</button>
     </div>
   </div>
@@ -901,14 +1085,14 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
     </div>
   </div>
 
-  <!-- ===== PPC SECTION 8 : HAD ===== -->
+  <!-- ===== PPC SECTION 8 : BECK (humeur) — remplace l'HAD ===== -->
   <div class="section" data-section="7" style="display:none">
-    <h2>8. Échelle HAD (anxiété et humeur)</h2>
-    <p class="small">Comment vous êtes-vous senti(e) <strong>au cours de la dernière semaine</strong> ? Choisissez la réponse qui décrit le mieux ce que vous avez ressenti.</p>
+    <h2>8. Votre humeur (questionnaire de Beck)</h2>
+    <p class="small">Pour chaque groupe, choisissez la phrase qui décrit le mieux comment vous vous êtes senti(e) <strong>ces deux dernières semaines</strong>.</p>
 
-    <div id="ppc-had-questions"></div>
+    <div id="ppc-beck-questions"></div>
 
-    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="ppc-had-total">HAD-A : 0/21 — HAD-D : 0/21</p>
+    <p style="text-align:right;font-weight:600;color:#5F3F1B;margin-top:12px" id="ppc-beck-total">Total : 0 / 39</p>
 
     <div class="nav">
       <button class="btn secondary" data-prev="6">← Retour</button>
@@ -1044,6 +1228,28 @@ const ISI_ITEMS = [
   { q:"Votre problème de sommeil est-il visible pour les autres en termes de qualité de vie ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
   { q:"Êtes-vous préoccupé(e) par votre problème de sommeil ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
   { q:"Dans quelle mesure votre problème de sommeil interfère avec votre fonctionnement quotidien ?", opts:["Pas du tout","Un peu","Moyennement","Beaucoup","Énormément"] },
+]
+
+// ====== Questionnaire de Beck (13 items, humeur) ======
+// Remplace l'HAD dans le parcours adulte. Chaque item vaut 0 à 3, total /39.
+// L'item 12 (appétit) a deux sens : « moins » (a) ou « plus » (b), même cotation.
+// Ordre et libellés FIGÉS : le QR transmet la valeur de chaque item, et
+// Hypnote (consultation adulte) relit l'item 9 (idées suicidaires).
+const BECK_ITEMS = [
+  { q:"Tristesse", opts:["Je ne me sens pas triste","Je me sens très souvent triste","Je suis tout le temps triste","Je suis si triste ou si malheureux(se) que ce n'est pas supportable"] },
+  { q:"Pessimisme", opts:["Je ne suis pas découragé(e) face à mon avenir","Je me sens plus découragé(e) qu'avant face à mon avenir","Je ne m'attends pas à ce que les choses s'arrangent pour moi","J'ai le sentiment que mon avenir est sans espoir et qu'il ne peut qu'empirer"] },
+  { q:"Échecs dans le passé", opts:["Je n'ai pas le sentiment d'avoir échoué dans la vie, d'être un(e) raté(e)","J'ai échoué plus souvent que je n'aurais dû","Quand je pense à mon passé, je constate un grand nombre d'échecs","J'ai le sentiment d'avoir complètement raté ma vie"] },
+  { q:"Perte de plaisir", opts:["J'éprouve toujours autant de plaisir qu'avant aux choses qui me plaisent","Je n'éprouve pas autant de plaisir aux choses qu'avant","J'éprouve très peu de plaisir aux choses qui me plaisaient habituellement","Je n'éprouve aucun plaisir aux choses qui me plaisaient habituellement"] },
+  { q:"Sentiments de culpabilité", opts:["Je ne me sens pas particulièrement coupable","Je me sens coupable pour bien des choses que j'ai faites ou que j'aurais dû faire","Je me sens coupable la plupart du temps","Je me sens tout le temps coupable"] },
+  { q:"Sentiment d'être puni(e)", opts:["Je n'ai pas le sentiment d'être puni(e)","Je sens que je pourrais être puni(e)","Je m'attends à être puni(e)","J'ai le sentiment d'être puni(e)"] },
+  { q:"Sentiments envers vous-même", opts:["Mes sentiments envers moi-même n'ont pas changé","J'ai perdu confiance en moi","Je suis déçu(e) par moi-même","Je ne m'aime pas du tout"] },
+  { q:"Attitude critique envers vous-même", opts:["Je ne me blâme pas ou ne me critique pas plus que d'habitude","Je suis plus critique envers moi-même que je ne l'étais","Je me reproche tous mes défauts","Je me reproche tous les malheurs qui arrivent"] },
+  { q:"Pensées ou désir de suicide", opts:["Je ne pense pas du tout à me suicider","Il m'arrive de penser à me suicider, mais je ne le ferais pas","J'aimerais me suicider","Je me suiciderais si l'occasion s'en présentait"] },
+  { q:"Pleurs", opts:["Je ne pleure pas plus qu'avant","Je pleure plus qu'avant","Je pleure pour la moindre petite chose","Je voudrais pleurer mais j'en suis incapable"] },
+  { q:"Irritabilité", opts:["Je ne suis pas plus irritable que d'habitude","Je suis plus irritable que d'habitude","Je suis beaucoup plus irritable que d'habitude","Je suis constamment irritable"] },
+  { q:"Modifications de l'appétit", opts:["Mon appétit n'a pas changé","J'ai un peu moins d'appétit que d'habitude","J'ai un peu plus d'appétit que d'habitude","J'ai beaucoup moins d'appétit","J'ai beaucoup plus d'appétit","Je n'ai pas d'appétit du tout","J'ai constamment envie de manger"],
+    vals:[0,1,1,2,2,3,3], sens:[0,-1,1,-1,1,-1,1] },
+  { q:"Fatigue", opts:["Je ne suis pas plus fatigué(e) que d'habitude","Je me fatigue plus facilement que d'habitude","Je suis trop fatigué(e) pour faire un grand nombre de choses que je faisais avant","Je suis trop fatigué(e) pour faire la plupart des choses que je faisais avant"] },
 ]
 
 // ====== Listes V3 ======
@@ -1540,6 +1746,12 @@ const state = {
   epworth:Array(EPWORTH_ITEMS.length).fill(null),
   pichot:Array(PICHOT_ITEMS.length).fill(null),
   had:Array(HAD_ITEMS.length).fill(null),
+  // Beck (parcours adulte) et sens de l'appétit (-1 moins, +1 plus)
+  beck:Array(BECK_ITEMS.length).fill(null), beckSens:0,
+  // Réponses des questions reprises de Snozas (dépistage STOP, motif, mode de
+  // vie, nuit, ronflements…) : codes courts, voir QX_* plus bas et
+  // stats_questionnaires.py côté Hypnote.
+  q:{},
   isi:Array(ISI_ITEMS.length).fill(null),
   // Tableaux d'INDICES (0-based) dans les listes V3 adulte
   symptn:[], symptd:[], comorb:[], prof:[],
@@ -1654,10 +1866,11 @@ function buildPSQ(containerId, items, stateKey, totalCallback){
 }
 
 // Construit une liste de chips qui stockent leur INDICE dans state[stateKey] (tableau d'entiers triés)
-function buildChipsIndex(containerId, options, stateKey){
+function buildChipsIndex(containerId, options, stateKey, caches){
   const c = document.getElementById(containerId)
   c.innerHTML = ''
   options.forEach((label, idx)=>{
+    if(caches && caches.includes(idx)) return
     const lbl = document.createElement('label')
     lbl.className = 'chip'
     lbl.textContent = label
@@ -1671,6 +1884,131 @@ function buildChipsIndex(containerId, options, stateKey){
     })
     c.appendChild(lbl)
   })
+}
+
+// ====== Questions « q » (reprises de Snozas) ======
+// data-q : choix unique (entier) ; data-qm : choix multiples (tableau trié,
+// data-excl = indice exclusif « Non ») ; data-qn : nombre ; data-qt : texte.
+// data-si : condition d'affichage, évaluée sur q (avec q.nrDiff calculé).
+// Une question masquée est effacée, pour que rien d'obsolète ne parte au QR.
+function condQ(){
+  const q = Object.assign({}, state.q)
+  const nr = state.q.nr || []
+  q.nrDiff = nr.some(i => i < 3) || (state.q.mo || []).includes(4)
+  return q
+}
+function effacerBloc(bloc){
+  bloc.querySelectorAll('[data-q],[data-qm],[data-qn],[data-qt]').forEach(el => {
+    const k = el.dataset.q || el.dataset.qm || el.dataset.qn || el.dataset.qt
+    delete state.q[k]
+    el.querySelectorAll('.on').forEach(x => x.classList.remove('on'))
+    if('value' in el && (el.dataset.qn || el.dataset.qt)) el.value = ''
+  })
+}
+function majConditions(){
+  const q = condQ()
+  document.querySelectorAll('[data-si]').forEach(bloc => {
+    let ok = false
+    try { ok = !!(new Function('q', 'return (' + bloc.dataset.si + ')'))(q) } catch(e){ ok = false }
+    if(!ok && bloc.style.display !== 'none') effacerBloc(bloc)
+    bloc.style.display = ok ? '' : 'none'
+  })
+}
+function brancherQuestionsQ(){
+  document.querySelectorAll('[data-q]').forEach(box => {
+    box.querySelectorAll('.opt').forEach(o => o.addEventListener('click', () => {
+      box.querySelectorAll('.opt').forEach(x => x.classList.remove('on'))
+      o.classList.add('on')
+      state.q[box.dataset.q] = parseInt(o.dataset.v)
+      majConditions()
+    }))
+  })
+  document.querySelectorAll('[data-qm]').forEach(box => {
+    const excl = box.dataset.excl != null ? parseInt(box.dataset.excl) : null
+    box.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+      const v = parseInt(c.dataset.v)
+      let arr = (state.q[box.dataset.qm] || []).slice()
+      if(arr.includes(v)) arr = arr.filter(x => x !== v)
+      else if(v === excl) arr = [v]
+      else arr = arr.filter(x => x !== excl).concat(v)
+      arr.sort((a, b) => a - b)
+      if(arr.length) state.q[box.dataset.qm] = arr
+      else delete state.q[box.dataset.qm]
+      box.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', arr.includes(parseInt(x.dataset.v))))
+      majConditions()
+    }))
+  })
+  document.querySelectorAll('[data-qn]').forEach(inp => inp.addEventListener('input', () => {
+    const v = parseFloat(String(inp.value).replace(',', '.'))
+    if(isNaN(v)) delete state.q[inp.dataset.qn]
+    else state.q[inp.dataset.qn] = Math.round(v)
+  }))
+  document.querySelectorAll('[data-qt]').forEach(inp => inp.addEventListener('input', () => {
+    const v = inp.value.trim().slice(0, 80)
+    if(v) state.q[inp.dataset.qt] = v
+    else delete state.q[inp.dataset.qt]
+  }))
+  majConditions()
+}
+
+function buildBeck(containerId){
+  const c = document.getElementById(containerId)
+  if(!c) return
+  c.innerHTML = ''
+  BECK_ITEMS.forEach((item, i) => {
+    const div = document.createElement('div')
+    div.className = 'question card'
+    div.innerHTML = `<div class="q">${i + 1}. ${item.q}</div>`
+    const wrap = document.createElement('div')
+    wrap.className = 'options'
+    item.opts.forEach((l, j) => {
+      const lbl = document.createElement('label')
+      lbl.className = 'opt'
+      lbl.textContent = l
+      lbl.addEventListener('click', () => {
+        wrap.querySelectorAll('.opt').forEach(x => x.classList.remove('on'))
+        lbl.classList.add('on')
+        state.beck[i] = item.vals ? item.vals[j] : j
+        if(item.sens) state.beckSens = item.sens[j]
+        updateBeckTotal()
+      })
+      wrap.appendChild(lbl)
+    })
+    div.appendChild(wrap)
+    c.appendChild(div)
+  })
+}
+function updateBeckTotal(){
+  const t = state.beck.reduce((a, b) => a + (b || 0), 0)
+  setTotalText(['beck-total', 'ppc-beck-total'], `Total : ${t} / 39`)
+}
+
+// Ce que les questions « q » disent déjà : cases des listes V3 cochées
+// d'office, pour que le formulaire de consultation les reçoive comme avant.
+// Les cases correspondantes ne sont plus montrées au patient (CACHE_*).
+const CACHE_SN = [0, 1, 2, 5, 7, 9]   // ronflements, pauses, suffocation, sueurs, nycturie, mouvements des jambes
+const CACHE_SD = [0, 1, 2]            // fatigue, sommeil non réparateur, maux de tête le matin
+const CACHE_HY = [3, 4, 5]            // tabac, cannabis, sédentarité
+const CACHE_RE = [1]                  // chambre à part
+function deduireListes(){
+  // Copies : l'état du patient n'est pas touché (il peut revenir en arrière).
+  const d = { symptn:state.symptn.slice(), symptd:state.symptd.slice(), hygiene:state.hygiene.slice(), retent:state.retent.slice() }
+  const q = state.q, a = (k, i) => { if(!d[k].includes(i)){ d[k].push(i); d[k].sort((x, y) => x - y) } }
+  const has = (k, i) => (q[k] || []).includes(i)
+  if(q.s === 1 || q.rn === 1) a('symptn', 0)
+  if(q.o === 1 || has('rc', 2)) a('symptn', 1)
+  if(has('rc', 1)) a('symptn', 2)
+  if(has('nv', 0)) a('symptn', 5)
+  if(has('nv', 2)) a('symptn', 7)
+  if(q.ck === 1) a('symptn', 9)
+  if(q.t === 1) a('symptd', 0)
+  if(q.rv === 1) a('symptd', 1)
+  if(has('nv', 1)) a('symptd', 2)
+  if(q.tb === 1) a('hygiene', 3)
+  if(q.dr === 1 && has('dg', 0)) a('hygiene', 4)
+  if(q.sp === 0) a('hygiene', 5)
+  if(has('rc', 0)) a('retent', 1)
+  return d
 }
 
 // ====== Totaux ======
@@ -1877,15 +2215,17 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // Échelles
   buildScale('epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
   buildScale('pichot-questions', PICHOT_ITEMS, PICHOT_OPTIONS, 'pichot', updatePichotTotal)
-  buildScale('had-questions', HAD_ITEMS, null, 'had', updateHadTotal)
+  buildBeck('beck-questions')
+  buildBeck('ppc-beck-questions')
   buildScale('isi-questions', ISI_ITEMS, null, 'isi', updateIsiTotal)
+  brancherQuestionsQ()
 
   // Chips (par INDICES — payload V3 attendu côté trame)
-  buildChipsIndex('chips-symptn', SYMPT_NOCTURNES, 'symptn')
-  buildChipsIndex('chips-symptd', SYMPT_DIURNES, 'symptd')
+  buildChipsIndex('chips-symptn', SYMPT_NOCTURNES, 'symptn', CACHE_SN)
+  buildChipsIndex('chips-symptd', SYMPT_DIURNES, 'symptd', CACHE_SD)
   buildChipsIndex('chips-comorb', COMORBIDITES, 'comorb')
   buildChipsIndex('chips-prof', PROFESSIONS, 'prof')
-  buildChipsIndex('chips-hygiene', HYGIENE, 'hygiene')
+  buildChipsIndex('chips-hygiene', HYGIENE, 'hygiene', CACHE_HY)
   buildChipsIndex('chips-traitements', TRAITEMENTS, 'traitements')
   buildChipsIndex('chips-atcdfam', ATCD_FAMILIAUX, 'atcdfam')
   // Spielman (insomnie, optionnel)
@@ -1894,7 +2234,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   buildChipsIndex('chips-pd', TERRAIN_INS, 'pd')
   buildChipsIndex('chips-pc', DECLENCH_INS, 'pc')
   buildChipsIndex('chips-pp', ENTRETIEN_INS, 'pp')
-  buildChipsIndex('chips-retent', RETENTISSEMENT, 'retent')
+  buildChipsIndex('chips-retent', RETENTISSEMENT, 'retent', CACHE_RE)
 
   // ====== Pédiatrie : inputs identité ======
   document.getElementById('pedia-nom').addEventListener('input', e=>state.nom=e.target.value.trim()||null)
@@ -1973,7 +2313,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // ====== Renouv PPC : échelles partagées (état dans state.epworth/pichot/had) ======
   buildScale('ppc-epworth-questions', EPWORTH_ITEMS, EPWORTH_OPTIONS, 'epworth', updateEpworthTotal)
   buildScale('ppc-pichot-questions', PICHOT_ITEMS, PICHOT_OPTIONS, 'pichot', updatePichotTotal)
-  buildScale('ppc-had-questions', HAD_ITEMS, null, 'had', updateHadTotal)
 
   // Bouton final
   document.getElementById('btn-finish').addEventListener('click', generateQR)
@@ -2113,13 +2452,8 @@ function generateQR(){
     // ===== Mode renouvellement PPC =====
     const epworth = state.epworth.reduce((a,b)=>a+(b||0),0)
     const pichot = state.pichot.reduce((a,b)=>a+(b||0),0)
-    let hada=0, hadd=0
-    HAD_ITEMS.forEach((item, i)=>{
-      const v = state.had[i]
-      if(v === null || v === undefined) return
-      if(item.t === 'A') hada += v
-      else hadd += v
-    })
+    // Beck : remplace l'HAD (comme le parcours adulte)
+    const beckRepondu = state.beck.some(v => v !== null && v !== undefined)
 
     payload = {
       v:3,
@@ -2136,8 +2470,7 @@ function generateQR(){
       hl: state.heure_lever,
       e: epworth,
       pi: pichot,
-      ha: hada,
-      hd: hadd,
+      ...(beckRepondu ? { bk: state.beck, bd: state.beck.reduce((a,b)=>a+(b||0),0), ba: state.beckSens || 0 } : {}),
       tol: state.tol,
       sr: state.sr,
       ce: state.ce,
@@ -2146,13 +2479,9 @@ function generateQR(){
     // ===== Mode adulte initial ('ad') =====
     const epworth = state.epworth.reduce((a,b)=>a+(b||0),0)
     const pichot = state.pichot.reduce((a,b)=>a+(b||0),0)
-    let hada=0, hadd=0
-    HAD_ITEMS.forEach((item, i)=>{
-      const v = state.had[i]
-      if(v === null || v === undefined) return
-      if(item.t === 'A') hada += v
-      else hadd += v
-    })
+    // Beck : remplace l'HAD. Total seulement si au moins un item répondu.
+    const beckRepondu = state.beck.some(v => v !== null && v !== undefined)
+    const d = deduireListes()
     const isi = state.isi.reduce((a,b)=>a+(b||0),0)
 
     payload = {
@@ -2168,8 +2497,10 @@ function generateQR(){
       i: imc,
       e: epworth,
       pi: pichot,
-      ha: hada,
-      hd: hadd,
+      // Beck : 13 valeurs (0-3, null si sans réponse), total /39, sens de l'appétit
+      ...(beckRepondu ? { bk: state.beck, bd: state.beck.reduce((a,b)=>a+(b||0),0), ba: state.beckSens || 0 } : {}),
+      // Questions reprises de Snozas (codes courts) — aussi gardées par Hypnote pour les statistiques
+      ...(Object.keys(state.q).length ? { q: state.q } : {}),
       is: isi,
       // Détail des 7 réponses ISI (0 à 4, null si sans réponse) : Hypnote en
       // déduit le type d'insomnie (endormissement, maintien, réveil précoce).
@@ -2177,16 +2508,16 @@ function generateQR(){
       // Bilan TCC-I (si « Souffrez-vous d'insomnie ? » = oui et bilan complet)
       ...(state.insomnie === 'oui' && bilanTccComplet() ? { db:state.dbas, ps:state.psas, mq:state.meq, ph:state.phq, sc2:state.sec, st:state.situ, lv:state.lever, tm:modeTcc().mode, tt:modeTcc().motif } : {}),
       mo: state.motif,
-      sn: state.symptn,
-      sd: state.symptd,
+      sn: d.symptn,
+      sd: d.symptd,
       co: state.comorb,
       pr: state.prof,
-      hy: state.hygiene,
+      hy: d.hygiene,
       tr: state.traitements,
       mn: state.med_noms,
       me: state.metier,
       af: state.atcdfam,
-      re: state.retent,
+      re: d.retent,
       hc: state.heure_coucher,
       hl: state.heure_lever,
       // Spielman (insomnie, optionnel — vides si pas rempli)
