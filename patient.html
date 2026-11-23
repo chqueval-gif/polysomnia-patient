@@ -652,6 +652,8 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <div class="chips" id="chips-pp"></div>
     </div>
 
+    <!-- Bilan TCC-I retiré du questionnaire (23/11/2026) : gardé invisible, le JS y construit ses échelles. -->
+    <div hidden style="display:none">
     <!-- Bilan du programme TCC-I (mêmes questions que tcc.html) : ce qui est
          répondu ici dispense le patient de refaire le bilan dans le programme. -->
     <div class="card">
@@ -681,6 +683,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
       <h3>Votre lever habituel</h3>
       <p class="small">L'heure à laquelle vous devez ou souhaitez être levé(e), la semaine comme le week-end.</p>
       <input type="time" id="tcc-lever" value="07:00">
+    </div>
     </div>
     </div>
 
@@ -1106,7 +1109,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em
 <div class="step" id="step-qr">
   <h1>✅ Questionnaire terminé</h1>
   <p>Présentez ce QR code à votre médecin. Il le scannera depuis son ordinateur pour récupérer vos réponses.</p>
-  <div class="card" id="resume-insomnie" style="display:none;margin-bottom:14px">
+  <div class="card" id="resume-insomnie-retire" style="display:none;margin-bottom:14px">
     <h3 style="margin:0 0 6px">Votre bilan d'insomnie</h3>
     <div id="resume-insomnie-txt" style="font-size:15px;line-height:1.5"></div>
     <p class="small" style="margin-top:8px;color:#4E586E">Ce résumé vous est donné à titre d'information ; votre médecin l'interprète avec vous et décide, s'il y a lieu, du programme d'insomnie en ligne (TCC-I) et de son mode.</p>
